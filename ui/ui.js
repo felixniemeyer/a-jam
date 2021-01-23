@@ -1,5 +1,9 @@
 class Ui {
+    
     constructor(ipfsWrapper) {
+        const store = new Vuex.Store({
+            
+        })
         this.ipfsWrapper = ipfsWrapper
         this.initElement()
     }
