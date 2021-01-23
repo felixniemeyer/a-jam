@@ -1,0 +1,13 @@
+{
+  "name": "jam",
+  "version": "0.0.1",
+  "description": "decentral application to make music together (asynchronous jam) ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1", 
+	"sass": "sass style.scss style.css --watch"
+  },
+  "author": "felix paul niemeyer",
+  "license": "MIT",
+  "dependencies": {}
+}
