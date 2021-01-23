@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1", 
-	  "watch": "sass style.scss style.css --watch & ./watch-js-files.sh &"
+	  "watch": "sass style.scss style.css --watch & ./watch-js-files.sh"
   },
   "author": "felix paul niemeyer",
   "license": "MIT",
