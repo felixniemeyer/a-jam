@@ -7,38 +7,60 @@ class Editor {
     }
     initWebAudio() {
         AudioContext = window.AudioContext || window.webkitAudioContext
-        this.em = document.createDocumentFragment()
-
-        this.state = 'inactive'
-
-        this.chunks = []
-        this.chunkType = ''
-
-        this.encoderMimeType = 'audio/wav'
-
-        this.config = {
-            manualEncoderId: 'wav',
-            micGain: 1.0,
-            processorBufferSize: 2048,
-            stopTracksAndCloseCtxWhenFinished: true,
-            usingMediaRecorder: typeof window.MediaRecorder !== 'undefined',
-            //userMediaConstraints: { audio: true }
-            userMediaConstraints: { audio: { echoCancellation: false } }
-        }
+        this.ac = new AudioContext()
     }
     initUserMedia() {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            console.log('getUserMedia supported.')
+            let chunks = []
             navigator.mediaDevices.getUserMedia(
                 {
-                    audio: true
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false
+                    }
                 })
-                .then(function (stream) {
+                .then((stream) => {
                     const mediaRecorder = new MediaRecorder(stream)
+                    mediaRecorder.ondataavailable = (e) => {
+                        chunks.push(e.data)
+                        console.log("bla")
+                    }
+                    mediaRecorder.onstop = () => {
+                        let audio = new Blob(chunks, { 'type': 'audio/ogg; codecs=opus' })
+                        let fileReader = new FileReader()
+                        let arrayBuffer
+                        fileReader.onloadend = () => {
+                            arrayBuffer = fileReader.result
+                            console.log(arrayBuffer)
+                            let source = this.ac.createBufferSource()
+                            this.ac.decodeAudioData(arrayBuffer).then(
+                                audioBuffer => {
+                                    console.log(audioBuffer)
+                                    source.buffer = audioBuffer
+                                    source.connect(this.ac.destination)
+                                    source.start(0)
+
+                                    let o = this.ac.createOscillator()
+                                    o.type = "sine"
+                                    o.connect(this.ac.destination)
+                                    o.frequency.value = 440
+                                    o.start()
+                                    
+                                    setTimeout(() => {o.stop()}, 1000)
+                                },
+                                err => {
+                                    console.error("failed to decode audio data:", err)
+                                }
+                            )
+                        }
+                        fileReader.readAsArrayBuffer(audio)
+                        console.log("stopped recording")
+                    }
                     this.initRecorder(
                         () => {
                             mediaRecorder.start()
-                        }, 
+                            chunks = []
+                        },
                         () => {
                             mediaRecorder.stop()
                         }
@@ -80,7 +102,7 @@ class Editor {
     }
     initRecorder(startRecording, stopRecording) {
         this.recorder = new Recorder({
-            startRecording, 
+            startRecording,
             stopRecording
         })
         this.recorder.mount(this.el)

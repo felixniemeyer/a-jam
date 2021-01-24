@@ -11,7 +11,3 @@ Motivation:
 Run `npm run sass` to build `style.css` from `style.scss`
 ### About js packages
 We don't use Webpack or anything to package the code into one file, because we want to leverage, that many programs use the same js packages
-
-
-## thanks to 
-- [kaliatech](https://github.com/kaliatech) for his webaudio record/play example

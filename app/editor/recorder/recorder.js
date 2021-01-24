@@ -1,6 +1,8 @@
 class Recorder {
     constructor(callbacks) {
         this.initElement()
+        this.callbacks = callbacks
+        this.recording = false
     }
     initElement() {
         this.el = document.createElement("div")
@@ -14,7 +16,13 @@ class Recorder {
         this.el.append(rb_el)
     }
     recordButtonPressed() {
-        tools.createDialogue("Recording!", '')
+        if(this.recording) {
+            this.callbacks.stopRecording()
+            this.recording = false
+        } else {
+            this.callbacks.startRecording()
+            this.recording = true
+        }
     }
     mount(mountPoint) {
         mountPoint.appendChild(this.el)
