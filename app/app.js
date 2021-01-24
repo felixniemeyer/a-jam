@@ -1,5 +1,5 @@
-class Ui {
-    constructor(ipfsWrapper) {
+class App {
+    constructor(params, ipfsWrapper) {
         this.ipfsWrapper = ipfsWrapper
         this.initElement()
     }

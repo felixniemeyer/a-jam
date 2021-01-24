@@ -37,7 +37,7 @@ const main = (function() {
             loadLog(msg, 'error')
         }
         loadLog("creating ui")
-        ui = new Ui({})
+        ui = new App({})
 
         loadLog("creating IPFS node")
         Ipfs.create().then(
