@@ -4,21 +4,30 @@ class App {
         this.initElement()
     }
     loadSession(sessionCid) {
-        // ipfs cat session 
-        
         this.editor = new Editor()
     }
     createNewSession() {
-        session = Object.assign({}, Editor.blankSession)
+        this.leaveSession()
+        this.editor = new Editor({
+            name: "my new jam session", 
+            tracks: []
+        })
+        this.editor.mount(this.el)
+    }
+    leaveSession() {
         if(this.editor !== undefined) {
             this.clearSession()
+            createDialogue(
+                "close session?", 
+                "all changes of the current session since the last publishing will be lost!", 
+                {
+                    ok: () => {
+                        this.closeSession()
+                    }, 
+                    cancel: () => {}
+                }
+            )
         }
-        this.editor = new Editor(Editor.blankSession)
-        this.editor.mount(this.element)
-    }
-    clearSession() {
-        // ask: "all changes of the current session since the last publishing will be lost"
-        this.closeSession()
     }
     publishSession() {
         // set timestamp of the session object
@@ -26,20 +35,21 @@ class App {
         // ipfs save session 
     }
     closeSession() {
-        this.session.umount()
-        delete this.session
+        this.editor.umount()
+        delete this.editor
     }
     welcome() {
         //TODO: show hello and list of recent sessions
     }
     initElement() {
-        this.element = document.createElement("div")
-        this.element.className = "ui"
+        this.el = document.createElement("div")
+        this.el.textContent = "app"
+        this.el.className = "app"
     }
     mount(mountPoint) {
-        mountPoint.appendChild(this.element)
+        mountPoint.appendChild(this.el)
     }
     umount() {
-        this.element.remove() 
+        this.el.remove() 
     }
 }

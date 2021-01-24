@@ -20,7 +20,7 @@ function parseGetParams() {
 }
 
 const main = (function() {
-    let ui 
+    let app 
     document.addEventListener('load', async () => {
     })
     document.addEventListener('DOMContentLoaded', async () => {
@@ -36,8 +36,8 @@ const main = (function() {
         const loadError = function (err) {
             loadLog(msg, 'error')
         }
-        loadLog("creating ui")
-        ui = new App({})
+        loadLog("creating app")
+        app = new App({})
 
         loadLog("creating IPFS node")
         Ipfs.create().then(
@@ -46,14 +46,14 @@ const main = (function() {
                 params = parseGetParams()
                 if(params.sessionCid !== undefined) {
                     loadLog("loading session")
-                    ui.loadSession(params.sessionCid)
+                    app.loadSession(params.sessionCid)
                 } else if(params.newSession) {
                     loadLog("creating session")
-                    ui.createNewSession()
+                    app.createNewSession()
                 } else {
-                    ui.welcome()
+                    app.welcome()
                 }
-                ui.mount(document.body)
+                app.mount(document.body)
                 loader.remove()
                 /* example usage
                 (async function() {
