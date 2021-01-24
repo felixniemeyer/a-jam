@@ -1,8 +1,14 @@
-ipfsNode = undefined
+import { IPFS, create } from 'ipfs'
+import App from './app/app'
+import IPFSWrapper from './app/ipfs-wrapper'
 
-function parseGetParams() {
-    var result = {},
-        tmp = []
+var ipfsNode:IPFS 
+
+type Params = {[key:string]:boolean|string}
+
+function parseGetParams() : Params {
+    var result : Params = {},
+        tmp : string[]
     location.search
         .substr(1)
         .split("&")
@@ -20,41 +26,42 @@ function parseGetParams() {
 }
 
 const main = (function() {
-    let ui 
     document.addEventListener('load', async () => {
     })
     document.addEventListener('DOMContentLoaded', async () => {
         let loader = document.getElementById('loading')
-        const loadLog = function(msg, type) {
+        const loadLog = function(msg:string, type?:string) {
             const logEntry = document.createElement('p')
             logEntry.textContent = msg
             if(type !== undefined) {
                 logEntry.className = type
             }
-            loader.appendChild(logEntry)
+            loader?.appendChild(logEntry)
         }
-        const loadError = function (err) {
-            loadLog(msg, 'error')
+        const loadError = function (err:string) {
+            loadLog(err, 'error')
         }
-        loadLog("creating ui")
-        ui = new Ui({})
 
-        loadLog("creating IPFS node")
-        Ipfs.create().then(
+
+        loadLog("connecting to ipfs")
+        create().then(
             node => {
-                nodeWrapper = new IPFSWrapper(node)
-                params = parseGetParams()
+                let ipfsWrapper = new IPFSWrapper(node)
+                let app = new App(ipfsWrapper)
+                let params = parseGetParams()
                 if(params.sessionCid !== undefined) {
-                    loadLog("loading session")
-                    ui.loadSession(params.sessionCid)
+                    if(typeof params.sessionCid == "string") {
+                        loadLog("loading session")
+                        app.loadSession(params.sessionCid)
+                    }
                 } else if(params.newSession) {
                     loadLog("creating session")
-                    ui.createNewSession()
+                    app.createNewSession()
                 } else {
-                    ui.welcome()
+                    app.welcome()
                 }
-                ui.mount(document.body)
-                loader.remove()
+                app.mount(document.body)
+                loader?.remove()
                 /* example usage
                 (async function() {
                     const results = await node.add('=^.^= meow meow')
@@ -73,11 +80,10 @@ const main = (function() {
                 })() */
             }, 
             err => {
-                loadError("failed to create IPFS connection:", err)
+                loadError("failed to create IPFS connection:" + err)
             }
         )
 
 
     })
-    return this
 })()

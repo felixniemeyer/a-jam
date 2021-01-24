@@ -4,10 +4,16 @@
   "description": "decentral application to make music together (asynchronous jam) ",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1", 
-	"sass": "sass style.scss style.css --watch"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sass": "sass style.scss style.css --watch"
   },
   "author": "felix paul niemeyer",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "ipfs": "^0.53.2",
+    "ts-loader": "^8.0.14",
+    "typescript": "^4.1.3",
+    "webpack": "^5.17.0"
+  }
 }

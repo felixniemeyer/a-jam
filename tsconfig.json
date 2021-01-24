@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "moduleResolution": "Node",
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "noImplicitAny": false,
+        "sourceMap": true,
+    }
+}
