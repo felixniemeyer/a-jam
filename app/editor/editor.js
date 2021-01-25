@@ -1,6 +1,7 @@
 class Editor {
     constructor(sessionObject) {
         this.so = sessionObject
+        this.sources = []
         this.initElement()
         this.initWebAudio()
         this.initUserMedia()
@@ -32,21 +33,15 @@ class Editor {
                         fileReader.onloadend = () => {
                             arrayBuffer = fileReader.result
                             console.log(arrayBuffer)
-                            let source = this.ac.createBufferSource()
                             this.ac.decodeAudioData(arrayBuffer).then(
                                 audioBuffer => {
                                     console.log(audioBuffer)
-                                    source.buffer = audioBuffer
-                                    source.connect(this.ac.destination)
-                                    source.start(0)
-
-                                    let o = this.ac.createOscillator()
-                                    o.type = "sine"
-                                    o.connect(this.ac.destination)
-                                    o.frequency.value = 440
-                                    o.start()
-                                    
-                                    setTimeout(() => {o.stop()}, 1000)
+                                    this.trackList.addTrack({
+                                        name: 'new recording',
+                                        audioBuffer,
+                                        volume: 1.0,
+                                        offset: 0,
+                                    })
                                 },
                                 err => {
                                     console.error("failed to decode audio data:", err)
@@ -76,8 +71,9 @@ class Editor {
         }
     }
     setName(name) {
+        console.log("setting name to", name) 
         this.so.name = name
-        this.element.name.el.textContent = name
+        this.name_el.textContent = name
     }
     setTracks(newTracks) {
     }
@@ -90,15 +86,53 @@ class Editor {
     initElement() {
         this.el = document.createElement("div")
         this.el.className = "editor"
-        this.el.textContent = "editor"
+        
+        let headline_el = document.createElement("div")
+        headline_el.className = "headline"
+
         this.name_el = document.createElement("div")
         this.name_el.className = 'name'
         this.name_el.textContent = this.so.name
-        this.el.appendChild(this.name_el)
+        this.name_el.spellcheck = false
+        this.name_el.setAttribute('contenteditable', true)
+        this.name_el.addEventListener('blur', () => {
+            this.setName(this.name_el.textContent)
+        })
+        
+        let publish_el = document.createElement("div")
+        publish_el.className = 'publish-button'
+
+        headline_el.append(this.name_el, publish_el)
+        
+        this.el.appendChild(headline_el)
+
+        this.play_el = document.createElement("div")
+        this.play_el.className = "play"
+        this.play_el.addEventListener('click', this.playAll.bind(this)) 
+        this.el.appendChild(this.play_el)
 
         this.trackList = new TrackList(this.so.tracks)
         this.trackList.mount(this.el)
 
+    }
+    playAll() {
+        this.stopAll() 
+        console.log("playing back")
+        let now = this.ac.currentTime + 0.1
+        this.so.tracks.forEach(track => {
+            console.log("track..")
+            let source = this.ac.createBufferSource()
+            source.buffer = track.audioBuffer
+            source.connect(this.ac.destination)
+            source.start(now)
+            this.sources.push(source)
+        })
+    }
+    stopAll() {
+        this.sources.forEach(source => {
+            source.stop()
+        })
+        this.sources = []
     }
     initRecorder(startRecording, stopRecording) {
         this.recorder = new Recorder({

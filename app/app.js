@@ -43,7 +43,6 @@ class App {
     }
     initElement() {
         this.el = document.createElement("div")
-        this.el.textContent = "app"
         this.el.className = "app"
     }
     mount(mountPoint) {

@@ -2,10 +2,12 @@ body {
     background-color: #0a1630;
     color: #eee;
     font-family: monospace;
-    margin: 0;
+    height: 100%;
+    width: 100%; 
+    margin: 0; 
 }
 
-div {
+diva {
     outline: 1px solid pink; 
 }
 
@@ -46,26 +48,63 @@ div {
     }
 }
 
-.app {
-    margin: 0;
-    .editor{
-        position: relative;
-        background-color: #123782;
-        .name{
-            width: 100%
+$button-size: 4em;
 
+@mixin img-button($url) {
+    width: $button-size; 
+    height: $button-size;
+    border-radius: $button-size / 2;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+    background-image: $url;
+    cursor: pointer;
+    &:hover{
+        opacity: 0.5;
+    }
+}
+
+.app {
+    .editor{
+        .headline {
+            background: linear-gradient(0deg, rgba(11, 26, 87, 0.6), rgba(136, 172, 224, 0.438));
+            border-bottom: 0.2em solid #fff7;
+            text-align: center;
+            .name{
+            vertical-align: middle;
+                display: inline-block;
+                padding: 1em; 
+                font-weight: bold;
+            }
+            .publish-button {
+            vertical-align: middle;
+                display: inline-block;
+                @include img-button(url('./img/publish.png'))
+            }
+        }
+        .play{
+            @include img-button(url('./img/play.png'));
         }
         .recorder{
+            position: fixed;
+            text-align: center;
+            width: 100%;
+            bottom: 0;
             .record-button{
-                width: 2rem; 
-                height: 2rem; 
-                background-color: #a00;
-                border-radius: 1rem;
+                display: inline-block;
+                @include img-button(url('./img/record.png'));
+                border-radius: $button-size / 2;
                 cursor: pointer;
-                &:hover {
-                    background-color: #f44;
+                &.recording {
+                    background-image: url("./img/stop-record.png");
                 }
             }
+        }
+        .track {
+            background: rgba(208, 221, 240, 0.438);
+            border-radius: 0.3em;
+            margin: 0.3em; 
+            min-height: 3em;
         }
     }
 }
