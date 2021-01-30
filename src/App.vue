@@ -1,22 +1,29 @@
 <template>
   <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <Home/>
+    <Session/>
   </div>
-  <router-view/>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component'
-import HelloWorld from '@/components/HelloWorld.vue' // @ is an alias to /src
+import Home from '@/components/Home.vue'
+import Session from '@/components/Session.vue'
+
+import ipfsWrapper from './ipfs-wrapper'
 
 @Options({
   components: {
-    // Title, Buttons, TrackList,
+    Home,
+    Session
   }
 })
 export default class App extends Vue {
-
+  beforeCreate() {
+    console.log('setup is executed')
+    ipfsWrapper.initialize()
+    console.log(ipfsWrapper)
+  }
 }
 </script>
 
