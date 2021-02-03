@@ -15,7 +15,10 @@
     "types": [
       "webpack-env",
       "mocha",
-      "chai"
+      "dom-mediacapture-record",
+      "vue-property-decorator", 
+      "chai",
+      "color-hash"
     ],
     "paths": {
       "@/*": [

@@ -5,19 +5,23 @@ class IPFSWrapper {
   state: Ref<string> = ref('uninitialized')
   node: ipfs.IPFS | undefined = undefined
   initialize() {
-    if (this.node === undefined && this.state.value !== 'initializing') {
-      this.state.value = 'initializing'
-      ipfs.create().then(
-        node => {
-          this.node = node
-          this.state.value = 'initialized'
-        },
-        err => {
-          console.error('could not start ipfs node:', err)
-          this.state.value = 'failed'
-        }
-      )
-    }
+    return new Promise((resolve, reject) => {
+      if (this.node === undefined && this.state.value !== 'initializing') {
+        this.state.value = 'initializing'
+        // create it using a delegated ipfs server running on davids pi
+        ipfs.create().then(
+          node => {
+            this.node = node
+            this.state.value = 'initialized'
+            resolve(node)
+          },
+          err => {
+            this.state.value = 'failed'
+            reject(Error('could not initialize ipfs connection: ' + err))
+          }
+        )
+      }
+    })
   }
 }
 

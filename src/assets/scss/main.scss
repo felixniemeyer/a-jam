@@ -1,0 +1,24 @@
+@mixin centered-background-image {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+}
+
+.cornerbutton {
+  @include centered-background-image;
+  position:fixed;
+  height: 3em;
+  width: 3em;
+  background-size: 50%;
+  cursor: pointer;
+  border-radius: 0.5em;
+  box-shadow: 0 0 0.5em #0008;
+}
+
+
+
+.cornerbutton.back {
+  left: 1em;
+  top: 1em;
+  background-image: url('~@/assets/icons/back.svg');
+}

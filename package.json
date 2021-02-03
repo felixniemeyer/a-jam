@@ -1,5 +1,5 @@
 {
-  "name": "jam",
+  "name": "ajam",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -19,6 +19,8 @@
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",
+    "@types/color-hash": "^1.0.0",
+    "@types/dom-mediacapture-record": "^1.0.7",
     "@types/mocha": "^5.2.4",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
@@ -36,6 +38,7 @@
     "@vue/test-utils": "^2.0.0-0",
     "chai": "^4.1.2",
     "chromedriver": "^84.0.1",
+    "color-hash": "^1.0.3",
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-node": "^11.1.0",
@@ -45,6 +48,7 @@
     "geckodriver": "^1.20.0",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
-    "typescript": "~3.9.3"
+    "typescript": "~3.9.3",
+    "vue-property-decorator": "^9.1.2"
   }
 }
