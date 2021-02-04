@@ -1,0 +1,20 @@
+- V1
+	- programming: 
+		- edit track names
+		- show share links:  "click to copy": 
+			- cid
+			- ipfs-link
+			- gateway 
+		- load from ipfs
+	- publishing
+		- upload on ipfs
+		- name it
+	- ipfs delegate node
+
+- V2
+	- recent projects
+	- track adjustments: 
+		- volume
+		- panning
+	- 
+

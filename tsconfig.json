@@ -18,7 +18,8 @@
       "dom-mediacapture-record",
       "vue-property-decorator", 
       "chai",
-      "color-hash"
+      "color-hash",
+      "ipfs"
     ],
     "paths": {
       "@/*": [

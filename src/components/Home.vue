@@ -24,7 +24,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component'
 
-import ipfsWrapper from '@/ipfs-wrapper'
+import { ipfsWrapper } from '@/ipfs-wrapper'
 
 @Options({
   components: {},
@@ -49,15 +49,7 @@ export default class Home extends Vue {
     margin-bottom: 0.1em;
   }
   .project{
-    cursor: pointer;
-    box-shadow: 0 0 1em #0004;
-    border-radius: 0.3em;
-    padding: 1em;
-    margin: 1em;
-    &:hover {
-      box-shadow: 0 0 0.4em #0004;
-      background-color: #0000000a;
-    }
+    @include clickable-surface;
     &.new{
       padding: 1.5em 1em;
       margin-bottom: 2.5em;

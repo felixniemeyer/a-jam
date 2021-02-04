@@ -1,20 +1,62 @@
 <template>
-  <div class="session">
+  <div v-if="publishing !== 'no'"
+    class="publishing">
+    <h1> publishing </h1>
+    <div class="log">
+      <div v-for="(entry, index) in publishingLog" :key="index">
+        <p class="msg" v-if="entry.type === 'msg'">
+          {{entry.s}}
+        </p>
+        <div v-else>
+          <CID
+            :cid="entry.s"/>
+        </div>
+      </div>
+    </div>
+    <div v-if="publishing === 'done'">
+      <div v-if="publishingError === undefined">
+      </div>
+      <div v-else class="publish-erro">
+      </div>
+      <div class="close" @click="confirmPublishResults()">
+        return to session
+      </div>
+    </div>
+  </div>
+  <div v-else-if="renaming" key='renaming-page'
+    class="renaming">
+    <input :value="title" ref="newSessionTitle" @keyup="$event.key === 'Enter' ? updateName() : {}" >
+    <div>
+      <div class="inline-button" @click="renaming=false">cancel</div>
+      <div class="inline-button" @click="updateName">ok</div>
+    </div>
+  </div>
+  <TrackSettings
+    v-else-if="editTrackIndex !== null"
+    :track="tracks[editTrackIndex]"
+    @cancel='editTrackIndex=null'
+    @save='updateTrack'/>
+  <div v-else
+  class="session">
     <div class="cornerbutton back" @click="promtSave()"></div>
-    <div class="title">
+    <div class="title" @click="renameSession()">
       <div class="text">
-        session title
+        {{ title }}
       </div>
       <span class="edit"></span>
     </div>
-    <div class="cornerbutton publish"></div>
+    <div class="cornerbutton publish" @click="publish()"></div>
     <div class="tracks">
       <TrackC
-        v-for="(track, index) in tracks"
-        :key="track.cid === undefined ? track.localId : track.cid"
+        v-for="(track, key) in tracks"
+        :key="key"
         :cid="track.cid"
+        :name="track.name"
         :relativeDuration="track.effectiveDuration / maxTrackDuration"
+        @editTrack="editTrack(key)"
         />
+      <div class='time' :style="{visibility: playing ? 'visible' : 'hidden', left: `calc(3em + ${playtime / maxTrackDuration} * (100% - 3.4em))`}">
+      </div>
     </div>
     <div class="controls">
       <div
@@ -36,44 +78,51 @@ import { reactive } from 'vue'
 import { Options, Vue } from 'vue-class-component'
 
 import TrackC from '@/components/Track.vue'
+import TrackSettings from '@/components/TrackSettings.vue'
+import CID from '@/components/CID.vue'
 
-class Track {
-  localId: number | undefined = undefined
-  cid: number | undefined = undefined
-  name = 'new recording'
-  audioBlob: Blob
-  audioBuffer: AudioBuffer
-  volume = 1.0
-  offset = 0.0
-  effectiveDuration = 0
-  constructor(blob: Blob, buffer: AudioBuffer) {
-    this.audioBlob = blob
-    this.audioBuffer = buffer
-  }
+import { ipfsWrapper, SessionConfig, TrackConfig } from '@/ipfs-wrapper'
+
+import Track from '@/datamodel/Track'
+
+class LogEntry {
+  constructor(
+    public type: 'msg' | 'cid',
+    public s: string
+  ) {}
 }
 
 @Options({
   components: {
-    TrackC
+    TrackC,
+    TrackSettings,
+    CID
   },
   emits: ['goHome']
 })
 export default class Session extends Vue {
   dirty = false
+  publishing = 'no'
+  publishingError: undefined | string
+  publishingLog: LogEntry[] = []
+  renaming = false
+  editTrackIndex: number | null = null
+  title = 'new session'
   playing = false
+  playtime = 0
   recording = false
-  sessionTitle = 'new session'
-  tracks: Track[] = []
+  tracks: Track[] = reactive([])
   nextLocalTrackId = 0
   maxTrackDuration = 0
   recordingChunks: Blob[] = []
   recordingStopTime = 0
   recordingStartTime = 0
+  base: string | undefined
   mediaRecorder: MediaRecorder | undefined
   stopTimeout: any
+  playtimeInterval: any
   ac: AudioContext = new AudioContext()
   firstInteraction = true
-  sources: AudioBufferSourceNode[] = []
   mounted() {
     this.initUserMedia()
   }
@@ -137,9 +186,14 @@ export default class Session extends Vue {
     track.localId = this.nextLocalTrackId++
     track.offset = offset
     track.effectiveDuration = audioBuffer.duration - offset
-    if (track.effectiveDuration > this.maxTrackDuration) {
-      this.maxTrackDuration = track.effectiveDuration
-    }
+    track.name = 'new track'
+    let newMaxDuration = track.effectiveDuration
+    this.tracks.forEach(track => { // have to go through all, because the playtimeInterval may habe pushed this.maxDuration too far
+      if (track.effectiveDuration > newMaxDuration) {
+        newMaxDuration = track.effectiveDuration
+      }
+    })
+    this.maxTrackDuration = newMaxDuration
     this.tracks.push(reactive(track))
   }
 
@@ -158,6 +212,10 @@ export default class Session extends Vue {
     } else {
       if (!this.recording) {
         this.playAll()
+        this.stopTimeout = setTimeout(
+          this.stopAllSources.bind(this),
+          this.maxTrackDuration * 1000 + 100
+        )
         this.playing = true
       }
     }
@@ -175,21 +233,28 @@ export default class Session extends Vue {
       } else {
         source.start(now, track.offset)
       }
-      this.sources.push(source)
+      track.source = source
     })
-    this.stopTimeout = setTimeout(
-      () => { this.playing = false },
-      this.maxTrackDuration * 1000 + 100
+    this.playtimeInterval = setInterval(
+      () => {
+        this.playtime = this.ac.currentTime - now
+        console.log('still checking')
+        if (this.recording && this.playtime > this.maxTrackDuration) {
+          this.maxTrackDuration = this.playtime
+        }
+      }, 1000 / 24
     )
     return now
   }
 
   stopAllSources() {
+    clearInterval(this.playtimeInterval)
     clearTimeout(this.stopTimeout)
-    this.sources.forEach(source => {
-      source.stop()
+    this.tracks.forEach(track => {
+      if (track.source !== undefined) {
+        track.source.stop()
+      }
     })
-    this.sources = []
     this.playing = false
   }
 
@@ -197,6 +262,7 @@ export default class Session extends Vue {
     if (this.mediaRecorder !== undefined) {
       if (this.recording) {
         this.mediaRecorder.stop() // triggers onstop callback
+        this.stopAllSources()
         this.recording = false
       } else {
         this.stopAllSources()
@@ -210,10 +276,138 @@ export default class Session extends Vue {
     }
   }
 
+  pLog(msg: string) {
+    this.publishingLog.push(
+      new LogEntry(
+        'msg',
+        msg
+      )
+    )
+  }
+
+  pLogCid(cid: string) {
+    this.publishingLog.push(
+      new LogEntry(
+        'cid',
+        cid
+      )
+    )
+    setTimeout(() => {
+      window.scrollTo(0, document.body.scrollHeight)
+    }, 100)
+  }
+
   publish() {
-    // save tracks
-    // create config
     console.log('publish')
+    if (ipfsWrapper.state.value === 'initialized') {
+      this.publishing = 'ongoing'
+      this.publishingError = undefined
+      this.publishingLog = []
+      const scrollDown = () => {
+        setTimeout(() => {
+          window.scrollTo(0, document.body.scrollHeight)
+        }, 100)
+      }
+      this.publishTracks().then(
+        () => this.publishSession().then(
+          cid => {
+            this.base = cid
+            this.pLog('jam session is now public on ipfs at:')
+            this.pLogCid(cid)
+            this.publishing = 'done'
+            scrollDown()
+          },
+          err => {
+            this.publishingError = String(err)
+            this.publishing = 'done'
+            scrollDown()
+          }
+        )
+      )
+    }
+  }
+
+  confirmPublishResults() {
+    this.publishing = 'no'
+  }
+
+  publishTracks() {
+    return new Promise((resolve, reject) => {
+      const promises: Promise<void>[] = []
+      this.tracks.forEach(track => {
+        if (track.cid === undefined) {
+          this.pLog(`publishing track ${track.localId}...`)
+          promises.push(new Promise((resolve, reject) => {
+            ipfsWrapper.saveTrackAudio(track.audioBlob).then(
+              cid => {
+                this.pLog(`track ${track.localId} is now public on ipfs at:`)
+                this.pLogCid(cid)
+                track.cid = cid
+                delete track.localId
+                resolve()
+              },
+              reject
+            )
+          }))
+        }
+      })
+      if (promises.length === 0) {
+        this.pLog('no tracks to publish.')
+      }
+      Promise.all(promises).then(
+        resolve,
+        reject
+      )
+    })
+  }
+
+  publishSession() {
+    const sc = new SessionConfig(
+      this.title,
+      this.base,
+      Date.now(),
+      []
+    )
+    this.tracks.forEach(track => {
+      if (track.cid !== undefined) {
+        sc.addTrack(new TrackConfig(
+          track.cid,
+          track.name,
+          track.volume,
+          track.panning,
+          track.offset
+        ))
+      }
+    })
+    this.pLog('publishing session...')
+    return ipfsWrapper.saveSessionConfig(sc)
+  }
+
+  renameSession() {
+    this.renaming = true;
+    this.$nextTick(() => {
+      (this.$refs.newSessionTitle as HTMLInputElement).select()
+    })
+  }
+
+  updateName() {
+    this.title=(this.$refs.newSessionTitle as HTMLInputElement).value
+    this.renaming=false
+  }
+
+  editTrack(index: number) {
+    this.editTrackIndex = index
+  }
+
+  updateTrack(_: any, updates: Record<string, any>) {
+    console.log('ye')
+    if (this.editTrackIndex !== null) {
+      const track = this.tracks[this.editTrackIndex]
+      if ('name' in updates) {
+        track.name = updates.name
+      }
+      this.editTrackIndex = null
+    }
   }
 
   load() {
@@ -224,6 +418,32 @@ export default class Session extends Vue {
 </script>
 
 <style lang="scss">
+.publishing {
+  .log {
+    font-family: monospace;
+    .msg {
+      margin: 1em 1em 0 1em;
+    }
+    .cid {
+    }
+  }
+  .close {
+    @include clickable-surface;
+  }
+}
+.renaming {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  transform: translate(0, -50%);
+  input {
+    padding: 1em;
+  }
+  .inline-button{
+    @include clickable-surface;
+    display: inline-block;
+  }
+}
 .session {
   .title {
     position: absolute;
@@ -262,6 +482,17 @@ export default class Session extends Vue {
     height: calc(100% - 10em);
     width: 100%;
     overflow-y: scroll;
+    overflow-x: hidden;
+    .time {
+      position: absolute;
+      background: linear-gradient(90deg, rgb(255, 85, 85), rgb(255, 85, 85) 49%, #fff 50%, #fff);
+      z-index: 50;
+      top: 0em;
+      left: 3em;
+      width: 0.4em;
+      opacity: 0.5;
+      height: 100%;
+    }
   }
 
   .controls {

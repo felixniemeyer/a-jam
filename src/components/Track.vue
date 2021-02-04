@@ -1,8 +1,8 @@
 <template>
-  <div class="track" :style="{ width: `calc(3em + ${relativeDuration} * (100% - 3.4em)`}">
+  <div class="track" :style="{ width: `calc(3em + ${relativeDuration} * (100% - 3.4em)`, backgroundColor: color}" @click="$emit('editTrack')">
     <div class="name">
       <span class="edit"></span>
-      <div class="text">
+      <div class="text" :style="{ backgroundColor: color + '81'}">
         {{ name }}
       </div>
     </div>
@@ -16,19 +16,19 @@ import ColorHash from 'color-hash'
 
 @Options({
   components: {},
-  emits: ['goHome']
+  emits: ['editTrack']
 })
 export default class Track extends Vue {
   @Prop(String) cid: string | undefined
   @Prop({ default: 1 }) relativeDuration!: number
-
-  name = 'new track';
+  @Prop(String) name!: string;
   get color() {
     if (this.cid) {
       const ch = new ColorHash({ lightness: 0.4 })
-      return ch.hex(this.name)
+      console.log(ch.hex(this.cid))
+      return ch.hex(this.cid)
     } else {
-      return '#555'
+      return '#234'
     }
   }
 }

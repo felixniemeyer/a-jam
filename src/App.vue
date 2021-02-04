@@ -18,7 +18,7 @@ import Home from '@/components/Home.vue'
 import Session from '@/components/Session.vue'
 import Info from '@/components/Info.vue'
 
-import ipfsWrapper from '@/ipfs-wrapper'
+import { ipfsWrapper } from '@/ipfs-wrapper'
 
 @Options({
   components: {
@@ -56,7 +56,7 @@ export default class App extends Vue {
 
 <style lang="scss">
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

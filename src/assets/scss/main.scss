@@ -1,3 +1,14 @@
+@mixin clickable-surface {
+  cursor: pointer;
+  box-shadow: 0 0 1em #0004;
+  border-radius: 0.3em;
+  padding: 1em;
+  margin: 1em;
+  &:hover {
+    box-shadow: 0 0 0.4em #0004;
+    background-color: #0000000a;
+  }
+}
 @mixin centered-background-image {
   background-repeat: no-repeat;
   background-position: center;
