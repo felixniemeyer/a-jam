@@ -541,9 +541,6 @@ export default class Session extends Vue {
 </script>
 
 <style lang="scss">
-div {
-  outline: 1px solid pink;
-}
 .publishing, .loading {
   .close {
     @include clickable-surface;
