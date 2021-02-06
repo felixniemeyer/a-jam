@@ -1,6 +1,6 @@
 <template>
-  <div class="cid-view">
-    <textarea class="cid" :value="cid" readonly @click="copyCid"></textarea>
+  <div class="copyable">
+    <textarea class="text" :value="text" readonly @click="copyCid"></textarea>
     <div class="copy-hint" :class="{visible}">copied to clipboard!</div>
   </div>
 </template>
@@ -13,13 +13,11 @@ import { Prop } from 'vue-property-decorator'
   components: {
   }
 })
-export default class CID extends Vue {
-  @Prop(String) cid!: string
+export default class Copyable extends Vue {
+  @Prop() text!: string
   visible = false
   copyCid(event: Event) {
-    console.log('heyyy')
     if (event.target instanceof HTMLTextAreaElement) {
-      console.log('it is!')
       event.target.select()
       document.execCommand('copy')
       this.visible = true
@@ -32,11 +30,11 @@ export default class CID extends Vue {
 </script>
 
 <style lang="scss">
-.cid-view{
+.copyable{
   position: relative;
   margin: 0.33em auto;
   width: 80%;
-  .cid{
+  .text{
     color: #333;
     border: none;
     background-color: #ddd;

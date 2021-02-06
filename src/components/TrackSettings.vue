@@ -27,8 +27,8 @@ export default class TrackSettings extends Vue {
     (this.$refs.name as HTMLInputElement).select()
   }
 
-  submitOnEnter($event:KeyboardEvent) {
-    if($event.key === 'Enter') {
+  submitOnEnter($event: KeyboardEvent) {
+    if ($event.key === 'Enter') {
       this.save($event)
     }
   }

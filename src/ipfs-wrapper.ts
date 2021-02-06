@@ -2,6 +2,8 @@ import { Ref, ref } from 'vue'
 import ipfs from 'ipfs'
 import { BaseName } from 'multibase'
 
+const NO_CONNECTION_ERROR = Error('ipfs not connected')
+
 export class TrackConfig {
   constructor(
     public cid: string,
@@ -29,6 +31,8 @@ class IPFSWrapper {
   state: Ref<string> = ref('uninitialized')
   node: ipfs.IPFS | undefined = undefined
   baseName: BaseName = 'base32'
+  gatewayURL = 'ipfs.io'
+  appIPNSIdentifier = 'tbd'
   initialize() {
     return new Promise((resolve, reject) => {
       if (this.node === undefined && this.state.value !== 'initializing') {
@@ -62,7 +66,7 @@ class IPFSWrapper {
           reject
         )
       } else {
-        reject(Error('ipfs undefined'))
+        reject(NO_CONNECTION_ERROR)
       }
     })
   }
@@ -78,7 +82,52 @@ class IPFSWrapper {
           reject
         )
       } else {
-        reject(Error('ipfs undefined'))
+        reject(NO_CONNECTION_ERROR)
+      }
+    })
+  }
+
+  loadSessionConfig(cid: string) {
+    return new Promise<SessionConfig>(async (resolve, reject) => {
+      if (this.node !== undefined) {
+        const data = this.node.cat(cid)
+        const decoder = new TextDecoder()
+        const messageParts = []
+        for await (const chunk of data) {
+          messageParts.push(decoder.decode(chunk, { stream: true }))
+        }
+        const sc = JSON.parse(messageParts.join())
+        resolve(sc as SessionConfig)
+      } else {
+        reject(NO_CONNECTION_ERROR)
+      }
+    })
+  }
+
+  loadTrackAudio(cid: string) {
+    return new Promise<AudioBuffer>(async (resolve, reject) => {
+      if (this.node !== undefined) {
+        const ac = new AudioContext()
+        const data = this.node.cat(cid)
+        const chunks = []
+        for await (const chunk of data) {
+          chunks.push(chunk)
+        }
+        const audio = new Blob(chunks, { type: 'audio/ogg; codecs=opus' })
+        const fileReader = new FileReader()
+        fileReader.onloadend = () => {
+          const arrayBuffer = fileReader.result
+          if (arrayBuffer instanceof ArrayBuffer) {
+            ac.decodeAudioData(arrayBuffer).then(
+              audioBuffer => { resolve(audioBuffer) }
+            )
+          } else {
+            reject(Error('track audio data from ipfs could not be read into an ArrayBuffer'))
+          }
+        }
+        fileReader.readAsArrayBuffer(audio)
+      } else {
+        reject(NO_CONNECTION_ERROR)
       }
     })
   }

@@ -1,23 +1,33 @@
 <template>
-  <div v-if="publishing !== 'no'"
-    class="publishing">
-    <h1> publishing </h1>
-    <div class="log">
-      <div v-for="(entry, index) in publishingLog" :key="index">
-        <p class="msg" v-if="entry.type === 'msg'">
-          {{entry.s}}
-        </p>
-        <div v-else>
-          <CID
-            :cid="entry.s"/>
-        </div>
-      </div>
+  <div v-if="askForAC">
+    <h1>start audio context</h1>
+    <p>ajam needs an AudioContext for handling audio data and for sound playback. </p>
+    <div class="inline-button"
+      @click="acceptAudioContext">
+      click here to enable AudioContext
     </div>
+  </div>
+  <div v-else-if="loading"
+    class="loading">
+    <h1> loading... </h1>
+    <Log
+      :entries="loadingLog"/>
+    <p v-if="loadingError !== null" class="error">{{ loadingError }}</p>
+    <div class="close" @click="$emit('goHome')">
+      {{ loadingError === null ? 'abort' : 'ok' }}
+    </div>
+  </div>
+  <div v-else-if="publishing !== 'no'"
+    class="publishing">
+    <h1> publishing... </h1>
+    <Log
+      :entries="publishingLog"/>
     <div v-if="publishing === 'done'">
-      <div v-if="publishingError === undefined">
-      </div>
-      <div v-else class="publish-erro">
-      </div>
+      <p
+        v-if="publishingError !== null"
+        class="error">
+        {{ publishingError }}
+      </p>
       <div class="close" @click="confirmPublishResults()">
         return to session
       </div>
@@ -25,6 +35,12 @@
   </div>
   <div v-else-if="renaming" key='renaming-page'
     class="renaming">
+    <div v-if="base !== undefined">
+      <p> this jam is based on: </p>
+      <Copyable :text="base"/>
+      <p> <i> {{ Date(baseDate).toLocaleString() }}</i></p>
+    </div>
+    <h3> rename </h3>
     <input :value="title" ref="newSessionTitle" @keyup="$event.key === 'Enter' ? updateName() : {}" >
     <div>
       <div class="inline-button" @click="renaming=false">cancel</div>
@@ -74,56 +90,67 @@
 </template>
 
 <script lang="ts">
-import { reactive } from 'vue'
 import { Options, Vue } from 'vue-class-component'
+import { Prop } from 'vue-property-decorator'
 
 import TrackC from '@/components/Track.vue'
 import TrackSettings from '@/components/TrackSettings.vue'
-import CID from '@/components/CID.vue'
+import Log , { LogEntry } from '@/components/Log.vue'
+import Copyable from '@/components/Copyable.vue'
 
 import { ipfsWrapper, SessionConfig, TrackConfig } from '@/ipfs-wrapper'
 
 import Track from '@/datamodel/Track'
 
-class LogEntry {
-  constructor(
-    public type: 'msg' | 'cid',
-    public s: string
-  ) {}
-}
-
 @Options({
   components: {
     TrackC,
     TrackSettings,
-    CID
+    Log,
+    Copyable
   },
   emits: ['goHome']
 })
 export default class Session extends Vue {
+  @Prop() sessionToLoad: string | undefined
+
   dirty = false
   publishing = 'no'
-  publishingError: undefined | string
+  publishingError: null | string = null
   publishingLog: LogEntry[] = []
+  loading = false
+  loadingLog: LogEntry[] = []
+  loadingError: string | null = null
   renaming = false
   editTrackIndex: number | null = null
   title = 'new session'
   playing = false
   playtime = 0
   recording = false
-  tracks: Track[] = reactive([])
+  tracks: Track[] = []
   nextLocalTrackId = 0
   maxTrackDuration = 0
   recordingChunks: Blob[] = []
   recordingStopTime = 0
   recordingStartTime = 0
   base: string | undefined
+  baseDate: number | undefined
   mediaRecorder: MediaRecorder | undefined
   stopTimeout: any
   playtimeInterval: any
   ac: AudioContext = new AudioContext()
-  firstInteraction = true
+  acceptAudioContext: CallableFunction = () => {}
+  askForAC = false
+
+  beforeCreate() {
+    if(this.sessionToLoad !== undefined) {
+      this.loading = true
+    }
+  }
   mounted() {
+    if(this.sessionToLoad !== undefined) {
+      this.loadSession(this.sessionToLoad)
+    }
     this.initUserMedia()
   }
 
@@ -187,14 +214,17 @@ export default class Session extends Vue {
     track.offset = offset
     track.effectiveDuration = audioBuffer.duration - offset
     track.name = 'new track'
-    let newMaxDuration = track.effectiveDuration
+    this.maxTrackDuration = this.checkForHigherTrackDuration(track.effectiveDuration)
+    this.tracks.push(track)
+  }
+
+  checkForHigherTrackDuration(max: number = 0) {
     this.tracks.forEach(track => { // have to go through all, because the playtimeInterval may habe pushed this.maxDuration too far
-      if (track.effectiveDuration > newMaxDuration) {
-        newMaxDuration = track.effectiveDuration
+      if (track.effectiveDuration > max) {
+        max = track.effectiveDuration
       }
     })
-    this.maxTrackDuration = newMaxDuration
-    this.tracks.push(reactive(track))
+    return max
   }
 
   // loadTrack()
@@ -285,23 +315,20 @@ export default class Session extends Vue {
     )
   }
 
-  pLogCid(cid: string) {
+  pLogCopyable(cid: string) {
     this.publishingLog.push(
       new LogEntry(
-        'cid',
+        'copyable',
         cid
       )
     )
-    setTimeout(() => {
-      window.scrollTo(0, document.body.scrollHeight)
-    }, 100)
   }
 
   publish() {
     console.log('publish')
     if (ipfsWrapper.state.value === 'initialized') {
       this.publishing = 'ongoing'
-      this.publishingError = undefined
+      this.publishingError = null
       this.publishingLog = []
       const scrollDown = () => {
         setTimeout(() => {
@@ -313,7 +340,12 @@ export default class Session extends Vue {
           cid => {
             this.base = cid
             this.pLog('jam session is now public on ipfs at:')
-            this.pLogCid(cid)
+            this.pLogCopyable(cid)
+            this.pLog('link for browsers that support ipfs: ')
+            this.pLogCopyable(`ipns://${ipfsWrapper.appIPNSIdentifier}/?loadSession=${cid}/`)
+            this.pLog('link for all browsers: ')
+            this.pLogCopyable(`https://${ipfsWrapper.gatewayURL}/ipns/${ipfsWrapper.appIPNSIdentifier}/?loadSession=${cid}`)
+            this.pLog('click to copy')
             this.publishing = 'done'
             scrollDown()
           },
@@ -337,18 +369,7 @@ export default class Session extends Vue {
       this.tracks.forEach(track => {
         if (track.cid === undefined) {
           this.pLog(`publishing track ${track.localId}...`)
-          promises.push(new Promise((resolve, reject) => {
-            ipfsWrapper.saveTrackAudio(track.audioBlob).then(
-              cid => {
-                this.pLog(`track ${track.localId} is now public on ipfs at:`)
-                this.pLogCid(cid)
-                track.cid = cid
-                delete track.localId
-                resolve()
-              },
-              reject
-            )
-          }))
+          promises.push(this.publishTrack(track))
         }
       })
       if (promises.length === 0) {
@@ -358,6 +379,25 @@ export default class Session extends Vue {
         resolve,
         reject
       )
+    })
+  }
+
+  publishTrack(track: Track) {
+    return new Promise<void>((resolve, reject) => {
+      if(track.audioBlob !== undefined) {
+        ipfsWrapper.saveTrackAudio(track.audioBlob).then(
+          cid => {
+            this.pLog(`track ${track.localId} is now public on ipfs at:`)
+            this.pLogCopyable(cid)
+            track.cid = cid
+            delete track.localId
+            resolve()
+          },
+          reject
+        )
+      } else {
+        reject("couldn't save track audio: audioBlob undefined")
+      }
     })
   }
 
@@ -384,15 +424,15 @@ export default class Session extends Vue {
   }
 
   renameSession() {
-    this.renaming = true;
+    this.renaming = true
     this.$nextTick(() => {
       (this.$refs.newSessionTitle as HTMLInputElement).select()
     })
   }
 
   updateName() {
-    this.title=(this.$refs.newSessionTitle as HTMLInputElement).value
-    this.renaming=false
+    this.title = (this.$refs.newSessionTitle as HTMLInputElement).value
+    this.renaming = false
   }
 
   editTrack(index: number) {
@@ -410,32 +450,111 @@ export default class Session extends Vue {
     }
   }
 
-  load() {
-    // load
-    console.log('load')
+  loadSession(cid: string) {
+    this.loadingLog.push(new LogEntry(
+      'msg', "loading session with cid:"
+    ))
+    this.loadingLog.push(new LogEntry(
+      'copyable', cid
+    ))
+    this.checkAudioContext().then(
+      () => {
+        ipfsWrapper.loadSessionConfig(cid).then(
+          sc => {
+            console.log("sc", sc)
+            this.base = cid
+            this.baseDate = sc.localTime
+            this.title = sc.title
+            this.loadTracks(sc.tracks).then(
+              () => {
+                this.loading = false
+              },
+              err => {
+                this.loadingError = err
+              }
+            )
+          }
+        )
+      },
+      () => {
+        this.loadingError = 'Audio Context wasn\'t allowed to start.'
+      }
+    )
+  }
+
+  loadTracks(trackConfigs: TrackConfig[]) {
+    return new Promise<void>((resolve, reject) => {
+      let promises: Promise<void>[] = []
+      let i = 0
+      trackConfigs.forEach(ts => {
+        this.loadingLog.push(new LogEntry(
+          'msg', `loading track ${ts.name} with cid:`
+        ))
+        this.loadingLog.push(new LogEntry(
+          'copyable', ts.cid
+        ))
+        let createTrack = (index: number, resolve: CallableFunction) => {
+          return (audioBuffer: AudioBuffer) => {
+            let track = new Track(undefined, audioBuffer)
+            track.cid = ts.cid
+            track.name = ts.name
+            track.offset = ts.offset
+            track.volume = ts.volume
+            track.panning = ts.panning
+            track.effectiveDuration = track.audioBuffer.duration - track.offset
+            console.log("track ef d", track.effectiveDuration)
+            this.tracks[index] = track
+            console.log(track)
+            resolve()
+          }
+        }
+        promises.push(new Promise<void>((resolve, reject) => {
+          ipfsWrapper.loadTrackAudio(ts.cid).then(
+            createTrack(i++, resolve),
+            reject
+          )
+        }))
+      })
+      Promise.all(promises).then(
+        () => {
+          this.maxTrackDuration = this.checkForHigherTrackDuration(0)
+          resolve()
+        },
+        reject
+      )
+    })
+  }
+
+  checkAudioContext() {
+    return new Promise<void>((resolve, reject) => {
+      if(this.ac.state === 'suspended') {
+        this.askForAC = true
+        this.acceptAudioContext = () => {
+          this.askForAC = false
+          this.ac.resume()
+          resolve()
+        }
+      }
+    })
   }
 }
 </script>
 
 <style lang="scss">
-.publishing {
-  .log {
-    font-family: monospace;
-    .msg {
-      margin: 1em 1em 0 1em;
-    }
-    .cid {
-    }
-  }
+div {
+  outline: 1px solid pink;
+}
+.publishing, .loading {
   .close {
     @include clickable-surface;
   }
 }
 .renaming {
   position: absolute;
-  width: 100%;
   top: 50%;
-  transform: translate(0, -50%);
+  left: 50%;
+  width: calc(100% - 1em);
+  transform: translate(-50%, -50%);
   input {
     padding: 1em;
   }

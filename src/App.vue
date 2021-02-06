@@ -1,6 +1,7 @@
 <template>
     <Session
       v-if="page === 'session'"
+      :sessionToLoad="sessionToLoad"
       @go-home="goHome()"/>
     <Info
       v-else-if="page === 'info'"
@@ -20,6 +21,27 @@ import Info from '@/components/Info.vue'
 
 import { ipfsWrapper } from '@/ipfs-wrapper'
 
+class GetParams {
+  loadSession: string | undefined
+  newSession = false
+  constructor() {
+    let tmp = []
+    location.search
+      .substr(1)
+      .split('&')
+      .forEach(item => {
+        tmp = item.split('=')
+        switch (tmp[0]) {
+          case 'loadSession':
+            this.loadSession = tmp[1]
+            break
+          case 'newSession':
+            this.newSession = true
+        }
+      })
+  }
+}
+
 @Options({
   components: {
     Home,
@@ -29,20 +51,30 @@ import { ipfsWrapper } from '@/ipfs-wrapper'
 })
 export default class App extends Vue {
   page = 'home'
+  getParams: GetParams = new GetParams()
+  sessionToLoad: string | undefined
   beforeCreate() {
-    ipfsWrapper.initialize().then(() => {
-      this.handleGetParams()
-    })
-    console.log(ipfsWrapper)
+  }
+
+  mounted() {
+    ipfsWrapper.initialize().then(
+      () => {
+        this.handleGetParams()
+      },
+      err => {
+        console.error('failed to initialize ipfs', err)
+      }
+    )
   }
 
   handleGetParams() {
-    // load, if a specific project cid is specified
-    this.page = 'session'
+    if (this.getParams.loadSession !== undefined) {
+      console.log('loading', this.getParams.loadSession)
+      this.sessionToLoad = this.getParams.loadSession
+      this.page = 'session'
+    }
   }
 
-  // loadProject(cid) {
-  // }
   createNewProject() {
     console.log('creating new project')
     this.page = 'session'
@@ -50,6 +82,7 @@ export default class App extends Vue {
 
   goHome() {
     this.page = 'home'
+    this.sessionToLoad = undefined
   }
 }
 </script>
