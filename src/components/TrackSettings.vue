@@ -1,5 +1,6 @@
 <template>
   <div class="track-settings">
+    <h3>rename track</h3>
     <input :value="track.name" ref="name" @keyup="submitOnEnter">
     <div>
       <div class="inline-button" @click="cancel">cancel</div>

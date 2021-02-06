@@ -38,7 +38,7 @@ default class Log extends Vue {
   @Prop() entries: LogEntry[] = []
 }
 
-export {Log as default, LogEntry }
+export { Log as default, LogEntry }
 
 </script>
 

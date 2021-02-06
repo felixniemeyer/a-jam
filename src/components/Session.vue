@@ -1,5 +1,6 @@
 <template>
-  <div v-if="askForAC">
+  <div v-if="askForAC"
+    class="ask-for-ac">
     <h1>start audio context</h1>
     <p>ajam needs an AudioContext for handling audio data and for sound playback. </p>
     <div class="inline-button"
@@ -40,7 +41,7 @@
       <Copyable :text="base"/>
       <p> <i> {{ Date(baseDate).toLocaleString() }}</i></p>
     </div>
-    <h3> rename </h3>
+    <h3> rename session </h3>
     <input :value="title" ref="newSessionTitle" @keyup="$event.key === 'Enter' ? updateName() : {}" >
     <div>
       <div class="inline-button" @click="renaming=false">cancel</div>
@@ -71,7 +72,7 @@
         :relativeDuration="track.effectiveDuration / maxTrackDuration"
         @editTrack="editTrack(key)"
         />
-      <div class='time' :style="{visibility: playing ? 'visible' : 'hidden', left: `calc(3em + ${playtime / maxTrackDuration} * (100% - 3.4em))`}">
+      <div class='time' :style="{visibility: playing || recording ? 'visible' : 'hidden', left: `calc(3em + ${playtime / maxTrackDuration} * (100% - 3.4em))`}">
       </div>
     </div>
     <div class="controls">
@@ -95,7 +96,7 @@ import { Prop } from 'vue-property-decorator'
 
 import TrackC from '@/components/Track.vue'
 import TrackSettings from '@/components/TrackSettings.vue'
-import Log , { LogEntry } from '@/components/Log.vue'
+import Log, { LogEntry } from '@/components/Log.vue'
 import Copyable from '@/components/Copyable.vue'
 
 import { ipfsWrapper, SessionConfig, TrackConfig } from '@/ipfs-wrapper'
@@ -143,12 +144,13 @@ export default class Session extends Vue {
   askForAC = false
 
   beforeCreate() {
-    if(this.sessionToLoad !== undefined) {
+    if (this.sessionToLoad !== undefined) {
       this.loading = true
     }
   }
+
   mounted() {
-    if(this.sessionToLoad !== undefined) {
+    if (this.sessionToLoad !== undefined) {
       this.loadSession(this.sessionToLoad)
     }
     this.initUserMedia()
@@ -218,7 +220,7 @@ export default class Session extends Vue {
     this.tracks.push(track)
   }
 
-  checkForHigherTrackDuration(max: number = 0) {
+  checkForHigherTrackDuration(max = 0) {
     this.tracks.forEach(track => { // have to go through all, because the playtimeInterval may habe pushed this.maxDuration too far
       if (track.effectiveDuration > max) {
         max = track.effectiveDuration
@@ -384,7 +386,7 @@ export default class Session extends Vue {
 
   publishTrack(track: Track) {
     return new Promise<void>((resolve, reject) => {
-      if(track.audioBlob !== undefined) {
+      if (track.audioBlob !== undefined) {
         ipfsWrapper.saveTrackAudio(track.audioBlob).then(
           cid => {
             this.pLog(`track ${track.localId} is now public on ipfs at:`)
@@ -452,7 +454,7 @@ export default class Session extends Vue {
 
   loadSession(cid: string) {
     this.loadingLog.push(new LogEntry(
-      'msg', "loading session with cid:"
+      'msg', 'loading session with cid:'
     ))
     this.loadingLog.push(new LogEntry(
       'copyable', cid
@@ -461,7 +463,7 @@ export default class Session extends Vue {
       () => {
         ipfsWrapper.loadSessionConfig(cid).then(
           sc => {
-            console.log("sc", sc)
+            console.log('sc', sc)
             this.base = cid
             this.baseDate = sc.localTime
             this.title = sc.title
@@ -484,7 +486,7 @@ export default class Session extends Vue {
 
   loadTracks(trackConfigs: TrackConfig[]) {
     return new Promise<void>((resolve, reject) => {
-      let promises: Promise<void>[] = []
+      const promises: Promise<void>[] = []
       let i = 0
       trackConfigs.forEach(ts => {
         this.loadingLog.push(new LogEntry(
@@ -493,16 +495,16 @@ export default class Session extends Vue {
         this.loadingLog.push(new LogEntry(
           'copyable', ts.cid
         ))
-        let createTrack = (index: number, resolve: CallableFunction) => {
+        const createTrack = (index: number, resolve: CallableFunction) => {
           return (audioBuffer: AudioBuffer) => {
-            let track = new Track(undefined, audioBuffer)
+            const track = new Track(undefined, audioBuffer)
             track.cid = ts.cid
             track.name = ts.name
             track.offset = ts.offset
             track.volume = ts.volume
             track.panning = ts.panning
             track.effectiveDuration = track.audioBuffer.duration - track.offset
-            console.log("track ef d", track.effectiveDuration)
+            console.log('track ef d', track.effectiveDuration)
             this.tracks[index] = track
             console.log(track)
             resolve()
@@ -527,7 +529,7 @@ export default class Session extends Vue {
 
   checkAudioContext() {
     return new Promise<void>((resolve, reject) => {
-      if(this.ac.state === 'suspended') {
+      if (this.ac.state === 'suspended') {
         this.askForAC = true
         this.acceptAudioContext = () => {
           this.askForAC = false
@@ -541,8 +543,8 @@ export default class Session extends Vue {
 </script>
 
 <style lang="scss">
-.publishing, .loading {
-  .close {
+.publishing, .loading, .ask-for-ac {
+  .close, .inline-button {
     @include clickable-surface;
   }
 }
