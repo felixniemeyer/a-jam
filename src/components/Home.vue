@@ -5,9 +5,12 @@
     <img class="logo" alt="ajam logo" src="../assets/logo.png" />
     <div v-if="ipfsState === 'initialized'">
       <div class="project new" @click="this.$emit('newProject')">new project</div>
-      <h4>recent projects</h4>
-      <div class="project">project<br /><i>2021-02-02</i></div>
-      <div class="project">project<br /><i>2021-02-02</i></div>
+      <h4 v-if="sessionHistory.length > 0">recent projects</h4>
+      <p class="project" v-for="(rse, key) in sessionHistory" :key="key">
+        {{ rse.title }} <br />
+        <span class='small'>{{ rse.cid }}</span> <br/>
+        <i class='date'>{{ Date(rse.timestamp).toLocaleString() }}</i>
+      </p>
     </div>
     <p v-else-if="ipfsState === 'failed'" class='error'>
       failed to connect to ipfs
@@ -26,12 +29,18 @@ import { Options, Vue } from 'vue-class-component'
 
 import { ipfsWrapper } from '@/ipfs-wrapper'
 
+import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
+
 @Options({
   components: {},
   emits: ['newProject', 'gotoInfo']
 })
 export default class Home extends Vue {
   ipfsState = ipfsWrapper.state
+  sessionHistory: RecentSessionEntry[] = []
+  mounted() {
+    this.sessionHistory = RecentSessionEntry.getHistory()
+  }
   newProject() {
     console.log('newProject')
   }
@@ -53,6 +62,12 @@ export default class Home extends Vue {
     &.new{
       padding: 1.5em 1em;
       margin-bottom: 2.5em;
+    }
+    .small {
+      font-size: 0.5em;
+    }
+    .date {
+      font-size: 0.5em;
     }
   }
   .cornerbutton{

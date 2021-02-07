@@ -102,6 +102,7 @@ import Copyable from '@/components/Copyable.vue'
 import { ipfsWrapper, SessionConfig, TrackConfig } from '@/ipfs-wrapper'
 
 import Track from '@/datamodel/Track'
+import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
 
 @Options({
   components: {
@@ -341,6 +342,7 @@ export default class Session extends Vue {
         () => this.publishSession().then(
           cid => {
             this.base = cid
+            RecentSessionEntry.append(new RecentSessionEntry(true, cid, this.title))
             this.pLog('jam session is now public on ipfs at:')
             this.pLogCopyable(cid)
             this.pLog('link for browsers that support ipfs: ')
@@ -469,6 +471,7 @@ export default class Session extends Vue {
             this.title = sc.title
             this.loadTracks(sc.tracks).then(
               () => {
+                RecentSessionEntry.append(new RecentSessionEntry(false, cid, sc.title))
                 this.loading = false
               },
               err => {
@@ -538,7 +541,7 @@ export default class Session extends Vue {
         }
       }
     })
-  }
+   }
 }
 </script>
 
