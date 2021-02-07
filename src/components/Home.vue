@@ -6,7 +6,7 @@
     <div v-if="ipfsState === 'initialized'">
       <div class="project new" @click="this.$emit('newProject')">new project</div>
       <h4 v-if="sessionHistory.length > 0">recent projects</h4>
-      <p class="project" v-for="(rse, key) in sessionHistory" :key="key">
+      <p class="project" v-for="(rse, key) in sessionHistory" :key="key" @click="$emit('loadSession', rse.cid)">
         {{ rse.title }} <br />
         <span class='small'>{{ rse.cid }}</span> <br/>
         <i class='date'>{{ Date(rse.timestamp).toLocaleString() }}</i>
@@ -33,7 +33,7 @@ import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
 
 @Options({
   components: {},
-  emits: ['newProject', 'gotoInfo']
+  emits: ['newProject', 'gotoInfo', 'loadSession']
 })
 export default class Home extends Vue {
   ipfsState = ipfsWrapper.state

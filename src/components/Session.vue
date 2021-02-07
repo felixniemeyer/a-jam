@@ -100,6 +100,7 @@ import Log, { LogEntry } from '@/components/Log.vue'
 import Copyable from '@/components/Copyable.vue'
 
 import { ipfsWrapper, SessionConfig, TrackConfig } from '@/ipfs-wrapper'
+import ac from '@/audio-context'
 
 import Track from '@/datamodel/Track'
 import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
@@ -140,7 +141,7 @@ export default class Session extends Vue {
   mediaRecorder: MediaRecorder | undefined
   stopTimeout: any
   playtimeInterval: any
-  ac: AudioContext = new AudioContext()
+  ac: AudioContext = ac
   acceptAudioContext: CallableFunction = () => {}
   askForAC = false
 
@@ -532,6 +533,7 @@ export default class Session extends Vue {
 
   checkAudioContext() {
     return new Promise<void>((resolve, reject) => {
+      console.log('ac state', this.ac.state)
       if (this.ac.state === 'suspended') {
         this.askForAC = true
         this.acceptAudioContext = () => {
@@ -539,6 +541,8 @@ export default class Session extends Vue {
           this.ac.resume()
           resolve()
         }
+      } else {
+        resolve()
       }
     })
    }

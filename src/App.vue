@@ -9,6 +9,7 @@
     <Home
       v-else
       @goto-info="page='info'"
+      @load-Session="loadSession"
       @new-project="createNewProject()"/>
 </template>
 
@@ -69,10 +70,14 @@ export default class App extends Vue {
 
   handleGetParams() {
     if (this.getParams.loadSession !== undefined) {
-      console.log('loading', this.getParams.loadSession)
-      this.sessionToLoad = this.getParams.loadSession
-      this.page = 'session'
+      this.loadSession(this.getParams.loadSession)
     }
+  }
+
+  loadSession(cid: string) {
+    console.log('loading', cid)
+    this.sessionToLoad = cid
+    this.page = 'session'
   }
 
   createNewProject() {

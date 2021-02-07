@@ -19,19 +19,27 @@ export default class RecentSessionEntry {
     let result = []
 
     if('next_history_id' in localStorage) {
-      let i = Number(localStorage.getItem('next_history_id'))
+      let i = Number(localStorage.getItem('next_history_id')) - 1
       let found = 0
       let key: string
-      while((key = 'recent_session_' + --i) in localStorage) {
+      let cids: {[key: string]: boolean} = {}
+      while((key = 'recent_session_' + i) in localStorage) {
         if(found > 100) {
           localStorage.removeItem(key)
         } else {
           let rseString = localStorage.getItem(key)
           if(rseString !== null) {
-            found++
-            result.push(RecentSessionEntry.fromString(rseString))
+            let rse = RecentSessionEntry.fromString(rseString)
+            if(rse.cid in cids) {
+              localStorage.removeItem(key)
+            } else {
+              cids[rse.cid] = true
+              found++
+              result.push(rse)
+            }
           }
         }
+        i -= 1
       }
     }
     return result
