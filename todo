@@ -9,12 +9,20 @@
 	- publishing
 		- upload on ipfs
 		- name it
-	- ipfs delegate node
+	
+- pre release: 
+	- remove small margin that causes scrolling in session view
+	- add pics to the issue
+	- release
+	- send Radu
+
+- ipfs delegate node
 
 - V2
 	- recent projects
 	- track adjustments: 
 		- volume
 		- panning
-	- 
+
+
 

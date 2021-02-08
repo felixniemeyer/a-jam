@@ -8,29 +8,29 @@ export default class RecentSessionEntry {
 
   }
 
-  static fromString(jsonString: string){
-    let o = JSON.parse(jsonString)
+  static fromString(jsonString: string) {
+    const o = JSON.parse(jsonString)
     return new RecentSessionEntry(
       o.m, o.c, o.t, o.d
     )
   }
 
   static getHistory() {
-    let result = []
+    const result = []
 
-    if('next_history_id' in localStorage) {
+    if ('next_history_id' in localStorage) {
       let i = Number(localStorage.getItem('next_history_id')) - 1
       let found = 0
       let key: string
-      let cids: {[key: string]: boolean} = {}
-      while((key = 'recent_session_' + i) in localStorage) {
-        if(found > 100) {
+      const cids: {[key: string]: boolean} = {}
+      while ((key = 'recent_session_' + i) in localStorage) {
+        if (found > 100) {
           localStorage.removeItem(key)
         } else {
-          let rseString = localStorage.getItem(key)
-          if(rseString !== null) {
-            let rse = RecentSessionEntry.fromString(rseString)
-            if(rse.cid in cids) {
+          const rseString = localStorage.getItem(key)
+          if (rseString !== null) {
+            const rse = RecentSessionEntry.fromString(rseString)
+            if (rse.cid in cids) {
               localStorage.removeItem(key)
             } else {
               cids[rse.cid] = true
@@ -47,7 +47,7 @@ export default class RecentSessionEntry {
 
   static append(rse: RecentSessionEntry) {
     let i
-    if('next_history_id' in localStorage) {
+    if ('next_history_id' in localStorage) {
       i = Number(localStorage.getItem('next_history_id'))
     } else {
       i = 0
@@ -61,7 +61,7 @@ export default class RecentSessionEntry {
       m: this.createdByMe,
       c: this.cid,
       t: this.title,
-      d: this.timestamp,
+      d: this.timestamp
     })
   }
 }

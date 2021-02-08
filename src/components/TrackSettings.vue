@@ -30,16 +30,13 @@ export default class TrackSettings extends Vue {
 
   submitOnEnter($event: KeyboardEvent) {
     if ($event.key === 'Enter') {
-      this.save($event)
+      this.save()
     }
   }
 
-  save($event: Event) {
+  save() {
     console.log('emitting')
-    this.$emit('save', $event, {
-      name: (this.$refs.name as HTMLInputElement).value
-
-    })
+    this.$emit('save', (this.$refs.name as HTMLInputElement).value)
   }
 }
 </script>

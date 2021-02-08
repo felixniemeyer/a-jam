@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <h1>ajam</h1>
-  <i>asynchronous jamming</i><br/>
+    <i>asynchronous jamming</i><br/>
     <img class="logo" alt="ajam logo" src="../assets/logo.png" />
     <div v-if="ipfsState === 'initialized'">
       <div class="project new" @click="this.$emit('newProject')">new project</div>
@@ -41,6 +41,7 @@ export default class Home extends Vue {
   mounted() {
     this.sessionHistory = RecentSessionEntry.getHistory()
   }
+
   newProject() {
     console.log('newProject')
   }

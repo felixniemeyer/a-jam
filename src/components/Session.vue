@@ -139,10 +139,10 @@ export default class Session extends Vue {
   base: string | undefined
   baseDate: number | undefined
   mediaRecorder: MediaRecorder | undefined
-  stopTimeout: any
-  playtimeInterval: any
+  stopTimeout: NodeJS.Timeout | undefined
+  playtimeInterval: NodeJS.Timeout | undefined
   ac: AudioContext = ac
-  acceptAudioContext: CallableFunction = () => {}
+  acceptAudioContext: CallableFunction = () => {} // eslint-disable-line
   askForAC = false
 
   beforeCreate() {
@@ -282,8 +282,14 @@ export default class Session extends Vue {
   }
 
   stopAllSources() {
-    clearInterval(this.playtimeInterval)
-    clearTimeout(this.stopTimeout)
+    if (this.playtimeInterval !== undefined) {
+      clearInterval(this.playtimeInterval)
+      this.playtimeInterval = undefined
+    }
+    if (this.stopTimeout !== undefined) {
+      clearTimeout(this.stopTimeout)
+      this.stopTimeout = undefined
+    }
     this.tracks.forEach(track => {
       if (track.source !== undefined) {
         track.source.stop()
@@ -401,7 +407,7 @@ export default class Session extends Vue {
           reject
         )
       } else {
-        reject("couldn't save track audio: audioBlob undefined")
+        reject(Error("couldn't save track audio: audioBlob undefined"))
       }
     })
   }
@@ -444,12 +450,12 @@ export default class Session extends Vue {
     this.editTrackIndex = index
   }
 
-  updateTrack(_: any, updates: Record<string, any>) {
+  updateTrack(name: string | undefined) {
     console.log('ye')
     if (this.editTrackIndex !== null) {
       const track = this.tracks[this.editTrackIndex]
-      if ('name' in updates) {
-        track.name = updates.name
+      if (name !== undefined) {
+        track.name = name
       }
       this.editTrackIndex = null
     }
@@ -532,7 +538,7 @@ export default class Session extends Vue {
   }
 
   checkAudioContext() {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => { // eslint-disable-line
       console.log('ac state', this.ac.state)
       if (this.ac.state === 'suspended') {
         this.askForAC = true
@@ -545,7 +551,7 @@ export default class Session extends Vue {
         resolve()
       }
     })
-   }
+  }
 }
 </script>
 
@@ -624,8 +630,10 @@ export default class Session extends Vue {
     position: fixed;
     bottom: 0em;
     height: 5em;
+    overflow-y: hidden;
     left: 50%;
     transform: translate(-50%, 0);
+    margin:0;
     .button {
       display: inline-block;
       height: 4em;
@@ -636,21 +644,21 @@ export default class Session extends Vue {
       background-position: center;
       border-radius: 2em;
       box-shadow: 0 0 0.5em #0008;
-    }
-    .record.button {
-      background-image: url("~@/assets/icons/record.svg");
-      cursor: pointer;
-      &.recording {
-        background-image: url("~@/assets/icons/stop-record.svg");
-        background-color: #c00;
+      &.record {
+        background-image: url("~@/assets/icons/record.svg");
+        cursor: pointer;
+        &.recording {
+          background-image: url("~@/assets/icons/stop-record.svg");
+          background-color: #c00;
+        }
       }
-    }
-    .play.button {
-      background-image: url("~@/assets/icons/play.svg");
-      background-size: 80%;
-      cursor: pointer;
-      &.playing {
-        background-image: url("~@/assets/icons/stop-play.svg");
+      &.play {
+        background-image: url("~@/assets/icons/play.svg");
+        background-size: 80%;
+        cursor: pointer;
+        &.playing {
+          background-image: url("~@/assets/icons/stop-play.svg");
+        }
       }
     }
   }

@@ -9,7 +9,7 @@
       created by felix paul niemeyer <br/>
       <a href="https://github.com/felixniemeyer">github.com/felixniemeyer</a><br/>
       eth address (click to copy):<br/>
-      <Copyable :text="0xc077b94DdA5358074F519C38b7237b17167a2394"/>
+      <Copyable text="0xc077b94DdA5358074F519C38b7237b17167a2394"/>
     </p>
   </div>
 </template>

@@ -54,8 +54,6 @@ export default class App extends Vue {
   page = 'home'
   getParams: GetParams = new GetParams()
   sessionToLoad: string | undefined
-  beforeCreate() {
-  }
 
   mounted() {
     ipfsWrapper.initialize().then(
@@ -93,12 +91,26 @@ export default class App extends Vue {
 </script>
 
 <style lang="scss">
+/* {
+  outline: 1px solid pink;
+} /**/
+body {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  max-width: 60vh;
+  left: 50%;
+  transform: translate(-50%, 0);
+  overflow-x: hidden;
+}
 #app {
   font-family: sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  height: 100%;
 }
 
 .error {
