@@ -7,26 +7,24 @@
     <p class='local-storage'>settings and project history are stored in the browser local storage. They may be lost, when you clear your browser data</p>
     <p class='author'>
       created by felix paul niemeyer <br/>
-      github: https://github.com/felixniemeyer<br/>
-      <button class="copy" @click="copyEthAddress()">copy eth addr</button><br/>
-      <input ref="ethAddress" class="address" value="0xc077b94DdA5358074F519C38b7237b17167a2394">
+      <a href="https://github.com/felixniemeyer">github.com/felixniemeyer</a><br/>
+      eth address (click to copy):<br/>
+      <Copyable :text="0xc077b94DdA5358074F519C38b7237b17167a2394"/>
     </p>
   </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component'
+import Copyable from '@/components/Copyable.vue'
 
 @Options({
   components: {
+    Copyable
   },
   emits: ['goHome']
 })
 export default class Info extends Vue {
-  copyEthAddress() {
-    (this.$refs.ethAddress as HTMLInputElement).select()
-    document.execCommand('copy')
-  }
 }
 </script>
 

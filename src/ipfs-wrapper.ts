@@ -31,8 +31,8 @@ class IPFSWrapper {
   state: Ref<string> = ref('uninitialized')
   node: ipfs.IPFS | undefined = undefined
   baseName: BaseName = 'base32'
-  gatewayURL = 'ipfs.io'
-  appIPNSIdentifier = 'tbd'
+  gatewayURL = 'gateway.ipfs.io'
+  appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
   initialize() {
     return new Promise((resolve, reject) => {
       if (this.node === undefined && this.state.value !== 'initializing') {
