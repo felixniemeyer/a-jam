@@ -48,6 +48,8 @@
         class="error">
         {{ publishingError }}
       </p>
+      <!-- LINK TO unstoppable domains: div style="color: #4c46f7;border: 0.1em solid #4c46f7;box-shadow: 0 0 0.5em #4c46f799;margin: 1em;border-radius: 0.5em;padding: 1em;">Want a blockchain domain so that users can easily find your music on the decentralized web? <b>Click here.</b>
+      </div-->
       <div class="button" @click="confirmPublishResults()">
         return to session
       </div>
