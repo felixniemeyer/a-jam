@@ -98,6 +98,9 @@
       </div>
       <div class='time' :style="{visibility: playing || recording ? 'visible' : 'hidden', left: `calc(3em + ${playtime / maxTrackDuration} * (100% - 3.4em))`}">
       </div>
+      <div class='spacer'/>
+      <div class="from-time">{{ formatTime(playtime) }}</div>
+      <div class="to-time">{{ formatTime(maxTrackDuration)}}</div>
     </div>
     <div class="controls">
       <div
@@ -256,8 +259,6 @@ export default class Session extends Vue {
     return max
   }
 
-  // loadTrack()
-
   leaveSession() {
     if (this.dirty) {
       this.suggestToPublish()
@@ -274,6 +275,13 @@ export default class Session extends Vue {
     this.$emit('goHome')
     this.stopAllSources()
     this.showLeavePromt = false
+  }
+  
+  formatTime(seconds: number) {
+    const s = Math.floor(seconds % 60)
+    const m = Math.floor(seconds / 60)
+    const pad = (n:number) => n.toString().padStart(2, "0")
+    return `${pad(m)}:${pad(s)}`
   }
 
   togglePlay() {
@@ -677,6 +685,22 @@ export default class Session extends Vue {
       margin: 1em 0.2em;
       background-color: #c00;
       border-radius: 0.5em;
+    }
+    .spacer {
+      height: 1em; 
+    }
+    .from-time, .to-time {
+      position: absolute; 
+      bottom: 0.2em;
+      background-color: #fff9; 
+      color: #777; 
+      padding: 0.2em; 
+    }
+    .from-time {
+      left: 0.2em; 
+    }
+    .to-time {
+      right: 0.2em;
     }
   }
 

@@ -19,7 +19,7 @@
 	- track adjustments: 
 		- volume
 		- panning
-	- search bar at the bottom + total time
+	- D: play time & total time at the bottom
 	- D: initial project maxduration = 10s => make it clear, what happens when recording
 	- D: show recording placeholder while recording
 		- thinner, without label, red
