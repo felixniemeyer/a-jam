@@ -1,0 +1,666 @@
+<template>
+  <div v-if="askForAC"
+    class="ask-for-ac">
+    <h1>start audio context</h1>
+    <p>ajam needs an AudioContext for handling audio data and for sound playback. </p>
+    <div class="inline-button"
+      @click="acceptAudioContext">
+      click here to enable AudioContext
+    </div>
+  </div>
+  <div v-else-if="loading"
+    class="loading">
+    <h1> loading... </h1>
+    <Log
+      :entries="loadingLog"/>
+    <p v-if="loadingError !== null" class="error">{{ loadingError }}</p>
+    <div class="close" @click="$emit('goHome')">
+      {{ loadingError === null ? 'abort' : 'ok' }}
+    </div>
+  </div>
+  <div v-else-if="publishing !== 'no'"
+    class="publishing">
+    <h1> publishing... </h1>
+    <Log
+      :entries="publishingLog"/>
+    <div v-if="publishing === 'done'">
+      <p
+        v-if="publishingError !== null"
+        class="error">
+        {{ publishingError }}
+      </p>
+      <div class="close" @click="confirmPublishResults()">
+        return to session
+      </div>
+    </div>
+  </div>
+  <div v-else-if="renaming" key='renaming-page'
+    class="renaming">
+    <div v-if="base !== undefined">
+      <p> this jam is based on: </p>
+      <Copyable :text="base"/>
+      <p> <i> {{ Date(baseDate).toLocaleString() }}</i></p>
+    </div>
+    <h3> rename session </h3>
+    <input :value="title" ref="newSessionTitle" @keyup="$event.key === 'Enter' ? updateName() : {}" >
+    <div>
+      <div class="inline-button" @click="renaming=false">cancel</div>
+      <div class="inline-button" @click="updateName">ok</div>
+    </div>
+  </div>
+  <TrackSettings
+    v-else-if="editTrackIndex !== null"
+    :track="tracks[editTrackIndex]"
+    @cancel='editTrackIndex=null'
+    @save='updateTrack'/>
+  <div v-else
+  class="session">
+    <div class="cornerbutton back" @click="promtSave()"></div>
+    <div class="title" @click="renameSession()">
+      <div class="text">
+        {{ title }}
+      </div>
+      <span class="edit"></span>
+    </div>
+    <div class="cornerbutton publish" @click="publish()"></div>
+    <div class="tracks">
+      <TrackC
+        v-for="(track, key) in tracks"
+        :key="key"
+        :cid="track.cid"
+        :name="track.name"
+        :relativeDuration="track.effectiveDuration / maxTrackDuration"
+        @editTrack="editTrack(key)"
+        />
+      <div class='time' :style="{visibility: playing || recording ? 'visible' : 'hidden', left: `calc(3em + ${playtime / maxTrackDuration} * (100% - 3.4em))`}">
+      </div>
+    </div>
+    <div class="controls">
+      <div
+        class="play button"
+        v-bind:class="{ playing }"
+        @click="this.ac.resume().then(togglePlay.bind(this))"
+      ></div>
+      <div
+        class="record button"
+        v-bind:class="{ recording }"
+        @click="this.ac.resume().then(toggleRecord.bind(this))"
+      ></div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import { Options, Vue } from 'vue-class-component'
+import { Prop } from 'vue-property-decorator'
+
+import TrackC from '@/components/Track.vue'
+import TrackSettings from '@/components/TrackSettings.vue'
+import Log, { LogEntry } from '@/components/Log.vue'
+import Copyable from '@/components/Copyable.vue'
+
+import { ipfsWrapper, SessionConfig, TrackConfig } from '@/ipfs-wrapper'
+import ac from '@/audio-context'
+
+import Track from '@/datamodel/Track'
+import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
+
+@Options({
+  components: {
+    TrackC,
+    TrackSettings,
+    Log,
+    Copyable
+  },
+  emits: ['goHome']
+})
+export default class Session extends Vue {
+  @Prop() sessionToLoad: string | undefined
+
+  dirty = false
+  publishing = 'no'
+  publishingError: null | string = null
+  publishingLog: LogEntry[] = []
+  loading = false
+  loadingLog: LogEntry[] = []
+  loadingError: string | null = null
+  renaming = false
+  editTrackIndex: number | null = null
+  title = 'new session'
+  playing = false
+  playtime = 0
+  recording = false
+  tracks: Track[] = []
+  nextLocalTrackId = 0
+  maxTrackDuration = 0
+  recordingChunks: Blob[] = []
+  recordingStopTime = 0
+  recordingStartTime = 0
+  base: string | undefined
+  baseDate: number | undefined
+  mediaRecorder: MediaRecorder | undefined
+  stopTimeout: NodeJS.Timeout | undefined
+  playtimeInterval: NodeJS.Timeout | undefined
+  ac: AudioContext = ac
+  acceptAudioContext: CallableFunction = () => {} // eslint-disable-line
+  askForAC = false
+
+  beforeCreate() {
+    if (this.sessionToLoad !== undefined) {
+      this.loading = true
+    }
+  }
+
+  mounted() {
+    if (this.sessionToLoad !== undefined) {
+      this.loadSession(this.sessionToLoad)
+    }
+    this.initUserMedia()
+  }
+
+  initUserMedia() {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false
+          }
+        })
+        .then(this.initRecorder.bind(this))
+        .catch(function (err) {
+          console.error('The following getUserMedia error occurred: ' + err)
+        })
+    } else {
+      console.error('getUserMedia not supported on your browser!')
+    }
+  }
+
+  initRecorder(stream: MediaStream) {
+    this.mediaRecorder = new MediaRecorder(stream)
+    this.mediaRecorder.ondataavailable = (e) => {
+      this.recordingStopTime = this.ac.currentTime
+      this.recordingChunks.push(e.data)
+    }
+    this.mediaRecorder.onstop = () => {
+      const audio = new Blob(this.recordingChunks, {
+        type: 'audio/ogg; codecs=opus'
+      })
+      const fileReader = new FileReader()
+      fileReader.onloadend = () => {
+        const arrayBuffer = fileReader.result
+        if (arrayBuffer instanceof ArrayBuffer) {
+          this.ac.decodeAudioData(arrayBuffer).then(
+            (audioBuffer) => {
+              const offset =
+                this.recordingStopTime -
+                (this.recordingStartTime + audioBuffer.duration)
+              this.createTrack(audio, audioBuffer, offset)
+            },
+            (err) => {
+              console.error('failed to decode audio data:', err)
+            }
+          )
+        } else {
+          console.error('arrayBuffer is not an ArrayBuffer')
+        }
+      }
+      fileReader.readAsArrayBuffer(audio)
+    }
+  }
+
+  createTrack(audioBlob: Blob, audioBuffer: AudioBuffer, offset: number) {
+    const track = new Track(
+      audioBlob,
+      audioBuffer
+    )
+    track.localId = this.nextLocalTrackId++
+    track.offset = offset
+    track.effectiveDuration = audioBuffer.duration - offset
+    track.name = 'new track'
+    this.maxTrackDuration = this.checkForHigherTrackDuration(track.effectiveDuration)
+    this.tracks.push(track)
+  }
+
+  checkForHigherTrackDuration(max = 0) {
+    this.tracks.forEach(track => { // have to go through all, because the playtimeInterval may habe pushed this.maxDuration too far
+      if (track.effectiveDuration > max) {
+        max = track.effectiveDuration
+      }
+    })
+    return max
+  }
+
+  // loadTrack()
+
+  promtSave() {
+    if (this.dirty) {
+      // check whether person wants to save. warn: "unpublished changes will be lost!"
+    }
+    this.$emit('goHome')
+  }
+
+  togglePlay() {
+    if (this.playing) {
+      this.stopAllSources()
+    } else {
+      if (!this.recording) {
+        this.playAll()
+        this.stopTimeout = setTimeout(
+          this.stopAllSources.bind(this),
+          this.maxTrackDuration * 1000 + 100
+        )
+        this.playing = true
+      }
+    }
+  }
+
+  playAll() {
+    this.stopAllSources()
+    const now = this.ac.currentTime
+    this.tracks.forEach(track => {
+      const source = this.ac.createBufferSource()
+      source.buffer = track.audioBuffer
+      source.connect(this.ac.destination)
+      if (track.offset < 0) {
+        source.start(now - track.offset)
+      } else {
+        source.start(now, track.offset)
+      }
+      track.source = source
+    })
+    this.playtimeInterval = setInterval(
+      () => {
+        this.playtime = this.ac.currentTime - now
+        console.log('still checking')
+        if (this.recording && this.playtime > this.maxTrackDuration) {
+          this.maxTrackDuration = this.playtime
+        }
+      }, 1000 / 24
+    )
+    return now
+  }
+
+  stopAllSources() {
+    if (this.playtimeInterval !== undefined) {
+      clearInterval(this.playtimeInterval)
+      this.playtimeInterval = undefined
+    }
+    if (this.stopTimeout !== undefined) {
+      clearTimeout(this.stopTimeout)
+      this.stopTimeout = undefined
+    }
+    this.tracks.forEach(track => {
+      if (track.source !== undefined) {
+        track.source.stop()
+      }
+    })
+    this.playing = false
+  }
+
+  toggleRecord() {
+    if (this.mediaRecorder !== undefined) {
+      if (this.recording) {
+        this.mediaRecorder.stop() // triggers onstop callback
+        this.stopAllSources()
+        this.recording = false
+      } else {
+        this.stopAllSources()
+        this.recordingStartTime = this.playAll()
+        this.recordingChunks = []
+        this.mediaRecorder.start()
+        this.recording = true
+      }
+    } else {
+      console.error('mediaRecorder undefined -> recording not possible')
+    }
+  }
+
+  pLog(msg: string) {
+    this.publishingLog.push(
+      new LogEntry(
+        'msg',
+        msg
+      )
+    )
+  }
+
+  pLogCopyable(cid: string) {
+    this.publishingLog.push(
+      new LogEntry(
+        'copyable',
+        cid
+      )
+    )
+  }
+
+  publish() {
+    console.log('publish')
+    if (ipfsWrapper.state.value === 'initialized') {
+      this.publishing = 'ongoing'
+      this.publishingError = null
+      this.publishingLog = []
+      const scrollDown = () => {
+        setTimeout(() => {
+          window.scrollTo(0, document.body.scrollHeight)
+        }, 100)
+      }
+      this.publishTracks().then(
+        () => this.publishSession().then(
+          cid => {
+            this.base = cid
+            RecentSessionEntry.append(new RecentSessionEntry(true, cid, this.title))
+            this.pLog('jam session is now public on ipfs at:')
+            this.pLogCopyable(cid)
+            this.pLog('link for browsers that support ipfs: ')
+            this.pLogCopyable(`ipns://${ipfsWrapper.appIPNSIdentifier}/?loadSession=${cid}/`)
+            this.pLog('link for all browsers: ')
+            this.pLogCopyable(`https://${ipfsWrapper.gatewayURL}/ipns/${ipfsWrapper.appIPNSIdentifier}/?loadSession=${cid}`)
+            this.pLog('click to copy')
+            this.publishing = 'done'
+            scrollDown()
+          },
+          err => {
+            this.publishingError = String(err)
+            this.publishing = 'done'
+            scrollDown()
+          }
+        )
+      )
+    }
+  }
+
+  confirmPublishResults() {
+    this.publishing = 'no'
+  }
+
+  publishTracks() {
+    return new Promise((resolve, reject) => {
+      const promises: Promise<void>[] = []
+      this.tracks.forEach(track => {
+        if (track.cid === undefined) {
+          this.pLog(`publishing track ${track.localId}...`)
+          promises.push(this.publishTrack(track))
+        }
+      })
+      if (promises.length === 0) {
+        this.pLog('no tracks to publish.')
+      }
+      Promise.all(promises).then(
+        resolve,
+        reject
+      )
+    })
+  }
+
+  publishTrack(track: Track) {
+    return new Promise<void>((resolve, reject) => {
+      if (track.audioBlob !== undefined) {
+        ipfsWrapper.saveTrackAudio(track.audioBlob).then(
+          cid => {
+            this.pLog(`track ${track.localId} is now public on ipfs at:`)
+            this.pLogCopyable(cid)
+            track.cid = cid
+            delete track.localId
+            resolve()
+          },
+          reject
+        )
+      } else {
+        reject(Error("couldn't save track audio: audioBlob undefined"))
+      }
+    })
+  }
+
+  publishSession() {
+    const sc = new SessionConfig(
+      this.title,
+      this.base,
+      Date.now(),
+      []
+    )
+    this.tracks.forEach(track => {
+      if (track.cid !== undefined) {
+        sc.addTrack(new TrackConfig(
+          track.cid,
+          track.name,
+          track.volume,
+          track.panning,
+          track.offset
+        ))
+      }
+    })
+    this.pLog('publishing session...')
+    return ipfsWrapper.saveSessionConfig(sc)
+  }
+
+  renameSession() {
+    this.renaming = true
+    this.$nextTick(() => {
+      (this.$refs.newSessionTitle as HTMLInputElement).select()
+    })
+  }
+
+  updateName() {
+    this.title = (this.$refs.newSessionTitle as HTMLInputElement).value
+    this.renaming = false
+  }
+
+  editTrack(index: number) {
+    this.editTrackIndex = index
+  }
+
+  updateTrack(name: string | undefined) {
+    console.log('ye')
+    if (this.editTrackIndex !== null) {
+      const track = this.tracks[this.editTrackIndex]
+      if (name !== undefined) {
+        track.name = name
+      }
+      this.editTrackIndex = null
+    }
+  }
+
+  loadSession(cid: string) {
+    this.loadingLog.push(new LogEntry(
+      'msg', 'loading session with cid:'
+    ))
+    this.loadingLog.push(new LogEntry(
+      'copyable', cid
+    ))
+    this.checkAudioContext().then(
+      () => {
+        ipfsWrapper.loadSessionConfig(cid).then(
+          sc => {
+            console.log('sc', sc)
+            this.base = cid
+            this.baseDate = sc.localTime
+            this.title = sc.title
+            this.loadTracks(sc.tracks).then(
+              () => {
+                RecentSessionEntry.append(new RecentSessionEntry(false, cid, sc.title))
+                this.loading = false
+              },
+              err => {
+                this.loadingError = err
+              }
+            )
+          }
+        )
+      },
+      () => {
+        this.loadingError = 'Audio Context wasn\'t allowed to start.'
+      }
+    )
+  }
+
+  loadTracks(trackConfigs: TrackConfig[]) {
+    return new Promise<void>((resolve, reject) => {
+      const promises: Promise<void>[] = []
+      let i = 0
+      trackConfigs.forEach(ts => {
+        this.loadingLog.push(new LogEntry(
+          'msg', `loading track ${ts.name} with cid:`
+        ))
+        this.loadingLog.push(new LogEntry(
+          'copyable', ts.cid
+        ))
+        const createTrack = (index: number, resolve: CallableFunction) => {
+          return (audioBuffer: AudioBuffer) => {
+            const track = new Track(undefined, audioBuffer)
+            track.cid = ts.cid
+            track.name = ts.name
+            track.offset = ts.offset
+            track.volume = ts.volume
+            track.panning = ts.panning
+            track.effectiveDuration = track.audioBuffer.duration - track.offset
+            console.log('track ef d', track.effectiveDuration)
+            this.tracks[index] = track
+            console.log(track)
+            resolve()
+          }
+        }
+        promises.push(new Promise<void>((resolve, reject) => {
+          ipfsWrapper.loadTrackAudio(ts.cid).then(
+            createTrack(i++, resolve),
+            reject
+          )
+        }))
+      })
+      Promise.all(promises).then(
+        () => {
+          this.maxTrackDuration = this.checkForHigherTrackDuration(0)
+          resolve()
+        },
+        reject
+      )
+    })
+  }
+
+  checkAudioContext() {
+    return new Promise<void>((resolve, reject) => { // eslint-disable-line
+      console.log('ac state', this.ac.state)
+      if (this.ac.state === 'suspended') {
+        this.askForAC = true
+        this.acceptAudioContext = () => {
+          this.askForAC = false
+          this.ac.resume()
+          resolve()
+        }
+      } else {
+        resolve()
+      }
+    })
+  }
+}
+</script>
+
+<style lang="scss">
+.publishing, .loading, .ask-for-ac {
+  .close, .inline-button {
+    @include clickable-surface;
+  }
+}
+.renaming {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% - 1em);
+  transform: translate(-50%, -50%);
+  input {
+    padding: 1em;
+  }
+  .inline-button{
+    @include clickable-surface;
+    display: inline-block;
+  }
+}
+.session {
+  .title {
+    position: absolute;
+    width: calc(0.9 * (100% - 8em));
+    left: 50%;
+    top: 2.5em;
+    max-height: 5em;
+    transform: translate(-50%, -50%);
+    .text{
+      display: inline-block;
+      max-width: calc(100% - 2em);
+      vertical-align: middle;
+    }
+    .edit{
+      @include centered-background-image;
+      vertical-align: bottom;
+      display: inline-block;
+      width: 2em;
+      height: 2em;
+      opacity: 0.33;
+      background-image: url("~@/assets/icons/edit.svg");
+    }
+  }
+  .cornerbutton.publish {
+    background-image: url("~@/assets/icons/publish.svg");
+    right: 1em;
+    top: 1em;
+  }
+
+  .tracks {
+    position: absolute;
+    background: linear-gradient(178deg, #ddd, #fff, #eee);
+    text-align: left;
+    left: 0;
+    top: 5em;
+    height: calc(100% - 10em);
+    width: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    .time {
+      position: absolute;
+      background: linear-gradient(90deg, rgb(255, 85, 85), rgb(255, 85, 85) 49%, #fff 50%, #fff);
+      z-index: 50;
+      top: 0em;
+      left: 3em;
+      width: 0.4em;
+      opacity: 0.5;
+      height: 100%;
+    }
+  }
+
+  .controls {
+    position: fixed;
+    bottom: 0em;
+    height: 5em;
+    overflow-y: hidden;
+    left: 50%;
+    transform: translate(-50%, 0);
+    margin:0;
+    .button {
+      display: inline-block;
+      height: 4em;
+      width: 4em;
+      margin: 0.5em;
+      background-size: 100%;
+      background-repeat: no-repeat;
+      background-position: center;
+      border-radius: 2em;
+      box-shadow: 0 0 0.5em #0008;
+      &.record {
+        background-image: url("~@/assets/icons/record.svg");
+        cursor: pointer;
+        &.recording {
+          background-image: url("~@/assets/icons/stop-record.svg");
+          background-color: #c00;
+        }
+      }
+      &.play {
+        background-image: url("~@/assets/icons/play.svg");
+        background-size: 80%;
+        cursor: pointer;
+        &.playing {
+          background-image: url("~@/assets/icons/stop-play.svg");
+        }
+      }
+    }
+  }
+}
+</style>

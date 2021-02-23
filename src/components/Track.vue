@@ -1,0 +1,68 @@
+<template>
+  <div class="track" :style="{ width: `calc(3em + ${relativeDuration} * (100% - 3.4em)`, backgroundColor: color}" @click="$emit('editTrack')">
+    <div class="name">
+      <span class="edit"></span>
+      <div class="text" :style="{ backgroundColor: color + '81'}">
+        {{ name }}
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import { Options, Vue } from 'vue-class-component'
+import { Prop } from 'vue-property-decorator'
+import ColorHash from 'color-hash'
+
+@Options({
+  components: {},
+  emits: ['editTrack']
+})
+export default class Track extends Vue {
+  @Prop(String) cid: string | undefined
+  @Prop({ default: 1 }) relativeDuration!: number
+  @Prop(String) name!: string;
+  get color() {
+    if (this.cid) {
+      const ch = new ColorHash({ lightness: 0.4 })
+      console.log(ch.hex(this.cid))
+      return ch.hex(this.cid)
+    } else {
+      return '#234'
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+.track {
+  position: relative;
+  background-color: #234;
+  color: #eee;
+  margin: 0.2em;
+  border-radius: 0.5em;
+  width: 50px;
+  .name {
+    .text {
+      background-color: #2348;
+      position: absolute;
+      white-space: nowrap;
+      top: 50%;
+      left: 3em;
+      padding: 0.25em 0.45em 0.25em 0;
+      border-radius: 0 0.5em 0.5em 0 ;
+      transform: translate(0, -50%);
+    }
+    .edit {
+      @include centered-background-image;
+      vertical-align: middle;
+      display: inline-block;
+      width: 2em;
+      height: 2em;
+      margin: 0.5em;
+      opacity: 0.5;
+      background-image: url("~@/assets/icons/white/edit.svg");
+    }
+  }
+}
+</style>
