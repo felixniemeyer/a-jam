@@ -24,7 +24,7 @@
     </div>
     <div class="inline-button"
       @click="showLeavePromt = false; publish()">
-      publish session 
+      publish session
     </div>
   </div>
   <div v-else-if="loading"
@@ -91,7 +91,7 @@
         :relativeDuration="track.effectiveDuration / maxTrackDuration"
         @editTrack="editTrack(key)"
         />
-      <div 
+      <div
         v-if="recording"
         class="recording-placeholder"
         :style="{width: `calc(3em + ${playtime / maxTrackDuration} * (100% - 3.4em)`}">
@@ -266,22 +266,21 @@ export default class Session extends Vue {
       this.confirmLeave()
     }
   }
-  
+
   suggestToPublish() {
     this.showLeavePromt = true
   }
-  
+
   confirmLeave() {
     this.$emit('goHome')
     this.stopAllSources()
     this.showLeavePromt = false
   }
-  
+
   formatTime(seconds: number) {
-    const s = Math.floor(seconds % 60)
+    const s = (seconds % 60).toFixed(1)
     const m = Math.floor(seconds / 60)
-    const pad = (n:number) => n.toString().padStart(2, "0")
-    return `${pad(m)}:${pad(s)}`
+    return `${m.toString().padStart(2,"0")}:${s.padStart(4,"0")}`
   }
 
   togglePlay() {
@@ -680,24 +679,24 @@ export default class Session extends Vue {
       opacity: 0.5;
       height: 100%;
     }
-    .recording-placeholder { 
-      height: 1em; 
+    .recording-placeholder {
+      height: 1em;
       margin: 1em 0.2em;
       background-color: #c00;
       border-radius: 0.5em;
     }
     .spacer {
-      height: 1em; 
+      height: 1em;
     }
     .from-time, .to-time {
-      position: absolute; 
+      position: absolute;
       bottom: 0.2em;
-      background-color: #fff9; 
-      color: #777; 
-      padding: 0.2em; 
+      background-color: #fff9;
+      color: #777;
+      padding: 0.2em;
     }
     .from-time {
-      left: 0.2em; 
+      left: 0.2em;
     }
     .to-time {
       right: 0.2em;

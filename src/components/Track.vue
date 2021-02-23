@@ -2,8 +2,8 @@
   <div class="track" :style="{ width: `calc(3em + ${relativeDuration} * (100% - 3.4em)`, backgroundColor: color}" @click="$emit('editTrack')">
     <div class="name">
       <span class="edit"></span>
-      <div class="text" :style="{ backgroundColor: color + '81'}">
-        {{ name }}
+      <div class="text" :style="{ backgroundColor: color + '88'}">
+        {{ name }}{{this.cid == undefined ? "(unpublished)" : ""}}
       </div>
     </div>
   </div>
@@ -28,7 +28,7 @@ export default class Track extends Vue {
       console.log(ch.hex(this.cid))
       return ch.hex(this.cid)
     } else {
-      return '#234'
+      return '#999999'
     }
   }
 }
@@ -37,14 +37,12 @@ export default class Track extends Vue {
 <style lang="scss">
 .track {
   position: relative;
-  background-color: #234;
   color: #eee;
   margin: 0.2em;
   border-radius: 0.5em;
   width: 50px;
   .name {
     .text {
-      background-color: #2348;
       position: absolute;
       white-space: nowrap;
       top: 50%;
