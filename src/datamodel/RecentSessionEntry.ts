@@ -1,4 +1,7 @@
+const HIST_LENGTH = 5
+
 export default class RecentSessionEntry {
+
   constructor(
     public createdByMe: boolean,
     public cid: string,
@@ -19,28 +22,36 @@ export default class RecentSessionEntry {
     const result = []
 
     if ('next_history_id' in localStorage) {
-      let i = Number(localStorage.getItem('next_history_id')) - 1
+      let i = Number(localStorage.getItem('next_history_id'))
+      let smallest_i = Number(localStorage.getItem('smallest_history_id')) | 0
       let found = 0
+      let new_smallest_i = smallest_i
       let key: string
       const cids: {[key: string]: boolean} = {}
-      while ((key = 'recent_session_' + i) in localStorage) {
-        if (found > 100) {
-          localStorage.removeItem(key)
-        } else {
-          const rseString = localStorage.getItem(key)
-          if (rseString !== null) {
-            const rse = RecentSessionEntry.fromString(rseString)
-            if (rse.cid in cids) {
-              localStorage.removeItem(key)
-            } else {
-              cids[rse.cid] = true
-              found++
-              result.push(rse)
+      while (i > smallest_i) {
+        i -= 1
+        console.log(i)
+        if((key = 'recent_session_' + i) in localStorage) {
+          if (found > HIST_LENGTH) {
+            localStorage.removeItem(key)
+          } else {
+            const rseString = localStorage.getItem(key)
+            if (rseString !== null) {
+              const rse = RecentSessionEntry.fromString(rseString)
+              if (rse.cid in cids) {
+                localStorage.removeItem(key)
+              } else {
+                cids[rse.cid] = true
+                console.log("cid", rse.cid)
+                found++
+                new_smallest_i = i
+                result.push(rse)
+              }
             }
           }
         }
-        i -= 1
       }
+      localStorage.setItem("smallest_history_id", new_smallest_i.toString())
     }
     return result
   }
@@ -53,7 +64,7 @@ export default class RecentSessionEntry {
       i = 0
     }
     localStorage.setItem('recent_session_' + i, rse.toString())
-    localStorage.setItem('next_history_id', String(i + 1))
+    localStorage.setItem('next_history_id', (i + 1).toString())
   }
 
   toString() {
