@@ -1,0 +1,45 @@
+/* How this issue tracking file works: 
+	- most recent entries are added on top
+	- entries can be broken down, which is expressed by indentation
+	- prepending the following prefixes has the following meaning: 
+		- "D([<comment>]): " = done
+		- "R([<comment>]): " = removed
+		- "WIP([<name>]): " = work started by <name> at <date>
+*/
+
+- documentation improvement
+	- add ipfs explanation and link to ipfs.io to readme
+
+- ipfs enhancements
+	- add /p2p of publishing node to publishing link
+	- add /p2p address of davids raspberry => hardcode it to the bootstrap nodes
+
+- V2
+	- D: recent projects
+	- track adjustments: 
+		- volume
+		- panning
+	- timeline at the top of the tracklist
+	- initial project maxduration = 10s => make it clear, what happens when recording
+	- show recording placeholder while recording
+		- thinner, without label, red
+	- stop all audio sources on session leave
+
+- D: pre release: 
+	- remove small margin that causes scrolling in session view
+	- add pics to the issue
+	- release
+	- send to Radu
+
+- D: V1
+	- programming: 
+		- edit track names
+		- show share links:  "click to copy": 
+			- cid
+			- ipfs-link
+			- gateway 
+		- load from ipfs
+	- publishing
+		- upload on ipfs
+		- name it
+	
