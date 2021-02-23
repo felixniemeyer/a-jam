@@ -267,6 +267,7 @@ export default class Session extends Vue {
   
   confirmLeave() {
     this.$emit('goHome')
+    this.stopAllSources()
     this.showLeavePromt = false
   }
 

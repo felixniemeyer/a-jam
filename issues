@@ -23,7 +23,7 @@
 	- initial project maxduration = 10s => make it clear, what happens when recording
 	- show recording placeholder while recording
 		- thinner, without label, red
-	- stop all audio sources on session leave
+	- D: stop all audio sources on session leave
 
 - D: pre release: 
 	- remove small margin that causes scrolling in session view
