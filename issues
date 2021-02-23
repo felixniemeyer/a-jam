@@ -19,9 +19,9 @@
 	- track adjustments: 
 		- volume
 		- panning
-	- timeline at the top of the tracklist
-	- initial project maxduration = 10s => make it clear, what happens when recording
-	- show recording placeholder while recording
+	- search bar at the bottom + total time
+	- D: initial project maxduration = 10s => make it clear, what happens when recording
+	- D: show recording placeholder while recording
 		- thinner, without label, red
 	- D: stop all audio sources on session leave
 

@@ -91,6 +91,11 @@
         :relativeDuration="track.effectiveDuration / maxTrackDuration"
         @editTrack="editTrack(key)"
         />
+      <div 
+        v-if="recording"
+        class="recording-placeholder"
+        :style="{width: `calc(3em + ${playtime / maxTrackDuration} * (100% - 3.4em)`}">
+      </div>
       <div class='time' :style="{visibility: playing || recording ? 'visible' : 'hidden', left: `calc(3em + ${playtime / maxTrackDuration} * (100% - 3.4em))`}">
       </div>
     </div>
@@ -152,7 +157,7 @@ export default class Session extends Vue {
   recording = false
   tracks: Track[] = []
   nextLocalTrackId = 0
-  maxTrackDuration = 0
+  maxTrackDuration = 10
   recordingChunks: Blob[] = []
   recordingStopTime = 0
   recordingStartTime = 0
@@ -300,6 +305,7 @@ export default class Session extends Vue {
       }
       track.source = source
     })
+    this.playtime = 0
     this.playtimeInterval = setInterval(
       () => {
         this.playtime = this.ac.currentTime - now
@@ -665,6 +671,12 @@ export default class Session extends Vue {
       width: 0.4em;
       opacity: 0.5;
       height: 100%;
+    }
+    .recording-placeholder { 
+      height: 1em; 
+      margin: 1em 0.2em;
+      background-color: #c00;
+      border-radius: 0.5em;
     }
   }
 
