@@ -1,11 +1,30 @@
 <template>
   <div v-if="askForAC"
-    class="ask-for-ac">
+    class="dialogue">
     <h1>start audio context</h1>
     <p>ajam needs an AudioContext for handling audio data and for sound playback. </p>
-    <div class="inline-button"
+    <div class="button"
       @click="acceptAudioContext">
       click here to enable AudioContext
+    </div>
+  </div>
+  <div v-else-if="showLeavePromt"
+    class="dialogue">
+    <h1>save your changes</h1>
+    <p>you have made changes to the session.</p>
+    <p>if you leave they will be lost. </p>
+    <p>publish the session to persist changes </p>
+    <div class="inline-button"
+      @click="confirmLeave">
+      still leave
+    </div>
+    <div class="inline-button"
+      @click="showLeavePromt = false">
+      stay
+    </div>
+    <div class="inline-button"
+      @click="showLeavePromt = false; publish()">
+      publish session 
     </div>
   </div>
   <div v-else-if="loading"
@@ -14,7 +33,7 @@
     <Log
       :entries="loadingLog"/>
     <p v-if="loadingError !== null" class="error">{{ loadingError }}</p>
-    <div class="close" @click="$emit('goHome')">
+    <div class="button" @click="$emit('goHome')">
       {{ loadingError === null ? 'abort' : 'ok' }}
     </div>
   </div>
@@ -29,7 +48,7 @@
         class="error">
         {{ publishingError }}
       </p>
-      <div class="close" @click="confirmPublishResults()">
+      <div class="button" @click="confirmPublishResults()">
         return to session
       </div>
     </div>
@@ -55,7 +74,7 @@
     @save='updateTrack'/>
   <div v-else
   class="session">
-    <div class="cornerbutton back" @click="promtSave()"></div>
+    <div class="cornerbutton back" @click="leaveSession()"></div>
     <div class="title" @click="renameSession()">
       <div class="text">
         {{ title }}
@@ -118,6 +137,7 @@ export default class Session extends Vue {
   @Prop() sessionToLoad: string | undefined
 
   dirty = false
+  showLeavePromt = false
   publishing = 'no'
   publishingError: null | string = null
   publishingLog: LogEntry[] = []
@@ -233,11 +253,21 @@ export default class Session extends Vue {
 
   // loadTrack()
 
-  promtSave() {
+  leaveSession() {
     if (this.dirty) {
-      // check whether person wants to save. warn: "unpublished changes will be lost!"
+      this.suggestToPublish()
+    } else {
+      this.confirmLeave()
     }
+  }
+  
+  suggestToPublish() {
+    this.showLeavePromt = true
+  }
+  
+  confirmLeave() {
     this.$emit('goHome')
+    this.showLeavePromt = false
   }
 
   togglePlay() {
@@ -310,6 +340,7 @@ export default class Session extends Vue {
         this.recordingChunks = []
         this.mediaRecorder.start()
         this.recording = true
+        this.dirty = true
       }
     } else {
       console.error('mediaRecorder undefined -> recording not possible')
@@ -358,6 +389,7 @@ export default class Session extends Vue {
             this.pLogCopyable(`https://${ipfsWrapper.gatewayURL}/ipns/${ipfsWrapper.appIPNSIdentifier}/?loadSession=${cid}`)
             this.pLog('click to copy')
             this.publishing = 'done'
+            this.dirty = false
             scrollDown()
           },
           err => {
@@ -444,6 +476,7 @@ export default class Session extends Vue {
   updateName() {
     this.title = (this.$refs.newSessionTitle as HTMLInputElement).value
     this.renaming = false
+    this.dirty = true
   }
 
   editTrack(index: number) {
@@ -451,13 +484,17 @@ export default class Session extends Vue {
   }
 
   updateTrack(name: string | undefined) {
-    console.log('ye')
     if (this.editTrackIndex !== null) {
+      let somethingChanged = false
       const track = this.tracks[this.editTrackIndex]
       if (name !== undefined) {
         track.name = name
+        somethingChanged = true
       }
       this.editTrackIndex = null
+      if(somethingChanged){
+        this.dirty = true
+      }
     }
   }
 
@@ -556,9 +593,13 @@ export default class Session extends Vue {
 </script>
 
 <style lang="scss">
-.publishing, .loading, .ask-for-ac {
-  .close, .inline-button {
+.publishing, .loading, .dialogue{
+  .button {
     @include clickable-surface;
+  }
+  .inline-button{
+    @include clickable-surface;
+    display: inline-block;
   }
 }
 .renaming {
