@@ -73,7 +73,7 @@
     @cancel='editTrackIndex=null'
     @save='updateTrack'/>
   <div v-else
-  class="session">
+    class="session">
     <div class="cornerbutton back" @click="leaveSession()"></div>
     <div class="title" @click="renameSession()">
       <div class="text">
@@ -82,7 +82,7 @@
       <span class="edit"></span>
     </div>
     <div class="cornerbutton publish" @click="publish()"></div>
-    <div class="tracks">
+    <div ref="tracksref" class="tracks">
       <TrackC
         v-for="(track, key) in tracks"
         :key="key"
@@ -96,13 +96,17 @@
         class="recording-placeholder"
         :style="{width: `calc(3em + ${playtime / maxTrackDuration} * (100% - 3.4em)`}">
       </div>
-      <div class='time' :style="{visibility: playing || recording ? 'visible' : 'hidden', left: `calc(3em + ${playtime / maxTrackDuration} * (100% - 3.4em))`}">
-      </div>
       <div class='spacer'/>
-      <div class="from-time">{{ formatTime(playtime) }}</div>
-      <div class="to-time">{{ formatTime(maxTrackDuration)}}</div>
     </div>
+    <div class='time'
+      :style="{visibility: playing || recording ? 'visible' : 'hidden', left: `calc(3.15em + ${Math.min(1, playtime / maxTrackDuration)} * (${tracksCssSize} - 3.5em))`}">
+    </div>
+    <div class="from-time">{{ formatTime(playtime) }}</div>
+    <div class="to-time">{{ formatTime(maxTrackDuration)}}</div>
     <div class="controls">
+      <span class="shortcut-hint play">
+        space
+      </span>
       <div
         class="play button"
         v-bind:class="{ playing }"
@@ -113,6 +117,9 @@
         v-bind:class="{ recording }"
         @click="this.ac.resume().then(toggleRecord.bind(this))"
       ></div>
+      <span class="shortcut-hint record">
+        r
+      </span>
     </div>
   </div>
 </template>
@@ -172,6 +179,7 @@ export default class Session extends Vue {
   ac: AudioContext = ac
   acceptAudioContext: CallableFunction = () => {} // eslint-disable-line
   askForAC = false
+  tracksCssSize = "100%"
 
   beforeCreate() {
     if (this.sessionToLoad !== undefined) {
@@ -184,6 +192,7 @@ export default class Session extends Vue {
       this.loadSession(this.sessionToLoad)
     }
     this.initUserMedia()
+    document.onkeydown = this.handleKeydown
   }
 
   initUserMedia() {
@@ -280,7 +289,18 @@ export default class Session extends Vue {
   formatTime(seconds: number) {
     const s = (seconds % 60).toFixed(1)
     const m = Math.floor(seconds / 60)
-    return `${m.toString().padStart(2,"0")}:${s.padStart(4,"0")}`
+    return `${m.toString().padStart(2, '0')}:${s.padStart(4, '0')}`
+  }
+
+  handleKeydown($event: KeyboardEvent) {
+    if ($event.key === ' ') {
+      this.togglePlay()
+      console.log("hur")
+    }
+    if ($event.key === 'r') {
+      this.toggleRecord()
+    }
+    console.log('hey')
   }
 
   togglePlay() {
@@ -312,11 +332,11 @@ export default class Session extends Vue {
       }
       track.source = source
     })
+    this.tracksCssSize = (this.$refs.tracksref as HTMLDivElement).clientWidth.toString() + "px"
     this.playtime = 0
     this.playtimeInterval = setInterval(
       () => {
         this.playtime = this.ac.currentTime - now
-        console.log('still checking')
         if (this.recording && this.playtime > this.maxTrackDuration) {
           this.maxTrackDuration = this.playtime
         }
@@ -340,6 +360,7 @@ export default class Session extends Vue {
       }
     })
     this.playing = false
+    this.playtime = 0
   }
 
   toggleRecord() {
@@ -506,7 +527,7 @@ export default class Session extends Vue {
         somethingChanged = true
       }
       this.editTrackIndex = null
-      if(somethingChanged){
+      if (somethingChanged) {
         this.dirty = true
       }
     }
@@ -607,6 +628,9 @@ export default class Session extends Vue {
 </script>
 
 <style lang="scss">
+/* {
+  outline: 1px solid green;
+} /** */
 .publishing, .loading, .dialogue{
   .button {
     @include clickable-surface;
@@ -631,6 +655,8 @@ export default class Session extends Vue {
   }
 }
 .session {
+  width: 100%;
+  height: 100%;
   .title {
     position: absolute;
     width: calc(0.9 * (100% - 8em));
@@ -669,16 +695,6 @@ export default class Session extends Vue {
     width: 100%;
     overflow-y: scroll;
     overflow-x: hidden;
-    .time {
-      position: absolute;
-      background: linear-gradient(90deg, rgb(255, 85, 85), rgb(255, 85, 85) 49%, #fff 50%, #fff);
-      z-index: 50;
-      top: 0em;
-      left: 3em;
-      width: 0.4em;
-      opacity: 0.5;
-      height: 100%;
-    }
     .recording-placeholder {
       height: 1em;
       margin: 1em 0.2em;
@@ -686,21 +702,32 @@ export default class Session extends Vue {
       border-radius: 0.5em;
     }
     .spacer {
-      height: 1em;
+      height: 2em;
     }
-    .from-time, .to-time {
-      position: absolute;
-      bottom: 0.2em;
-      background-color: #fff9;
-      color: #777;
-      padding: 0.2em;
-    }
-    .from-time {
-      left: 0.2em;
-    }
-    .to-time {
-      right: 0.2em;
-    }
+  }
+
+  .time {
+    position: fixed;
+    top:5em;
+    height: calc(100% - 10em);
+    background: linear-gradient(90deg, rgba(255, 85, 85, 0), rgb(255, 85, 85) 49%, #fff 50%, #fff0);
+    z-index: 50;
+    left: 3em;
+    width: 0.3em;
+    opacity: 0.75;
+  }
+  .from-time, .to-time {
+    position: fixed;
+    bottom: 5.2em;
+    background-color: #fffb;
+    color: #777;
+    padding: 0.2em;
+  }
+  .from-time {
+    left: 0.2em;
+  }
+  .to-time {
+    right: 0.2em;
   }
 
   .controls {
@@ -708,8 +735,7 @@ export default class Session extends Vue {
     bottom: 0em;
     height: 5em;
     overflow-y: hidden;
-    left: 50%;
-    transform: translate(-50%, 0);
+    width: 100%;
     margin:0;
     .button {
       display: inline-block;
@@ -736,6 +762,19 @@ export default class Session extends Vue {
         &.playing {
           background-image: url("~@/assets/icons/stop-play.svg");
         }
+      }
+      vertical-align: middle;
+    }
+    .shortcut-hint {
+      display: inline-block;
+      width: 4em;
+      color: #777;
+      vertical-align: middle;
+      &.play {
+        text-align: right;
+      }
+      &.record {
+        text-align: left;
       }
     }
   }

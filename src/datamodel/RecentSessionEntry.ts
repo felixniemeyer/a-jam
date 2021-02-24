@@ -1,7 +1,6 @@
-const HIST_LENGTH = 5
+const HIST_LENGTH = 100
 
 export default class RecentSessionEntry {
-
   constructor(
     public createdByMe: boolean,
     public cid: string,
@@ -20,19 +19,24 @@ export default class RecentSessionEntry {
 
   static getHistory() {
     const result = []
-
+    /**
+     * we traverse from the next_id-1 to the smallest possible id
+     * we skip entries that have a cid, that was already encountered
+     * we skip and delete all entries after we found HIST_LENGTH entries
+     * we set the new smallest possible id to smallest id from the results
+     */
     if ('next_history_id' in localStorage) {
       let i = Number(localStorage.getItem('next_history_id'))
-      let smallest_i = Number(localStorage.getItem('smallest_history_id')) | 0
+      const smallestId = Number(localStorage.getItem('smallest_history_id')) | 0
       let found = 0
-      let new_smallest_i = smallest_i
+      let newSmallestId = smallestId
       let key: string
       const cids: {[key: string]: boolean} = {}
-      while (i > smallest_i) {
+      while (i > smallestId) {
         i -= 1
         console.log(i)
-        if((key = 'recent_session_' + i) in localStorage) {
-          if (found > HIST_LENGTH) {
+        if ((key = 'recent_session_' + i) in localStorage) {
+          if (found >= HIST_LENGTH) {
             localStorage.removeItem(key)
           } else {
             const rseString = localStorage.getItem(key)
@@ -42,16 +46,16 @@ export default class RecentSessionEntry {
                 localStorage.removeItem(key)
               } else {
                 cids[rse.cid] = true
-                console.log("cid", rse.cid)
+                console.log('cid', rse.cid)
                 found++
-                new_smallest_i = i
+                newSmallestId = i
                 result.push(rse)
               }
             }
           }
         }
       }
-      localStorage.setItem("smallest_history_id", new_smallest_i.toString())
+      localStorage.setItem('smallest_history_id', newSmallestId.toString())
     }
     return result
   }

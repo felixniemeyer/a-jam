@@ -3,7 +3,7 @@
     <div class="name">
       <span class="edit"></span>
       <div class="text" :style="{ backgroundColor: color + '88'}">
-        {{ name }}{{this.cid == undefined ? "(unpublished)" : ""}}
+        {{ name }}<span v-if="this.cid == undefined" class="small"> (unpublished)</span>
       </div>
     </div>
   </div>
@@ -50,6 +50,9 @@ export default class Track extends Vue {
       padding: 0.25em 0.45em 0.25em 0;
       border-radius: 0 0.5em 0.5em 0 ;
       transform: translate(0, -50%);
+      .small{
+        font-size: 0.5em;
+      }
     }
     .edit {
       @include centered-background-image;
