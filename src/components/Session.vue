@@ -192,7 +192,7 @@ export default class Session extends Vue {
       this.loadSession(this.sessionToLoad)
     }
     this.initUserMedia()
-    document.onkeydown = this.handleKeydown
+    document.addEventListener('keydown', this.handleKeydown)
   }
 
   initUserMedia() {
@@ -292,12 +292,39 @@ export default class Session extends Vue {
     return `${m.toString().padStart(2, '0')}:${s.padStart(4, '0')}`
   }
 
+  showingSession() {
+    return ! ( 
+      this.askForAC || 
+      this.showLeavePromt ||
+      this.loading ||
+      this.publishing !== 'no' ||
+      this.renaming ||
+      this.editTrackIndex !== null
+    )
+  }
+
   handleKeydown($event: KeyboardEvent) {
-    if ($event.key === ' ') {
-      this.togglePlay()
+    if(this.showingSession()) {
+      if ($event.key === ' ') {
+        this.togglePlay()
+      }
+      if ($event.key === 'r') {
+        this.toggleRecord()
+      }
+      if ($event.key === 'Escape') {
+        this.leaveSession()
+      }
     }
-    if ($event.key === 'r') {
-      this.toggleRecord()
+    if($event.key === 'Escape') {
+      if(this.showLeavePromt) {
+        this.showLeavePromt = false
+      }
+      if(this.renaming) {
+        this.renaming = false
+      }
+      if(this.editTrackIndex !== null) {
+        this.editTrackIndex = null
+      }
     }
   }
 
@@ -639,6 +666,11 @@ export default class Session extends Vue {
         resolve()
       }
     })
+  }
+  
+  beforeDestroy() {
+    this.stopAllSources()
+    document.removeEventListener('keydown', this.handleKeydown)
   }
 }
 </script>

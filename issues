@@ -7,6 +7,28 @@
 		- "WIP([<name>]): " = work started by <name> at <date>
 */
 
+- V3 
+	- Vuex
+	- Merge Sessions
+		- show recent
+		- merge
+			- track names if <> => "old << new"
+			- session name "old << new"
+	- Mute, Solo tracks
+	- Select playback time
+		- Create start flags
+	- Track Settings
+		- offset
+		- Filter
+			- reverb
+			- delay
+			- ...
+	- Pinning Service 
+		- configure pinning service in settings
+		- promt for pinning service on publish
+
+- Reduce latency (firefox e.g.) 
+
 - D: documentation improvement
 	- add ipfs explanation and link to ipfs.io to readme
 
