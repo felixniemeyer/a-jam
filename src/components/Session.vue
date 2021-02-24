@@ -70,8 +70,11 @@
   <TrackSettings
     v-else-if="editTrackIndex !== null"
     :track="tracks[editTrackIndex]"
-    @cancel='editTrackIndex=null'
-    @save='updateTrack'/>
+    @back='editTrackIndex=null'
+    @changeName='changeTrackName'
+    @updateVolume='updateTrackVolume'
+    @updatePanning='updateTrackPanning'
+    />
   <div v-else
     class="session">
     <div class="cornerbutton back" @click="leaveSession()"></div>
@@ -345,18 +348,29 @@ export default class Session extends Vue {
 
   playAll() {
     this.stopAllSources()
+    this.tracks.forEach(track => {
+      track.source = this.ac.createBufferSource()
+      track.source.buffer = track.audioBuffer
+      track.panner = this.ac.createStereoPanner()
+      track.panner.pan.value = track.panning
+      track.gain = this.ac.createGain()
+      track.gain.gain.value = track.volume
+
+      track.source
+        .connect(track.gain)
+        .connect(track.panner)
+        .connect(this.ac.destination)
+    })
+
     const now = this.ac.currentTime
     this.tracks.forEach(track => {
-      const source = this.ac.createBufferSource()
-      source.buffer = track.audioBuffer
-      source.connect(this.ac.destination)
       if (track.offset < 0) {
-        source.start(now - track.offset)
+        track.source!.start(now - track.offset)
       } else {
-        source.start(now, track.offset)
+        track.source!.start(now, track.offset)
       }
-      track.source = source
     })
+
     this.tracksCssSize = (this.$refs.tracksref as HTMLDivElement).clientWidth.toString() + "px"
     this.playtime = 0
     this.playtimeInterval = setInterval(
@@ -559,7 +573,7 @@ export default class Session extends Vue {
     this.editTrackIndex = index
   }
 
-  updateTrack(name: string | undefined) {
+  changeTrackName(name: string | undefined) {
     if (this.editTrackIndex !== null) {
       let somethingChanged = false
       const track = this.tracks[this.editTrackIndex]
@@ -574,11 +588,10 @@ export default class Session extends Vue {
     }
   }
   
-  /*
   updateTrackVolume(name: number) {
   }
   updateTrackPanning(name: number) {
-  }*/
+  }
 
   loadSession(cid: string) {
     this.loadingLog.push(new LogEntry(

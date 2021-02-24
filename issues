@@ -26,6 +26,7 @@
 	- Pinning Service 
 		- configure pinning service in settings
 		- promt for pinning service on publish
+	- segregate track data and audio nodes
 
 - Reduce latency (firefox e.g.) 
 
@@ -39,6 +40,7 @@
 - V2
 	- D: recent projects
 	- track adjustments: 
+		- should work immedeately
 		- volume
 		- panning
 	- D: play time & total time at the bottom

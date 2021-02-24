@@ -6,6 +6,18 @@
       <div class="inline-button" @click="cancel">cancel</div>
       <div class="inline-button" @click="save">ok</div>
     </div>
+    <Slider
+      name="volume"
+      :from="0.0"
+      :to="1.0"
+      :value="track.volume"
+      @change="(e, v) => $emit('updateVolume', v)" />
+    <Slider
+      name="panning"
+      :from="-1.0"
+      :to="1.0"
+      :value="track.panning"
+      @change="(e, v) => $emit('updateVolume', v)" />
   </div>
 </template>
 
@@ -14,9 +26,13 @@ import { Options, Vue } from 'vue-class-component'
 import { Prop } from 'vue-property-decorator'
 import Track from '@/datamodel/Track'
 
+import Slider from '@/components/Slider.vue'
+
 @Options({
-  components: {},
-  emits: ['cancel', 'save']
+  components: {
+    Slider
+  },
+  emits: ['back', 'change-name', 'update-volume', 'update-panning']
 })
 export default class TrackSettings extends Vue {
   @Prop(Track) track!: Track
