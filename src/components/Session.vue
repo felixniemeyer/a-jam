@@ -105,7 +105,7 @@
     <div class="to-time">{{ formatTime(maxTrackDuration)}}</div>
     <div class="controls">
       <span class="shortcut-hint play">
-        space
+        (space)
       </span>
       <div
         class="play button"
@@ -118,7 +118,7 @@
         @click="this.ac.resume().then(toggleRecord.bind(this))"
       ></div>
       <span class="shortcut-hint record">
-        r
+        (r)
       </span>
     </div>
   </div>
@@ -708,16 +708,17 @@ export default class Session extends Vue {
 
   .time {
     position: fixed;
+    z-index: 50;
     top:5em;
     height: calc(100% - 10em);
     background: linear-gradient(90deg, rgba(255, 85, 85, 0), rgb(255, 85, 85) 49%, #fff 50%, #fff0);
-    z-index: 50;
     left: 3em;
     width: 0.3em;
     opacity: 0.75;
   }
   .from-time, .to-time {
     position: fixed;
+    z-index: 51;
     bottom: 5.2em;
     background-color: #fffb;
     color: #777;
@@ -768,6 +769,7 @@ export default class Session extends Vue {
     .shortcut-hint {
       display: inline-block;
       width: 4em;
+      margin: 0.5em; 
       color: #777;
       vertical-align: middle;
       &.play {
