@@ -81,13 +81,11 @@ export default class App extends Vue {
   }
 
   loadSession(cid: string) {
-    console.log('loading', cid)
     this.sessionToLoad = cid
     this.page = 'session'
   }
 
   createNewProject() {
-    console.log('creating new project')
     this.page = 'session'
   }
 

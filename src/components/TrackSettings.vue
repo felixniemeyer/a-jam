@@ -35,7 +35,6 @@ export default class TrackSettings extends Vue {
   }
 
   save() {
-    console.log('emitting')
     this.$emit('save', (this.$refs.name as HTMLInputElement).value)
   }
 }

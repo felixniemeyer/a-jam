@@ -41,10 +41,6 @@ export default class Home extends Vue {
   mounted() {
     this.sessionHistory = RecentSessionEntry.getHistory()
   }
-
-  newProject() {
-    console.log('newProject')
-  }
 }
 </script>
 

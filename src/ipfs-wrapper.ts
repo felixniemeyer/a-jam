@@ -102,7 +102,6 @@ class IPFSWrapper {
       if (this.node !== undefined) {
         this.node.add(JSON.stringify(sc)).then(
           results => {
-            console.log(results)
             resolve(results.cid.toV1().toString(this.baseName))
           },
           reject
@@ -161,7 +160,5 @@ class IPFSWrapper {
     })
   }
 }
-
-console.log('hi there!')
 
 export const ipfsWrapper = new IPFSWrapper()
