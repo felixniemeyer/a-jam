@@ -24,6 +24,7 @@ import { ipfsWrapper } from '@/ipfs-wrapper'
 
 class GetParams {
   loadSession: string | undefined
+  loadSessionOrigin: string | undefined
   newSession = false
   constructor() {
     let tmp = []
@@ -36,8 +37,12 @@ class GetParams {
           case 'loadSession':
             this.loadSession = tmp[1]
             break
+          case 'loadSessionOrigin': 
+            this.loadSessionOrigin = tmp[1]
+            break
           case 'newSession':
             this.newSession = true
+            break
         }
       })
   }
@@ -69,6 +74,9 @@ export default class App extends Vue {
   handleGetParams() {
     if (this.getParams.loadSession !== undefined) {
       this.loadSession(this.getParams.loadSession)
+    }
+    if (this.getParams.loadSessionOrigin !== undefined) {
+      ipfsWrapper.connectToNodeById(this.getParams.loadSessionOrigin)
     }
   }
 
@@ -110,7 +118,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  height: 100%;
 }
 
 .error {

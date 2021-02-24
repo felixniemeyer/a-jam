@@ -25,7 +25,6 @@ export default class Track extends Vue {
   get color() {
     if (this.cid) {
       const ch = new ColorHash({ lightness: 0.4 })
-      console.log(ch.hex(this.cid))
       return ch.hex(this.cid)
     } else {
       return '#999999'

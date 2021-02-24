@@ -7,12 +7,12 @@
 		- "WIP([<name>]): " = work started by <name> at <date>
 */
 
-- documentation improvement
+- D: documentation improvement
 	- add ipfs explanation and link to ipfs.io to readme
 
-- ipfs enhancements
-	- add /p2p of publishing node to publishing link
-	- add /p2p address of davids raspberry => hardcode it to the bootstrap nodes
+- D: ipfs enhancements
+	- add /p2p of publishing node to publishing link and connect to it for loading
+	- connect /p2p address of davids raspberry => hardcode it 
 
 - V2
 	- D: recent projects

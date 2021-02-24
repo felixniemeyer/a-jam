@@ -1,10 +1,13 @@
 import { Ref, ref } from 'vue'
-import ipfs from 'ipfs'
+import ipfs, { multiaddr } from 'ipfs'
+import Multiaddr from 'multiaddr'
 import { BaseName } from 'multibase'
 
 import ac from '@/audio-context'
 
 const NO_CONNECTION_ERROR = Error('ipfs not connected')
+// a ipfs node I'm running to support ipfs function 
+const HEBELPI_ID = '12D3KooWQotQBp2zSqyJ1C5pjeAvrrd5kkeaxHzhCjHFXMsKYLRi'
 
 export class TrackConfig {
   constructor(
@@ -39,13 +42,12 @@ class IPFSWrapper {
     return new Promise((resolve, reject) => {
       if (this.node === undefined && this.state.value !== 'initializing') {
         this.state.value = 'initializing'
-        // create it using a delegated ipfs server running on davids pi
         const settings = {
-          offline: true // TODO: remove for production
         }
         ipfs.create(settings).then(
           node => {
             this.node = node
+            this.connectToNodeById(HEBELPI_ID)
             this.state.value = 'initialized'
             resolve(node)
           },
@@ -54,6 +56,28 @@ class IPFSWrapper {
             reject(Error('could not initialize ipfs connection: ' + err))
           }
         )
+      }
+    })
+  }
+
+  connectToNodeById(nodeId: string) {
+    if(this.node !== undefined) {
+      this.connectToNode(multiaddr(`/p2p/${nodeId}`))
+    }
+  }
+
+  connectToNode(nodeAddr: Multiaddr) {
+    if(this.node !== undefined) {
+      this.node.bootstrap.add(nodeAddr)
+    }
+  }
+  
+  getIpfsNodeId() {
+    return new Promise<string>((resolve, reject) => {
+      if(this.node == undefined) {
+        reject()
+      } else {
+        return this.node.id().then(identity => { resolve(identity.id) }) 
       }
     })
   }

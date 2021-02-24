@@ -34,7 +34,6 @@ export default class RecentSessionEntry {
       const cids: {[key: string]: boolean} = {}
       while (i > smallestId) {
         i -= 1
-        console.log(i)
         if ((key = 'recent_session_' + i) in localStorage) {
           if (found >= HIST_LENGTH) {
             localStorage.removeItem(key)
@@ -46,7 +45,6 @@ export default class RecentSessionEntry {
                 localStorage.removeItem(key)
               } else {
                 cids[rse.cid] = true
-                console.log('cid', rse.cid)
                 found++
                 newSmallestId = i
                 result.push(rse)

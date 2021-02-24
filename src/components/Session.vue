@@ -58,7 +58,7 @@
     <div v-if="base !== undefined">
       <p> this jam is based on: </p>
       <Copyable :text="base"/>
-      <p> <i> {{ Date(baseDate).toLocaleString() }}</i></p>
+      <p class="small"> <i> {{ Date(baseDate).toLocaleString() }}</i></p>
     </div>
     <h3> rename session </h3>
     <input :value="title" ref="newSessionTitle" @keyup="$event.key === 'Enter' ? updateName() : {}" >
@@ -295,12 +295,10 @@ export default class Session extends Vue {
   handleKeydown($event: KeyboardEvent) {
     if ($event.key === ' ') {
       this.togglePlay()
-      console.log("hur")
     }
     if ($event.key === 'r') {
       this.toggleRecord()
     }
-    console.log('hey')
   }
 
   togglePlay() {
@@ -401,7 +399,6 @@ export default class Session extends Vue {
   }
 
   publish() {
-    console.log('publish')
     if (ipfsWrapper.state.value === 'initialized') {
       this.publishing = 'ongoing'
       this.publishingError = null
@@ -412,29 +409,46 @@ export default class Session extends Vue {
         }, 100)
       }
       this.publishTracks().then(
-        () => this.publishSession().then(
-          cid => {
-            this.base = cid
-            RecentSessionEntry.append(new RecentSessionEntry(true, cid, this.title))
-            this.pLog('jam session is now public on ipfs at:')
-            this.pLogCopyable(cid)
-            this.pLog('link for browsers that support ipfs: ')
-            this.pLogCopyable(`ipns://${ipfsWrapper.appIPNSIdentifier}/?loadSession=${cid}/`)
-            this.pLog('link for all browsers: ')
-            this.pLogCopyable(`https://${ipfsWrapper.gatewayURL}/ipns/${ipfsWrapper.appIPNSIdentifier}/?loadSession=${cid}`)
-            this.pLog('click to copy')
-            this.publishing = 'done'
-            this.dirty = false
-            scrollDown()
-          },
-          err => {
-            this.publishingError = String(err)
-            this.publishing = 'done'
-            scrollDown()
-          }
-        )
+        () => {
+          let getIpfsNodeIdPromise = ipfsWrapper.getIpfsNodeId()
+          let publishTracksPromise = this.publishSession()
+          Promise.all([getIpfsNodeIdPromise, publishTracksPromise]).then(
+            values => {
+              const ipfsNodeId = values[0]
+              const cid = values[1]
+              this.base = cid
+              RecentSessionEntry.append(new RecentSessionEntry(true, cid, this.title))
+              this.logLinks(cid, ipfsNodeId)
+              this.publishing = 'done'
+              this.dirty = false
+              scrollDown()
+            },
+            err => {
+              this.publishingError = String(err)
+              this.publishing = 'done'
+              scrollDown()
+              return err
+            }
+          )
+        }, 
+        err => err
       )
     }
+  }
+
+  logLinks(cid: string, ipfsNodeId: string){
+    const params = [
+      `loadSession=${cid}`,
+      `loadSessionOrigin=${ipfsNodeId}`
+    ]
+    const paramString = params.join('&')
+    this.pLog('jam session is now public on ipfs at:')
+    this.pLogCopyable(cid)
+    this.pLog('link for browsers that support ipfs: ')
+    this.pLogCopyable(`ipns://${ipfsWrapper.appIPNSIdentifier}/?${paramString}`)
+    this.pLog('link for all browsers: ')
+    this.pLogCopyable(`https://${ipfsWrapper.gatewayURL}/ipns/${ipfsWrapper.appIPNSIdentifier}/?${paramString}`)
+    this.pLog('click to copy')
   }
 
   confirmPublishResults() {
@@ -532,6 +546,12 @@ export default class Session extends Vue {
       }
     }
   }
+  
+  /*
+  updateTrackVolume(name: number) {
+  }
+  updateTrackPanning(name: number) {
+  }*/
 
   loadSession(cid: string) {
     this.loadingLog.push(new LogEntry(
@@ -544,7 +564,6 @@ export default class Session extends Vue {
       () => {
         ipfsWrapper.loadSessionConfig(cid).then(
           sc => {
-            console.log('sc', sc)
             this.base = cid
             this.baseDate = sc.localTime
             this.title = sc.title
@@ -586,9 +605,7 @@ export default class Session extends Vue {
             track.volume = ts.volume
             track.panning = ts.panning
             track.effectiveDuration = track.audioBuffer.duration - track.offset
-            console.log('track ef d', track.effectiveDuration)
             this.tracks[index] = track
-            console.log(track)
             resolve()
           }
         }
@@ -611,7 +628,6 @@ export default class Session extends Vue {
 
   checkAudioContext() {
     return new Promise<void>((resolve, reject) => { // eslint-disable-line
-      console.log('ac state', this.ac.state)
       if (this.ac.state === 'suspended') {
         this.askForAC = true
         this.acceptAudioContext = () => {
@@ -648,6 +664,9 @@ export default class Session extends Vue {
   transform: translate(-50%, -50%);
   input {
     padding: 1em;
+  }
+  .small {
+    font-size: 0.7em;
   }
   .inline-button{
     @include clickable-surface;
