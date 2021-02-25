@@ -20,7 +20,9 @@
     </p>
     <div class="cornerbutton info"
       @click="this.$emit('gotoInfo')"></div>
-    <!-- <div class="cornerbutton settings"></div> -->
+    <div class="cornerbutton settings"
+      @click="this.$emit('goto-settings')">
+    </div>
   </div>
 </template>
 
@@ -33,7 +35,7 @@ import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
 
 @Options({
   components: {},
-  emits: ['newProject', 'gotoInfo', 'loadSession']
+  emits: ['newProject', 'gotoInfo', 'loadSession', 'goto-settings']
 })
 export default class Home extends Vue {
   ipfsState = ipfsWrapper.state
@@ -76,8 +78,8 @@ export default class Home extends Vue {
     }
     &.settings {
       background-image: url("~@/assets/icons/settings.svg");
-      left: 0.5em;
-      top:0.5em;
+      left: 1em;
+      top: 1em;
   }
   }
 }

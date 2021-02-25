@@ -24,7 +24,7 @@
       :value="track.panning"
       @update="v => $emit('update-panning', v)" />
     <Slider
-      name="offset in ms"
+      name="offset in ms (requires re-play)"
       left="delayed"
       right="earlier"
       :factor="1000"

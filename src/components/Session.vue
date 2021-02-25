@@ -158,6 +158,7 @@ import { reactive } from 'vue'
 })
 export default class Session extends Vue {
   @Prop() sessionToLoad: string | undefined
+  @Prop() defaultRecordingOffset = 0.060
 
   dirty = false
   showLeavePromt = false
@@ -189,7 +190,6 @@ export default class Session extends Vue {
   askForAC = false
   tracksCssSize = '100%'
   playbackDelay = 0.005
-  defaultRecordingOffset = 0.060
 
   beforeCreate () {
     if (this.sessionToLoad !== undefined) {

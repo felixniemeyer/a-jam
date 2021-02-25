@@ -2,14 +2,21 @@
     <Session
       v-if="page === 'session'"
       :sessionToLoad="sessionToLoad"
+      :defaultRecordingOffset="defaultRecordingOffset"
       @go-home="goHome()"/>
     <Info
       v-else-if="page === 'info'"
       @go-home="goHome()"/>
+    <Settings
+      v-else-if="page === 'settings'"
+      :defaultRecordingOffset="defaultRecordingOffset"
+      @goHome="goHome()"
+      @updateDefaultRecordingOffset="updateDefaultRecordingOffset"/>
     <Home
       v-else
       @gotoInfo="page='info'"
       @loadSession="loadSession"
+      @gotoSettings="page='settings'"
       @newProject="createNewProject()"/>
 </template>
 
@@ -19,6 +26,7 @@ import { Options, Vue } from 'vue-class-component'
 import Home from '@/components/Home.vue'
 import Session from '@/components/Session.vue'
 import Info from '@/components/Info.vue'
+import Settings from '@/components/Settings.vue'
 
 import { ipfsWrapper } from '@/ipfs-wrapper'
 
@@ -26,6 +34,7 @@ class GetParams {
   loadSession: string | undefined
   loadSessionOrigin: string | undefined
   newSession = false
+
   constructor () {
     let tmp = []
     location.search
@@ -52,13 +61,16 @@ class GetParams {
   components: {
     Home,
     Session,
-    Info
+    Info,
+    Settings
   }
 })
 export default class App extends Vue {
   page = 'home'
   getParams: GetParams = new GetParams()
   sessionToLoad: string | undefined
+  defaultRecordingOffset = 0.060
+  persistDefaultRecordingOffsetTimeout: NodeJS.Timeout | undefined
 
   mounted () {
     ipfsWrapper.initialize().then(
@@ -69,6 +81,24 @@ export default class App extends Vue {
         console.error('failed to initialize ipfs', err)
       }
     )
+    this.loadSettings()
+  }
+
+  loadSettings () {
+    if ('defaultRecordingOffset' in localStorage) {
+      this.defaultRecordingOffset = Number(localStorage.getItem('defaultRecordingOffset'))
+      console.log(this.defaultRecordingOffset)
+    }
+  }
+
+  updateDefaultRecordingOffset (v: number) {
+    this.defaultRecordingOffset = v
+    if (this.persistDefaultRecordingOffsetTimeout !== undefined) {
+      clearTimeout(this.persistDefaultRecordingOffsetTimeout)
+    }
+    this.persistDefaultRecordingOffsetTimeout = setTimeout(() => {
+      localStorage.setItem('defaultRecordingOffset', v.toString())
+    }, 500)
   }
 
   handleGetParams () {

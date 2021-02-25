@@ -30,7 +30,10 @@
 	- segregate track data and audio nodes
 	- start new session with file upload
 
-- Reduce latency (firefox e.g.) 
+- pre release
+	- D(removed reconstruction from end time + introduced default rec offset): Reduce latency (firefox e.g.) 
+	- D: make default recording offset configurable
+	- enable remove track
 
 - D: documentation improvement
 	- add ipfs explanation and link to ipfs.io to readme
