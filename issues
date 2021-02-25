@@ -9,6 +9,7 @@
 
 - V3 
 	- Vuex
+	- Vue Router (to enable browser back and forth buttons, bookmarks...)
 	- Merge Sessions
 		- show recent
 		- merge

@@ -8,9 +8,9 @@
       @go-home="goHome()"/>
     <Home
       v-else
-      @goto-info="page='info'"
-      @load-Session="loadSession"
-      @new-project="createNewProject()"/>
+      @gotoInfo="page='info'"
+      @loadSession="loadSession"
+      @newProject="createNewProject()"/>
 </template>
 
 <script lang="ts">

@@ -48,8 +48,9 @@
         class="error">
         {{ publishingError }}
       </p>
-      <!-- LINK TO unstoppable domains: div style="color: #4c46f7;border: 0.1em solid #4c46f7;box-shadow: 0 0 0.5em #4c46f799;margin: 1em;border-radius: 0.5em;padding: 1em;">Want a blockchain domain so that users can easily find your music on the decentralized web? <b>Click here.</b>
-      </div-->
+      <a href="https://unstoppabledomains.com/r/ac3b8968ad7245e" target="_blank" class="ud-affiliate">
+        Want a blockchain domain so that users can easily find your music on the decentralized web? <b>Click here.</b> (affiliate link)
+      </a>
       <div class="button" @click="confirmPublishResults()">
         return to session
       </div>
@@ -494,7 +495,7 @@ export default class Session extends Vue {
     this.pLogCopyable(`ipns://${ipfsWrapper.appIPNSIdentifier}/?${paramString}`)
     this.pLog('link for all browsers: ')
     this.pLogCopyable(`https://${ipfsWrapper.gatewayURL}/ipns/${ipfsWrapper.appIPNSIdentifier}/?${paramString}`)
-    this.pLog('click to copy')
+    this.pLog('(click any link to copy)')
   }
 
   confirmPublishResults() {
@@ -720,6 +721,14 @@ export default class Session extends Vue {
   .inline-button{
     @include clickable-surface;
     display: inline-block;
+  }
+  .ud-affiliate {
+    display: block;
+    text-decoration: none;
+    @include clickable-surface;
+    color: #4c46f7;
+    border: 0.1em solid #4c46f7;
+    box-shadow: 0 0 0.5em #4c46f799;
   }
 }
 .renaming {
