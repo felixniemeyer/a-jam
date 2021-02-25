@@ -22,7 +22,7 @@ export default class Track extends Vue {
   @Prop(String) cid: string | undefined
   @Prop({ default: 1 }) relativeDuration!: number
   @Prop(String) name!: string;
-  get color() {
+  get color () {
     if (this.cid) {
       const ch = new ColorHash({ lightness: 0.4 })
       return ch.hex(this.cid)

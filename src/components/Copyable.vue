@@ -16,7 +16,7 @@ import { Prop } from 'vue-property-decorator'
 export default class Copyable extends Vue {
   @Prop() text!: string
   visible = false
-  copyCid(event: Event) {
+  copyCid (event: Event) {
     if (event.target instanceof HTMLTextAreaElement) {
       event.target.select()
       document.execCommand('copy')

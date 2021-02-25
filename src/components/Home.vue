@@ -38,7 +38,7 @@ import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
 export default class Home extends Vue {
   ipfsState = ipfsWrapper.state
   sessionHistory: RecentSessionEntry[] = []
-  mounted() {
+  mounted () {
     this.sessionHistory = RecentSessionEntry.getHistory()
   }
 }

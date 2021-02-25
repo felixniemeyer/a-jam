@@ -1,7 +1,9 @@
 <template>
   <div class="slider">
-    {{name}}: {{value.toFixed(decimalPlaces)}}
+    {{name}}: {{(value*factor).toFixed(decimalPlaces)}}
     <div class="bar" ref="bar">
+      <div class="left">{{left}}</div>
+      <div class="right">{{right}}</div>
       <div class="dot"
         :style="{left: `${(this.value - this.from) / (this.to - this.from) * 100}%`}"
         @mousedown.prevent="startDrag"
@@ -27,14 +29,17 @@ export default class Log extends Vue {
   @Prop() from!: number
   @Prop() to!: number
   @Prop() value!: number
+  @Prop() left = 'low'
+  @Prop() right = 'high'
   @Prop() decimalPlaces = 2
+  @Prop() factor = 1
 
   dragging = false
   dragOffset = 0
   x0 = 0
   width = 1
 
-  mounted() {
+  mounted () {
     document.addEventListener('mouseup', this.endDrag)
     document.addEventListener('mouseleave', this.endDrag)
     document.addEventListener('mousemove', this.drag)
@@ -44,7 +49,7 @@ export default class Log extends Vue {
     document.addEventListener('touchmove', this.drag)
   }
 
-  startDrag(e: MouseEvent | TouchEvent) {
+  startDrag (e: MouseEvent | TouchEvent) {
     const bound = (this.$refs.bar as HTMLDivElement).getBoundingClientRect()
     this.x0 = bound.left
     this.width = bound.right - bound.left
@@ -54,23 +59,23 @@ export default class Log extends Vue {
     this.dragOffset = (this.value - v) / (this.to - this.from)
   }
 
-  endDrag(e: MouseEvent | TouchEvent) {
+  endDrag (e: MouseEvent | TouchEvent) {
     this.drag(e)
     this.dragging = false
   }
 
-  endTouch() {
+  endTouch () {
     this.dragging = false
   }
 
-  drag(e: MouseEvent | TouchEvent) {
+  drag (e: MouseEvent | TouchEvent) {
     if (this.dragging) {
       const v = this.getV(e)
       this.$emit('update', v)
     }
   }
 
-  getV(e: MouseEvent | TouchEvent) {
+  getV (e: MouseEvent | TouchEvent) {
     let x = 0
     if (e instanceof MouseEvent) {
       x = e.x
@@ -83,8 +88,7 @@ export default class Log extends Vue {
     return this.from + (this.to - this.from) * r
   }
 
-  beforeUnmount() {
-    console.log('destroying Slider')
+  beforeUnmount () {
     document.removeEventListener('mouseup', this.endDrag)
     document.removeEventListener('mouseleave', this.endDrag)
     document.removeEventListener('mousemove', this.drag)
@@ -100,14 +104,20 @@ export default class Log extends Vue {
 $dotsize: 3em;
 
 .slider {
+  line-height: 3em;
+  width: 96%;
+  margin: 1em 2%;
+  border-radius: 0.2em;
+  box-shadow: 0 0 0.5em #8888;
+  height: 6em;
   .bar{
     position: relative;
-    width: calc(96% - #{$dotsize});
+    width: calc(100% - #{$dotsize});
     height: 0.4em;
     background: linear-gradient(180deg, #888, #ccc 80%, #aaa);
-    margin: ($dotsize / 2) auto ($dotsize * 3 / 2) 2%;
+    margin: ($dotsize / 3) 0;
     border-radius: 0.2em;
-    left: 5%;
+    left: $dotsize / 2;
     .dot {
       box-shadow: 0 0 0.5em #0007;
       position: absolute;
@@ -119,6 +129,17 @@ $dotsize: 3em;
       background-color: rgb(132, 205, 223);
       box-sizing: border-box;
       border: 0.4em solid rgb(9, 112, 138);
+    }
+    .right, .left{
+      position: absolute;
+      bottom: -0.5em;
+      color: #777;
+    }
+    .left {
+      left: 0.5em;
+    }
+    .right {
+      right: 0.5em;
     }
   }
 }

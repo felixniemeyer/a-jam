@@ -77,6 +77,7 @@
     @changeName='changeTrackName'
     @updateVolume='updateTrackVolume'
     @updatePanning='updateTrackPanning'
+    @updateOffset='updateTrackOffset'
     />
   <div v-else
     class="session">
@@ -146,6 +147,7 @@ import Track from '@/datamodel/Track'
 import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
 import { reactive } from 'vue'
 
+
 @Options({
   components: {
     TrackC,
@@ -177,7 +179,7 @@ export default class Session extends Vue {
   maxTrackDuration = 10
   recordingChunks: Blob[] = []
   recordingStopTime = 0
-  recordingStartTime = 0
+  playbackStartTime = 0
   base: string | undefined
   baseDate: number | undefined
   mediaRecorder: MediaRecorder | undefined
@@ -187,22 +189,32 @@ export default class Session extends Vue {
   acceptAudioContext: CallableFunction = () => {} // eslint-disable-line
   askForAC = false
   tracksCssSize = '100%'
+  playbackDelay = 0.005
+  defaultRecordingOffset = 0.060
 
-  beforeCreate() {
+  beforeCreate () {
     if (this.sessionToLoad !== undefined) {
       this.loading = true
     }
   }
 
-  mounted() {
-    if (this.sessionToLoad !== undefined) {
-      this.loadSession(this.sessionToLoad)
-    }
-    this.initUserMedia()
+  mounted () {
+    this.checkAudioContext().then(
+      () => {
+        if (this.sessionToLoad !== undefined) {
+          this.loadSession(this.sessionToLoad)
+        }
+        this.initUserMedia()
+      },
+      () => {
+        this.loadingError = 'Audio Context wasn\'t allowed to start.'
+      }
+    )
     document.addEventListener('keydown', this.handleKeydown)
+    this.updateTracksCssSize()
   }
 
-  initUserMedia() {
+  initUserMedia () {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices
         .getUserMedia({
@@ -220,10 +232,9 @@ export default class Session extends Vue {
     }
   }
 
-  initRecorder(stream: MediaStream) {
+  initRecorder (stream: MediaStream) {
     this.mediaRecorder = new MediaRecorder(stream)
     this.mediaRecorder.ondataavailable = (e) => {
-      this.recordingStopTime = this.ac.currentTime
       this.recordingChunks.push(e.data)
     }
     this.mediaRecorder.onstop = () => {
@@ -236,10 +247,7 @@ export default class Session extends Vue {
         if (arrayBuffer instanceof ArrayBuffer) {
           this.ac.decodeAudioData(arrayBuffer).then(
             (audioBuffer) => {
-              const offset =
-                this.recordingStopTime -
-                (this.recordingStartTime + audioBuffer.duration)
-              this.createTrack(audio, audioBuffer, offset)
+              this.createTrack(audio, audioBuffer, this.playbackDelay + this.defaultRecordingOffset)
             },
             (err) => {
               console.error('failed to decode audio data:', err)
@@ -253,7 +261,7 @@ export default class Session extends Vue {
     }
   }
 
-  createTrack(audioBlob: Blob, audioBuffer: AudioBuffer, offset: number) {
+  createTrack (audioBlob: Blob, audioBuffer: AudioBuffer, offset: number) {
     const track = new Track(
       audioBlob,
       audioBuffer
@@ -266,7 +274,7 @@ export default class Session extends Vue {
     this.tracks.push(track)
   }
 
-  checkForHigherTrackDuration(max = 0) {
+  checkForHigherTrackDuration (max = 0) {
     this.tracks.forEach(track => { // have to go through all, because the playtimeInterval may habe pushed this.maxDuration too far
       if (track.effectiveDuration > max) {
         max = track.effectiveDuration
@@ -275,7 +283,7 @@ export default class Session extends Vue {
     return max
   }
 
-  leaveSession() {
+  leaveSession () {
     if (this.dirty) {
       this.suggestToPublish()
     } else {
@@ -283,23 +291,23 @@ export default class Session extends Vue {
     }
   }
 
-  suggestToPublish() {
+  suggestToPublish () {
     this.showLeavePromt = true
   }
 
-  confirmLeave() {
+  confirmLeave () {
     this.$emit('goHome')
     this.stopAllSources()
     this.showLeavePromt = false
   }
 
-  formatTime(seconds: number) {
+  formatTime (seconds: number) {
     const s = (seconds % 60).toFixed(1)
     const m = Math.floor(seconds / 60)
     return `${m.toString().padStart(2, '0')}:${s.padStart(4, '0')}`
   }
 
-  showingSession() {
+  showingSession () {
     return !(
       this.askForAC ||
       this.showLeavePromt ||
@@ -310,7 +318,7 @@ export default class Session extends Vue {
     )
   }
 
-  handleKeydown($event: KeyboardEvent) {
+  handleKeydown ($event: KeyboardEvent) {
     if (this.showingSession()) {
       if ($event.key === ' ') {
         this.togglePlay()
@@ -335,7 +343,7 @@ export default class Session extends Vue {
     }
   }
 
-  togglePlay() {
+  togglePlay () {
     if (this.playing) {
       this.stopAllSources()
     } else {
@@ -343,14 +351,14 @@ export default class Session extends Vue {
         this.playAll()
         this.stopTimeout = setTimeout(
           this.stopAllSources.bind(this),
-          this.maxTrackDuration * 1000 + 100
+          this.maxTrackDuration * 1000 + this.playbackDelay * 2
         )
         this.playing = true
       }
     }
   }
 
-  playAll() {
+  playAll () {
     this.stopAllSources()
     this.tracks.forEach(track => {
       track.source = this.ac.createBufferSource()
@@ -366,31 +374,34 @@ export default class Session extends Vue {
         .connect(this.ac.destination)
     })
 
-    const now = this.ac.currentTime
+    this.playbackStartTime = this.ac.currentTime + this.playbackDelay
     this.tracks.forEach(track => {
       if (track.source !== undefined) {
-        if (track.offset < 0) {
-          track.source.start(now - track.offset)
+        if (track.offset > 0) {
+          track.source.start(this.playbackStartTime, track.offset)
         } else {
-          track.source.start(now, track.offset)
+          track.source.start(this.playbackStartTime - track.offset)
         }
       }
     })
 
-    this.tracksCssSize = (this.$refs.tracksref as HTMLDivElement).clientWidth.toString() + 'px'
+    setTimeout(this.updateTracksCssSize.bind(this))
     this.playtime = 0
-    this.playtimeInterval = setInterval(
-      () => {
-        this.playtime = this.ac.currentTime - now
-        if (this.recording && this.playtime > this.maxTrackDuration) {
-          this.maxTrackDuration = this.playtime
-        }
-      }, 1000 / 24
-    )
-    return now
+    this.playtimeInterval = setInterval(this.updatePlaytime.bind(this), 1000 / 24)
   }
 
-  stopAllSources() {
+  updatePlaytime () {
+    this.playtime = this.ac.currentTime - this.playbackStartTime
+    if (this.recording && this.playtime > this.maxTrackDuration) {
+      this.maxTrackDuration = this.playtime
+    }
+  }
+
+  updateTracksCssSize () {
+    this.tracksCssSize = (this.$refs.tracksref as HTMLDivElement).clientWidth.toString() + 'px'
+  }
+
+  stopAllSources () {
     if (this.playtimeInterval !== undefined) {
       clearInterval(this.playtimeInterval)
       this.playtimeInterval = undefined
@@ -408,7 +419,7 @@ export default class Session extends Vue {
     this.playtime = 0
   }
 
-  toggleRecord() {
+  toggleRecord () {
     if (this.mediaRecorder !== undefined) {
       if (this.recording) {
         this.mediaRecorder.stop() // triggers onstop callback
@@ -416,8 +427,8 @@ export default class Session extends Vue {
         this.recording = false
       } else {
         this.stopAllSources()
-        this.recordingStartTime = this.playAll()
         this.recordingChunks = []
+        this.playAll()
         this.mediaRecorder.start()
         this.recording = true
         this.dirty = true
@@ -427,7 +438,7 @@ export default class Session extends Vue {
     }
   }
 
-  pLog(msg: string) {
+  pLog (msg: string) {
     this.publishingLog.push(
       new LogEntry(
         'msg',
@@ -436,7 +447,7 @@ export default class Session extends Vue {
     )
   }
 
-  pLogCopyable(cid: string) {
+  pLogCopyable (cid: string) {
     this.publishingLog.push(
       new LogEntry(
         'copyable',
@@ -445,7 +456,7 @@ export default class Session extends Vue {
     )
   }
 
-  publish() {
+  publish () {
     if (ipfsWrapper.state.value === 'initialized') {
       this.publishing = 'ongoing'
       this.publishingError = null
@@ -483,7 +494,7 @@ export default class Session extends Vue {
     }
   }
 
-  logLinks(cid: string, ipfsNodeId: string) {
+  logLinks (cid: string, ipfsNodeId: string) {
     const params = [
       `loadSession=${cid}`,
       `loadSessionOrigin=${ipfsNodeId}`
@@ -498,11 +509,11 @@ export default class Session extends Vue {
     this.pLog('(click any link to copy)')
   }
 
-  confirmPublishResults() {
+  confirmPublishResults () {
     this.publishing = 'no'
   }
 
-  publishTracks() {
+  publishTracks () {
     return new Promise((resolve, reject) => {
       const promises: Promise<void>[] = []
       this.tracks.forEach(track => {
@@ -521,7 +532,7 @@ export default class Session extends Vue {
     })
   }
 
-  publishTrack(track: Track) {
+  publishTrack (track: Track) {
     return new Promise<void>((resolve, reject) => {
       if (track.audioBlob !== undefined) {
         ipfsWrapper.saveTrackAudio(track.audioBlob).then(
@@ -540,7 +551,7 @@ export default class Session extends Vue {
     })
   }
 
-  publishSession() {
+  publishSession () {
     const sc = new SessionConfig(
       this.title,
       this.base,
@@ -562,24 +573,24 @@ export default class Session extends Vue {
     return ipfsWrapper.saveSessionConfig(sc)
   }
 
-  renameSession() {
+  renameSession () {
     this.renaming = true
     this.$nextTick(() => {
       (this.$refs.newSessionTitle as HTMLInputElement).select()
     })
   }
 
-  updateName() {
+  updateName () {
     this.title = (this.$refs.newSessionTitle as HTMLInputElement).value
     this.renaming = false
     this.dirty = true
   }
 
-  editTrack(index: number) {
+  editTrack (index: number) {
     this.editTrackIndex = index
   }
 
-  changeTrackName(name: string | undefined) {
+  changeTrackName (name: string | undefined) {
     if (this.editTrackIndex !== null) {
       let somethingChanged = false
       const track = this.tracks[this.editTrackIndex]
@@ -594,7 +605,7 @@ export default class Session extends Vue {
     }
   }
 
-  updateTrackVolume(v: number) {
+  updateTrackVolume (v: number) {
     if (this.editTrackIndex !== null) {
       const track = this.tracks[this.editTrackIndex]
       track.volume = v
@@ -604,7 +615,7 @@ export default class Session extends Vue {
     }
   }
 
-  updateTrackPanning(v: number) {
+  updateTrackPanning (v: number) {
     if (this.editTrackIndex !== null) {
       const track = this.tracks[this.editTrackIndex]
       track.panning = v
@@ -614,39 +625,40 @@ export default class Session extends Vue {
     }
   }
 
-  loadSession(cid: string) {
+  updateTrackOffset (v: number) {
+    if (this.editTrackIndex !== null) {
+      const track = this.tracks[this.editTrackIndex]
+      track.offset = v
+      track.effectiveDuration = track.audioBuffer.duration - v
+    }
+  }
+
+  loadSession (cid: string) {
     this.loadingLog.push(new LogEntry(
       'msg', 'loading session with cid:'
     ))
     this.loadingLog.push(new LogEntry(
       'copyable', cid
     ))
-    this.checkAudioContext().then(
-      () => {
-        ipfsWrapper.loadSessionConfig(cid).then(
-          sc => {
-            this.base = cid
-            this.baseDate = sc.localTime
-            this.title = sc.title
-            this.loadTracks(sc.tracks).then(
-              () => {
-                RecentSessionEntry.append(new RecentSessionEntry(false, cid, sc.title))
-                this.loading = false
-              },
-              err => {
-                this.loadingError = err
-              }
-            )
+    ipfsWrapper.loadSessionConfig(cid).then(
+      sc => {
+        this.base = cid
+        this.baseDate = sc.localTime
+        this.title = sc.title
+        this.loadTracks(sc.tracks).then(
+          () => {
+            RecentSessionEntry.append(new RecentSessionEntry(false, cid, sc.title))
+            this.loading = false
+          },
+          err => {
+            this.loadingError = err
           }
         )
-      },
-      () => {
-        this.loadingError = 'Audio Context wasn\'t allowed to start.'
       }
     )
   }
 
-  loadTracks(trackConfigs: TrackConfig[]) {
+  loadTracks (trackConfigs: TrackConfig[]) {
     return new Promise<void>((resolve, reject) => {
       const promises: Promise<void>[] = []
       let i = 0
@@ -688,7 +700,7 @@ export default class Session extends Vue {
     })
   }
 
-  checkAudioContext() {
+  checkAudioContext () {
     return new Promise<void>((resolve, reject) => { // eslint-disable-line
       if (this.ac.state === 'suspended') {
         this.askForAC = true
@@ -703,7 +715,7 @@ export default class Session extends Vue {
     })
   }
 
-  beforeUnmount() {
+  beforeUnmount () {
     this.stopAllSources()
     document.removeEventListener('keydown', this.handleKeydown)
   }

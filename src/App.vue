@@ -26,7 +26,7 @@ class GetParams {
   loadSession: string | undefined
   loadSessionOrigin: string | undefined
   newSession = false
-  constructor() {
+  constructor () {
     let tmp = []
     location.search
       .substr(1)
@@ -60,7 +60,7 @@ export default class App extends Vue {
   getParams: GetParams = new GetParams()
   sessionToLoad: string | undefined
 
-  mounted() {
+  mounted () {
     ipfsWrapper.initialize().then(
       () => {
         this.handleGetParams()
@@ -71,7 +71,7 @@ export default class App extends Vue {
     )
   }
 
-  handleGetParams() {
+  handleGetParams () {
     if (this.getParams.loadSession !== undefined) {
       this.loadSession(this.getParams.loadSession)
     }
@@ -80,16 +80,16 @@ export default class App extends Vue {
     }
   }
 
-  loadSession(cid: string) {
+  loadSession (cid: string) {
     this.sessionToLoad = cid
     this.page = 'session'
   }
 
-  createNewProject() {
+  createNewProject () {
     this.page = 'session'
   }
 
-  goHome() {
+  goHome () {
     this.page = 'home'
     this.sessionToLoad = undefined
   }

@@ -19,7 +19,7 @@ import { Prop } from 'vue-property-decorator'
 import Copyable from '@/components/Copyable.vue'
 
 class LogEntry {
-  constructor(
+  constructor (
     public type: 'msg' | 'copyable',
     public s: string
   ) {

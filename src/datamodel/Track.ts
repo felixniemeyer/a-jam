@@ -13,7 +13,7 @@ export default class Track {
   panner: StereoPannerNode | undefined
   gain: GainNode | undefined
 
-  constructor(blob: Blob | undefined, buffer: AudioBuffer) {
+  constructor (blob: Blob | undefined, buffer: AudioBuffer) {
     this.audioBlob = blob
     this.audioBuffer = buffer
   }

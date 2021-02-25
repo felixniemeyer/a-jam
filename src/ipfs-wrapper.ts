@@ -10,7 +10,7 @@ const NO_CONNECTION_ERROR = Error('ipfs not connected')
 const HEBELPI_ID = '12D3KooWQotQBp2zSqyJ1C5pjeAvrrd5kkeaxHzhCjHFXMsKYLRi'
 
 export class TrackConfig {
-  constructor(
+  constructor (
     public cid: string,
     public name: string,
     public volume: number,
@@ -20,14 +20,14 @@ export class TrackConfig {
 }
 
 export class SessionConfig {
-  constructor(
+  constructor (
     public title: string,
     public origin: string | undefined,
     public localTime: number,
     public tracks: TrackConfig[]
   ) {}
 
-  addTrack(tc: TrackConfig) {
+  addTrack (tc: TrackConfig) {
     this.tracks.push(tc)
   }
 }
@@ -38,7 +38,7 @@ class IPFSWrapper {
   baseName: BaseName = 'base32'
   gatewayURL = 'gateway.ipfs.io'
   appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
-  initialize() {
+  initialize () {
     return new Promise((resolve, reject) => {
       if (this.node === undefined && this.state.value !== 'initializing') {
         this.state.value = 'initializing'
@@ -60,19 +60,19 @@ class IPFSWrapper {
     })
   }
 
-  connectToNodeById(nodeId: string) {
+  connectToNodeById (nodeId: string) {
     if (this.node !== undefined) {
       this.connectToNode(multiaddr(`/p2p/${nodeId}`))
     }
   }
 
-  connectToNode(nodeAddr: Multiaddr) {
+  connectToNode (nodeAddr: Multiaddr) {
     if (this.node !== undefined) {
       this.node.bootstrap.add(nodeAddr)
     }
   }
 
-  getIpfsNodeId() {
+  getIpfsNodeId () {
     return new Promise<string>((resolve, reject) => {
       if (this.node === undefined) {
         reject(NO_CONNECTION_ERROR)
@@ -82,7 +82,7 @@ class IPFSWrapper {
     })
   }
 
-  saveTrackAudio(blob: Blob) {
+  saveTrackAudio (blob: Blob) {
     return new Promise<string>((resolve, reject) => {
       if (this.node !== undefined) {
         this.node.add(blob).then(
@@ -97,7 +97,7 @@ class IPFSWrapper {
     })
   }
 
-  saveSessionConfig(sc: SessionConfig) {
+  saveSessionConfig (sc: SessionConfig) {
     return new Promise<string>((resolve, reject) => {
       if (this.node !== undefined) {
         this.node.add(JSON.stringify(sc)).then(
@@ -112,7 +112,7 @@ class IPFSWrapper {
     })
   }
 
-  loadSessionConfig(cid: string) {
+  loadSessionConfig (cid: string) {
     return new Promise<SessionConfig>((resolve, reject) => {
       if (this.node !== undefined) {
         (async node => {
@@ -131,7 +131,7 @@ class IPFSWrapper {
     })
   }
 
-  loadTrackAudio(cid: string) {
+  loadTrackAudio (cid: string) {
     return new Promise<AudioBuffer>((resolve, reject) => {
       if (this.node !== undefined) {
         (async node => {

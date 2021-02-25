@@ -1,7 +1,7 @@
 const HIST_LENGTH = 100
 
 export default class RecentSessionEntry {
-  constructor(
+  constructor (
     public createdByMe: boolean,
     public cid: string,
     public title: string,
@@ -10,14 +10,14 @@ export default class RecentSessionEntry {
 
   }
 
-  static fromString(jsonString: string) {
+  static fromString (jsonString: string) {
     const o = JSON.parse(jsonString)
     return new RecentSessionEntry(
       o.m, o.c, o.t, o.d
     )
   }
 
-  static getHistory() {
+  static getHistory () {
     const result = []
     /**
      * we traverse from the next_id-1 to the smallest possible id
@@ -58,7 +58,7 @@ export default class RecentSessionEntry {
     return result
   }
 
-  static append(rse: RecentSessionEntry) {
+  static append (rse: RecentSessionEntry) {
     let i
     if ('next_history_id' in localStorage) {
       i = Number(localStorage.getItem('next_history_id'))
@@ -69,7 +69,7 @@ export default class RecentSessionEntry {
     localStorage.setItem('next_history_id', (i + 1).toString())
   }
 
-  toString() {
+  toString () {
     return JSON.stringify({
       m: this.createdByMe,
       c: this.cid,
