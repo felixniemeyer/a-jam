@@ -29,8 +29,8 @@
       right="earlier"
       :factor="1000"
       :decimalPlaces="0"
-      :from="-0.150"
-      :to="0.150"
+      :from="initialOffset-0.100"
+      :to="initialOffset+0.100"
       :value="track.offset"
       @update="v => $emit('update-offset', v)" />
     <div>
@@ -56,6 +56,7 @@ import Copyable from '@/components/Copyable.vue'
 })
 export default class TrackSettings extends Vue {
   @Prop(Track) track!: Track
+  initialOffset: number = this.track.offset
 
   mounted () {
     (this.$refs.name as HTMLInputElement).select()

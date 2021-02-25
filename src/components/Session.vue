@@ -147,7 +147,6 @@ import Track from '@/datamodel/Track'
 import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
 import { reactive } from 'vue'
 
-
 @Options({
   components: {
     TrackC,
