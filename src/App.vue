@@ -37,7 +37,7 @@ class GetParams {
           case 'loadSession':
             this.loadSession = tmp[1]
             break
-          case 'loadSessionOrigin': 
+          case 'loadSessionOrigin':
             this.loadSessionOrigin = tmp[1]
             break
           case 'newSession':

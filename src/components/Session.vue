@@ -183,7 +183,7 @@ export default class Session extends Vue {
   ac: AudioContext = ac
   acceptAudioContext: CallableFunction = () => {} // eslint-disable-line
   askForAC = false
-  tracksCssSize = "100%"
+  tracksCssSize = '100%'
 
   beforeCreate() {
     if (this.sessionToLoad !== undefined) {
@@ -297,8 +297,8 @@ export default class Session extends Vue {
   }
 
   showingSession() {
-    return ! ( 
-      this.askForAC || 
+    return !(
+      this.askForAC ||
       this.showLeavePromt ||
       this.loading ||
       this.publishing !== 'no' ||
@@ -308,7 +308,7 @@ export default class Session extends Vue {
   }
 
   handleKeydown($event: KeyboardEvent) {
-    if(this.showingSession()) {
+    if (this.showingSession()) {
       if ($event.key === ' ') {
         this.togglePlay()
       }
@@ -319,14 +319,14 @@ export default class Session extends Vue {
         this.leaveSession()
       }
     }
-    if($event.key === 'Escape') {
-      if(this.showLeavePromt) {
+    if ($event.key === 'Escape') {
+      if (this.showLeavePromt) {
         this.showLeavePromt = false
       }
-      if(this.renaming) {
+      if (this.renaming) {
         this.renaming = false
       }
-      if(this.editTrackIndex !== null) {
+      if (this.editTrackIndex !== null) {
         this.editTrackIndex = null
       }
     }
@@ -365,14 +365,16 @@ export default class Session extends Vue {
 
     const now = this.ac.currentTime
     this.tracks.forEach(track => {
-      if (track.offset < 0) {
-        track.source!.start(now - track.offset)
-      } else {
-        track.source!.start(now, track.offset)
+      if (track.source !== undefined) {
+        if (track.offset < 0) {
+          track.source.start(now - track.offset)
+        } else {
+          track.source.start(now, track.offset)
+        }
       }
     })
 
-    this.tracksCssSize = (this.$refs.tracksref as HTMLDivElement).clientWidth.toString() + "px"
+    this.tracksCssSize = (this.$refs.tracksref as HTMLDivElement).clientWidth.toString() + 'px'
     this.playtime = 0
     this.playtimeInterval = setInterval(
       () => {
@@ -452,8 +454,8 @@ export default class Session extends Vue {
       }
       this.publishTracks().then(
         () => {
-          let getIpfsNodeIdPromise = ipfsWrapper.getIpfsNodeId()
-          let publishTracksPromise = this.publishSession()
+          const getIpfsNodeIdPromise = ipfsWrapper.getIpfsNodeId()
+          const publishTracksPromise = this.publishSession()
           Promise.all([getIpfsNodeIdPromise, publishTracksPromise]).then(
             values => {
               const ipfsNodeId = values[0]
@@ -472,13 +474,13 @@ export default class Session extends Vue {
               return err
             }
           )
-        }, 
+        },
         err => err
       )
     }
   }
 
-  logLinks(cid: string, ipfsNodeId: string){
+  logLinks(cid: string, ipfsNodeId: string) {
     const params = [
       `loadSession=${cid}`,
       `loadSessionOrigin=${ipfsNodeId}`
@@ -588,22 +590,22 @@ export default class Session extends Vue {
       }
     }
   }
-  
+
   updateTrackVolume(v: number) {
-    if(this.editTrackIndex !== null) {
-      let track = this.tracks[this.editTrackIndex]
+    if (this.editTrackIndex !== null) {
+      const track = this.tracks[this.editTrackIndex]
       track.volume = v
-      if(track.gain !== undefined) {
+      if (track.gain !== undefined) {
         track.gain.gain.value = v
       }
     }
   }
 
   updateTrackPanning(v: number) {
-    if(this.editTrackIndex !== null) {
-      let track = this.tracks[this.editTrackIndex]
+    if (this.editTrackIndex !== null) {
+      const track = this.tracks[this.editTrackIndex]
       track.panning = v
-      if(track.panner!== undefined) {
+      if (track.panner !== undefined) {
         track.panner.pan.value = v
       }
     }
@@ -697,7 +699,7 @@ export default class Session extends Vue {
       }
     })
   }
-  
+
   beforeUnmount() {
     this.stopAllSources()
     document.removeEventListener('keydown', this.handleKeydown)
@@ -850,7 +852,7 @@ export default class Session extends Vue {
     .shortcut-hint {
       display: inline-block;
       width: 4em;
-      margin: 0.5em; 
+      margin: 0.5em;
       color: #777;
       vertical-align: middle;
       &.play {

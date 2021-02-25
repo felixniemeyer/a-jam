@@ -18,20 +18,19 @@
 import { Options, Vue } from 'vue-class-component'
 import { Prop } from 'vue-property-decorator'
 
-
 @Options({
-  components: {}, 
+  components: {},
   emits: ['update']
 })
 export default class Log extends Vue {
   @Prop() name!: string
   @Prop() from!: number
-  @Prop() to!: number 
-  @Prop() value!: number 
+  @Prop() to!: number
+  @Prop() value!: number
   @Prop() decimalPlaces = 2
-  
+
   dragging = false
-  dragOffset = 0 
+  dragOffset = 0
   x0 = 0
   width = 1
 
@@ -39,7 +38,7 @@ export default class Log extends Vue {
     document.addEventListener('mouseup', this.endDrag)
     document.addEventListener('mouseleave', this.endDrag)
     document.addEventListener('mousemove', this.drag)
-    
+
     document.addEventListener('touchend', this.endTouch)
     document.addEventListener('touchcancel', this.endTouch)
     document.addEventListener('touchmove', this.drag)
@@ -50,30 +49,30 @@ export default class Log extends Vue {
     this.x0 = bound.left
     this.width = bound.right - bound.left
     this.dragOffset = 0
-    let v = this.getV(e)
+    const v = this.getV(e)
     this.dragging = true
     this.dragOffset = (this.value - v) / (this.to - this.from)
   }
-  
+
   endDrag(e: MouseEvent | TouchEvent) {
     this.drag(e)
     this.dragging = false
   }
-  
+
   endTouch() {
     this.dragging = false
   }
-  
-  drag(e: MouseEvent | TouchEvent){
-    if(this.dragging) {
-      let v = this.getV(e)
+
+  drag(e: MouseEvent | TouchEvent) {
+    if (this.dragging) {
+      const v = this.getV(e)
       this.$emit('update', v)
     }
   }
-  
+
   getV(e: MouseEvent | TouchEvent) {
     let x = 0
-    if(e instanceof MouseEvent){
+    if (e instanceof MouseEvent) {
       x = e.x
     } else if (e instanceof TouchEvent) {
       x = e.touches[0].pageX
@@ -83,9 +82,9 @@ export default class Log extends Vue {
     r = Math.min(1, Math.max(0, r))
     return this.from + (this.to - this.from) * r
   }
-  
+
   beforeUnmount() {
-    console.log("destroying Slider")
+    console.log('destroying Slider')
     document.removeEventListener('mouseup', this.endDrag)
     document.removeEventListener('mouseleave', this.endDrag)
     document.removeEventListener('mousemove', this.drag)
@@ -98,22 +97,22 @@ export default class Log extends Vue {
 </script>
 
 <style lang="scss">
-$dotsize: 3em; 
+$dotsize: 3em;
 
 .slider {
   .bar{
     position: relative;
-    width: calc(96% - #{$dotsize}); 
-    height: 0.4em; 
+    width: calc(96% - #{$dotsize});
+    height: 0.4em;
     background: linear-gradient(180deg, #888, #ccc 80%, #aaa);
-    margin: ($dotsize / 2) auto ($dotsize * 3 / 2) 2%;  
+    margin: ($dotsize / 2) auto ($dotsize * 3 / 2) 2%;
     border-radius: 0.2em;
-    left: 5%; 
+    left: 5%;
     .dot {
       box-shadow: 0 0 0.5em #0007;
       position: absolute;
-      height: $dotsize; 
-      width: $dotsize; 
+      height: $dotsize;
+      width: $dotsize;
       top: 50%;
       transform: translate(-50%, -50%);
       border-radius: $dotsize / 2;

@@ -6,7 +6,7 @@ import { BaseName } from 'multibase'
 import ac from '@/audio-context'
 
 const NO_CONNECTION_ERROR = Error('ipfs not connected')
-// a ipfs node I'm running to support ipfs function 
+// a ipfs node I'm running to support ipfs function
 const HEBELPI_ID = '12D3KooWQotQBp2zSqyJ1C5pjeAvrrd5kkeaxHzhCjHFXMsKYLRi'
 
 export class TrackConfig {
@@ -61,23 +61,23 @@ class IPFSWrapper {
   }
 
   connectToNodeById(nodeId: string) {
-    if(this.node !== undefined) {
+    if (this.node !== undefined) {
       this.connectToNode(multiaddr(`/p2p/${nodeId}`))
     }
   }
 
   connectToNode(nodeAddr: Multiaddr) {
-    if(this.node !== undefined) {
+    if (this.node !== undefined) {
       this.node.bootstrap.add(nodeAddr)
     }
   }
-  
+
   getIpfsNodeId() {
     return new Promise<string>((resolve, reject) => {
-      if(this.node == undefined) {
-        reject()
+      if (this.node === undefined) {
+        reject(NO_CONNECTION_ERROR)
       } else {
-        return this.node.id().then(identity => { resolve(identity.id) }) 
+        return this.node.id().then(identity => { resolve(identity.id) })
       }
     })
   }
