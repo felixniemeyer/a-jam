@@ -3,21 +3,21 @@
     <h3>rename track</h3>
     <input :value="track.name" ref="name" @keyup="submitOnEnter">
     <div>
-      <div class="inline-button" @click="cancel">cancel</div>
-      <div class="inline-button" @click="save">ok</div>
+      <div class="inline-button" @click="$emit('back')">back</div>
+      <div class="inline-button" @click="changeName">ok</div>
     </div>
     <Slider
       name="volume"
       :from="0.0"
-      :to="1.0"
+      :to="2.0"
       :value="track.volume"
-      @change="(e, v) => $emit('updateVolume', v)" />
+      @update="v => $emit('update-volume', v)" />
     <Slider
       name="panning"
       :from="-1.0"
       :to="1.0"
       :value="track.panning"
-      @change="(e, v) => $emit('updateVolume', v)" />
+      @update="v => $emit('update-panning', v)" />
   </div>
 </template>
 
@@ -36,9 +36,6 @@ import Slider from '@/components/Slider.vue'
 })
 export default class TrackSettings extends Vue {
   @Prop(Track) track!: Track
-  cancel() {
-    this.$emit('cancel')
-  }
 
   mounted() {
     (this.$refs.name as HTMLInputElement).select()
@@ -46,12 +43,12 @@ export default class TrackSettings extends Vue {
 
   submitOnEnter($event: KeyboardEvent) {
     if ($event.key === 'Enter') {
-      this.save()
+      this.changeName()
     }
   }
 
-  save() {
-    this.$emit('save', (this.$refs.name as HTMLInputElement).value)
+  changeName() {
+    this.$emit('change-name', (this.$refs.name as HTMLInputElement).value)
   }
 }
 </script>

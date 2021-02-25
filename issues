@@ -37,9 +37,9 @@
 	- add /p2p of publishing node to publishing link and connect to it for loading
 	- connect /p2p address of davids raspberry => hardcode it 
 
-- V2
+- D: V2
 	- D: recent projects
-	- track adjustments: 
+	- D: track adjustments: 
 		- should work immedeately
 		- volume
 		- panning

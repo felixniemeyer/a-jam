@@ -141,6 +141,7 @@ import ac from '@/audio-context'
 
 import Track from '@/datamodel/Track'
 import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
+import { reactive } from 'vue'
 
 @Options({
   components: {
@@ -588,9 +589,24 @@ export default class Session extends Vue {
     }
   }
   
-  updateTrackVolume(name: number) {
+  updateTrackVolume(v: number) {
+    if(this.editTrackIndex !== null) {
+      let track = this.tracks[this.editTrackIndex]
+      track.volume = v
+      if(track.gain !== undefined) {
+        track.gain.gain.value = v
+      }
+    }
   }
-  updateTrackPanning(name: number) {
+
+  updateTrackPanning(v: number) {
+    if(this.editTrackIndex !== null) {
+      let track = this.tracks[this.editTrackIndex]
+      track.panning = v
+      if(track.panner!== undefined) {
+        track.panner.pan.value = v
+      }
+    }
   }
 
   loadSession(cid: string) {
@@ -645,6 +661,7 @@ export default class Session extends Vue {
             track.volume = ts.volume
             track.panning = ts.panning
             track.effectiveDuration = track.audioBuffer.duration - track.offset
+            reactive(track)
             this.tracks[index] = track
             resolve()
           }
@@ -681,7 +698,7 @@ export default class Session extends Vue {
     })
   }
   
-  beforeDestroy() {
+  beforeUnmount() {
     this.stopAllSources()
     document.removeEventListener('keydown', this.handleKeydown)
   }
