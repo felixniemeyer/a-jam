@@ -27,6 +27,7 @@
 		- configure pinning service in settings
 		- promt for pinning service on publish
 	- segregate track data and audio nodes
+	- start new session with file upload
 
 - Reduce latency (firefox e.g.) 
 
