@@ -86,8 +86,8 @@ export default class TrackSettings extends Vue {
       this.confirmRemove = true
     }
   }
-  
-  resetInitialOffset() {
+
+  resetInitialOffset () {
     this.initialOffset = this.track.offset
   }
 

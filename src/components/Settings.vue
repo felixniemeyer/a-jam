@@ -34,8 +34,8 @@ import Slider from '@/components/Slider.vue'
 export default class Info extends Vue {
   @Prop() defaultRecordingOffset!: number
   initialOffset: number = this.defaultRecordingOffset
-  
-  resetInitialOffset() {
+
+  resetInitialOffset () {
     this.initialOffset = this.defaultRecordingOffset
   }
 }

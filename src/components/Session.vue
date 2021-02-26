@@ -398,7 +398,7 @@ export default class Session extends Vue {
   }
 
   updateTracksCssSize () {
-    if(this.$refs.tracksref !== undefined) {
+    if (this.$refs.tracksref !== undefined) {
       this.tracksCssSize = (this.$refs.tracksref as HTMLDivElement).clientWidth.toString() + 'px'
     }
   }

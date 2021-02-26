@@ -11,7 +11,7 @@
       created by felix paul niemeyer <br/>
       <a href="https://github.com/felixniemeyer">github.com/felixniemeyer</a>
     </p>
-    eth address  
+    eth address
     <Copyable text="0xc077b94DdA5358074F519C38b7237b17167a2394"/>
     (click to copy)
   </div>
@@ -40,7 +40,7 @@ export default class Info extends Vue {
     color: rgb(18, 92, 134)
   }
   .local-storage{
-    color: $warn; 
+    color: $warn;
   }
   .author{
     .address{

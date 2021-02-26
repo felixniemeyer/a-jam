@@ -43,11 +43,20 @@ class IPFSWrapper {
       if (this.node === undefined && this.state.value !== 'initializing') {
         this.state.value = 'initializing'
         const settings = {
+          libp2p: {
+            config: {
+              dht: {
+                enabled: true
+              }
+            }
+          }
         }
         ipfs.create(settings).then(
           node => {
             this.node = node
-            this.connectToNodeById(HEBELPI_ID)
+            setTimeout(() => { // wait for some peers and then...
+              this.connectToNodeById(HEBELPI_ID)
+            }, 10000)
             this.state.value = 'initialized'
             resolve(node)
           },
@@ -62,8 +71,15 @@ class IPFSWrapper {
 
   connectToNodeById (nodeId: string) {
     if (this.node !== undefined) {
-      // transport /p2p/ is not supported by a js ipfs node, so skip that for now...
-      // this.connectToNode(multiaddr(`/p2p/${nodeId}`))
+      let peerId = ipfs.PeerId.createFromB58String(nodeId)
+      this.node.dht.findPeer(peerId).then(
+        info => {
+          info.addrs.forEach(addr => this.connectToNode.bind(this))
+        },
+        err => {
+          console.error("could not find peer.", err)
+        }
+      )
     }
   }
 
@@ -71,18 +87,10 @@ class IPFSWrapper {
     if (this.node !== undefined) {
       this.node.swarm.connect(nodeAddr).then(
         () => {
-          console.log("successfully connected to ", nodeAddr.toString())
+          console.log('successfully connected to ', nodeAddr.toString())
         },
         err => {
-          if(err instanceof AggregateError){
-            console.log("AGGFR")
-            err.errors.forEach(err => console.error(err))
-          } else {
-            console.error("could not connect to node", nodeAddr.toString(), "because", err)
-            for(let key of err) {
-              console.log(key)
-            }
-          }
+          console.error('could not connect to node', nodeAddr.toString(), 'because', err.toString())
         }
       )
     }

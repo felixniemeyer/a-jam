@@ -60,7 +60,7 @@ export default class Log extends Vue {
   }
 
   endDrag (e: MouseEvent | TouchEvent) {
-    if(this.dragging) {
+    if (this.dragging) {
       this.drag(e)
       this.dragging = false
       this.$emit('drag-end', this.getV(e))
