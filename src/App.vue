@@ -87,7 +87,6 @@ export default class App extends Vue {
   loadSettings () {
     if ('defaultRecordingOffset' in localStorage) {
       this.defaultRecordingOffset = Number(localStorage.getItem('defaultRecordingOffset'))
-      console.log(this.defaultRecordingOffset)
     }
   }
 

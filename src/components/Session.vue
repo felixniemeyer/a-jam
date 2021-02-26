@@ -75,6 +75,7 @@
     :track="tracks[editTrackIndex]"
     @back='editTrackIndex=null'
     @changeName='changeTrackName'
+    @remove='removeTrack'
     @updateVolume='updateTrackVolume'
     @updatePanning='updateTrackPanning'
     @updateOffset='updateTrackOffset'
@@ -397,7 +398,9 @@ export default class Session extends Vue {
   }
 
   updateTracksCssSize () {
-    this.tracksCssSize = (this.$refs.tracksref as HTMLDivElement).clientWidth.toString() + 'px'
+    if(this.$refs.tracksref !== undefined) {
+      this.tracksCssSize = (this.$refs.tracksref as HTMLDivElement).clientWidth.toString() + 'px'
+    }
   }
 
   stopAllSources () {
@@ -601,6 +604,15 @@ export default class Session extends Vue {
       if (somethingChanged) {
         this.dirty = true
       }
+    }
+  }
+
+  removeTrack () {
+    if (this.editTrackIndex !== null) {
+      const trackToBeDeleted = this.tracks[this.editTrackIndex]
+      this.editTrackIndex = null
+      this.tracks = this.tracks.filter(track => track !== trackToBeDeleted)
+      this.maxTrackDuration = this.checkForHigherTrackDuration()
     }
   }
 

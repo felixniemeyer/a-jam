@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <h1>ajam</h1>
+    <h1>a-jam</h1>
     <i>asynchronous jamming</i><br/>
     <img class="logo" alt="ajam logo" src="../assets/logo.png" />
     <div v-if="ipfsState === 'initialized'">

@@ -22,7 +22,7 @@ import { Prop } from 'vue-property-decorator'
 
 @Options({
   components: {},
-  emits: ['update']
+  emits: ['update', 'drag-end']
 })
 export default class Log extends Vue {
   @Prop() name!: string
@@ -60,8 +60,11 @@ export default class Log extends Vue {
   }
 
   endDrag (e: MouseEvent | TouchEvent) {
-    this.drag(e)
-    this.dragging = false
+    if(this.dragging) {
+      this.drag(e)
+      this.dragging = false
+      this.$emit('drag-end', this.getV(e))
+    }
   }
 
   endTouch () {
@@ -104,18 +107,17 @@ export default class Log extends Vue {
 $dotsize: 3em;
 
 .slider {
-  line-height: 3em;
   width: 96%;
   margin: 1em 2%;
   border-radius: 0.2em;
   box-shadow: 0 0 0.5em #8888;
-  height: 6em;
+  padding: 0.5em 0;
   .bar{
     position: relative;
     width: calc(100% - #{$dotsize});
     height: 0.4em;
     background: linear-gradient(180deg, #888, #ccc 80%, #aaa);
-    margin: ($dotsize / 3) 0;
+    margin: ($dotsize / 2) 0;
     border-radius: 0.2em;
     left: $dotsize / 2;
     .dot {
@@ -132,7 +134,7 @@ $dotsize: 3em;
     }
     .right, .left{
       position: absolute;
-      bottom: -0.5em;
+      bottom: 0.7em;
       color: #777;
     }
     .left {

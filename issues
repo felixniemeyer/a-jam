@@ -29,11 +29,12 @@
 		- promt for pinning service on publish
 	- segregate track data and audio nodes
 	- start new session with file upload
+	- Jam session config object versions and migrations
 
 - pre release
 	- D(removed reconstruction from end time + introduced default rec offset): Reduce latency (firefox e.g.) 
 	- D: make default recording offset configurable
-	- enable remove track
+	- D: enable remove track
 
 - D: documentation improvement
 	- add ipfs explanation and link to ipfs.io to readme

@@ -4,9 +4,11 @@
       <p> this track refers to this audio file: </p>
       <Copyable :text="track.cid"/>
     </div>
-    <h3>rename track</h3>
+    <div class="danger inline-button" tabindex="0" @click="remove" @blur="confirmRemove = false">
+      {{confirmRemove ? "confirm remove track" : "remove track"}}
+    </div><br/>
     <input :value="track.name" ref="name" @keyup="submitOnEnter">
-    <div class="inline-button" @click="changeName">rename</div>
+    <div class="inline-button" @click="changeName">rename track</div>
     <Slider
       name="volume"
       left="mute"
@@ -32,9 +34,10 @@
       :from="initialOffset-0.100"
       :to="initialOffset+0.100"
       :value="track.offset"
+      @dragEnd="resetInitialOffset"
       @update="v => $emit('update-offset', v)" />
     <div>
-      <div class="inline-button" @click="$emit('back')">back</div>
+      <div class="inline-button" @click="$emit('back')">back to session</div>
     </div>
   </div>
 </template>
@@ -52,11 +55,19 @@ import Copyable from '@/components/Copyable.vue'
     Slider,
     Copyable
   },
-  emits: ['back', 'change-name', 'update-volume', 'update-panning', 'update-offset']
+  emits: [
+    'back',
+    'change-name',
+    'update-volume',
+    'update-panning',
+    'update-offset',
+    'remove'
+  ]
 })
 export default class TrackSettings extends Vue {
   @Prop(Track) track!: Track
   initialOffset: number = this.track.offset
+  confirmRemove = false
 
   mounted () {
     (this.$refs.name as HTMLInputElement).select()
@@ -68,6 +79,18 @@ export default class TrackSettings extends Vue {
     }
   }
 
+  remove () {
+    if (this.confirmRemove) {
+      this.$emit('remove')
+    } else {
+      this.confirmRemove = true
+    }
+  }
+  
+  resetInitialOffset() {
+    this.initialOffset = this.track.offset
+  }
+
   changeName () {
     this.$emit('change-name', (this.$refs.name as HTMLInputElement).value)
   }
@@ -76,13 +99,14 @@ export default class TrackSettings extends Vue {
 
 <style lang="scss">
 .track-settings {
-  position: absolute;
-  width: 100%;
-  top: 50%;
-  transform: translate(0, -50%);
+  padding-top: 3em;
   .inline-button{
     @include clickable-surface;
     display: inline-block;
+    &.danger {
+      background-color: $warn;
+      color: #fff;
+    }
   }
   input {
     padding: 1em;

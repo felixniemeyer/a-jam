@@ -62,13 +62,29 @@ class IPFSWrapper {
 
   connectToNodeById (nodeId: string) {
     if (this.node !== undefined) {
-      this.connectToNode(multiaddr(`/p2p/${nodeId}`))
+      // transport /p2p/ is not supported by a js ipfs node, so skip that for now...
+      // this.connectToNode(multiaddr(`/p2p/${nodeId}`))
     }
   }
 
   connectToNode (nodeAddr: Multiaddr) {
     if (this.node !== undefined) {
-      this.node.bootstrap.add(nodeAddr)
+      this.node.swarm.connect(nodeAddr).then(
+        () => {
+          console.log("successfully connected to ", nodeAddr.toString())
+        },
+        err => {
+          if(err instanceof AggregateError){
+            console.log("AGGFR")
+            err.errors.forEach(err => console.error(err))
+          } else {
+            console.error("could not connect to node", nodeAddr.toString(), "because", err)
+            for(let key of err) {
+              console.log(key)
+            }
+          }
+        }
+      )
     }
   }
 

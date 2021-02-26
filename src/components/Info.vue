@@ -2,15 +2,18 @@
   <div class='cornerbutton back' @click="this.$emit('goHome')">
   </div>
   <div class='container'>
-    <h1>ajam</h1>
-    <p class='ipfs-info'>this app uses <a href="https://ipfs.io/">IPFS</a> to store audio files and jam sessions.</p>
-    <p class='local-storage'>settings and project history are stored in the browser local storage. They may be lost, when you clear your browser data</p>
+    <h1>a-jam</h1>
+    <p>This app enables you to record musical ideas and share them with your friends so that they can add their ideas. It's like a jam session but...
+    </p><p><i>asynchronous</i>. </p>
+    <p class='ipfs-info'>This app uses <a href="https://ipfs.io/">IPFS</a> to store audio files and jam sessions.</p>
+    <p class='local-storage'>Settings and project history are stored in the browser local storage. They may be lost, when you clear your browser data</p>
     <p class='author'>
       created by felix paul niemeyer <br/>
-      <a href="https://github.com/felixniemeyer">github.com/felixniemeyer</a><br/>
-      eth address (click to copy):<br/>
-      <Copyable text="0xc077b94DdA5358074F519C38b7237b17167a2394"/>
+      <a href="https://github.com/felixniemeyer">github.com/felixniemeyer</a>
     </p>
+    eth address  
+    <Copyable text="0xc077b94DdA5358074F519C38b7237b17167a2394"/>
+    (click to copy)
   </div>
 </template>
 
@@ -30,19 +33,14 @@ export default class Info extends Vue {
 
 <style lang="scss">
 .container {
-  position: absolute;
-  top: 33%;
-  left: 50%;
-  width: 100%;
-  transform: translate(-50%, -50%);
   p {
     margin: 1em 2em;
   }
   .ipfs-info{
-    color: rgb(26, 46, 102)
+    color: rgb(18, 92, 134)
   }
   .local-storage{
-    color: rgb(26, 102, 67)
+    color: $warn; 
   }
   .author{
     .address{
