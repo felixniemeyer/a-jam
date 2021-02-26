@@ -104,9 +104,6 @@ export default class App extends Vue {
     if (this.getParams.loadSession !== undefined) {
       this.loadSession(this.getParams.loadSession)
     }
-    if (this.getParams.loadSessionOrigin !== undefined) {
-      ipfsWrapper.connectToNodeById(this.getParams.loadSessionOrigin)
-    }
   }
 
   loadSession (cid: string) {

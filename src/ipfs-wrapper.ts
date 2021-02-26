@@ -1,13 +1,10 @@
 import { Ref, ref } from 'vue'
-import ipfs, { multiaddr } from 'ipfs'
-import Multiaddr from 'multiaddr'
+import ipfs from 'ipfs'
 import { BaseName } from 'multibase'
 
 import ac from '@/audio-context'
 
 const NO_CONNECTION_ERROR = Error('ipfs not connected')
-// a ipfs node I'm running to support ipfs function
-const HEBELPI_ID = '12D3KooWQotQBp2zSqyJ1C5pjeAvrrd5kkeaxHzhCjHFXMsKYLRi'
 
 export class TrackConfig {
   constructor (
@@ -43,20 +40,10 @@ class IPFSWrapper {
       if (this.node === undefined && this.state.value !== 'initializing') {
         this.state.value = 'initializing'
         const settings = {
-          libp2p: {
-            config: {
-              dht: {
-                enabled: true
-              }
-            }
-          }
         }
         ipfs.create(settings).then(
           node => {
             this.node = node
-            setTimeout(() => { // wait for some peers and then...
-              this.connectToNodeById(HEBELPI_ID)
-            }, 10000)
             this.state.value = 'initialized'
             resolve(node)
           },
@@ -67,33 +54,6 @@ class IPFSWrapper {
         )
       }
     })
-  }
-
-  connectToNodeById (nodeId: string) {
-    if (this.node !== undefined) {
-      let peerId = ipfs.PeerId.createFromB58String(nodeId)
-      this.node.dht.findPeer(peerId).then(
-        info => {
-          info.addrs.forEach(addr => this.connectToNode.bind(this))
-        },
-        err => {
-          console.error("could not find peer.", err)
-        }
-      )
-    }
-  }
-
-  connectToNode (nodeAddr: Multiaddr) {
-    if (this.node !== undefined) {
-      this.node.swarm.connect(nodeAddr).then(
-        () => {
-          console.log('successfully connected to ', nodeAddr.toString())
-        },
-        err => {
-          console.error('could not connect to node', nodeAddr.toString(), 'because', err.toString())
-        }
-      )
-    }
   }
 
   getIpfsNodeId () {
