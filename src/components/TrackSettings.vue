@@ -4,11 +4,15 @@
       <p> this track refers to this audio file: </p>
       <Copyable :text="track.cid"/>
     </div>
-    <div class="danger inline-button" tabindex="0" @click="remove" @blur="confirmRemove = false">
-      {{confirmRemove ? "confirm remove track" : "remove track"}}
-    </div><br/>
+    <div>
+      <div class="danger inline-button" tabindex="0" @click="remove" @blur="confirmRemove = false">
+        {{confirmRemove ? "confirm remove track" : "remove track"}}
+      </div>
+    </div>
     <input :value="track.name" ref="name" @keyup="submitOnEnter">
-    <div class="inline-button" @click="changeName">rename track</div>
+    <div>
+      <div class="inline-button" @click="changeName">rename track</div>
+    </div>
     <Slider
       name="volume"
       left="mute"

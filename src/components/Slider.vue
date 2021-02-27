@@ -7,10 +7,7 @@
       <div class="dot"
         :style="{left: `${(this.value - this.from) / (this.to - this.from) * 100}%`}"
         @mousedown.prevent="startDrag"
-        @touchstart.prevent="startDrag"
-        @mouseup.prevent="endDrag"
-        @touchend.prevent="endTouch"
-        @touchcancel.prevent="endTouch">
+        @touchstart.prevent="startDrag">
       </div>
     </div>
   </div>
@@ -40,8 +37,8 @@ export default class Log extends Vue {
   width = 1
 
   mounted () {
-    document.addEventListener('mouseup', this.endDrag)
-    document.addEventListener('mouseleave', this.endDrag)
+    document.addEventListener('mouseup', this.endMouse)
+    document.addEventListener('mouseleave', this.endMouse)
     document.addEventListener('mousemove', this.drag)
 
     document.addEventListener('touchend', this.endTouch)
@@ -59,16 +56,20 @@ export default class Log extends Vue {
     this.dragOffset = (this.value - v) / (this.to - this.from)
   }
 
-  endDrag (e: MouseEvent | TouchEvent) {
-    if (this.dragging) {
-      this.drag(e)
-      this.dragging = false
-      this.$emit('drag-end', this.getV(e))
-    }
+  endMouse (e: MouseEvent | TouchEvent) {
+    this.drag(e)
+    this.endDrag()
   }
 
   endTouch () {
-    this.dragging = false
+    this.endDrag()
+  }
+
+  endDrag () {
+    if (this.dragging) {
+      this.dragging = false
+      this.$emit('drag-end')
+    }
   }
 
   drag (e: MouseEvent | TouchEvent) {
