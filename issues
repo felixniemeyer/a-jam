@@ -15,10 +15,15 @@
 		- use "defineComponent" instead of classes
 	- Features 
 		- Merge Sessions
-			- on page trackinfo, click "merge sessions" => Show recent
-			- Merge
+			- on page trackinfo, click "merge session" 
+			- Show recent sessions
+			- click one => Merge
 				- Track names if <> => "old << new"
 				- Session name "old << new"
+			- import track from another session => button under the tracks
+				- shows recent session
+				- click one => shows tracks from this other session 
+				- click one => loads this track into the current session
 		- Mute, Solo tracks
 		- Select playback time
 			- Create start flags
@@ -31,12 +36,35 @@
 	- Pinning Service(s) integration
 		- Configure pinning service in settings
 		- Promt for pinning service on publish
+	- IPFS
+		- pin a foreign project on local ipfs node on load
+			- enable automatic in settings (default: auto) 
+			- manually in session settings
 	- Start new session with file upload
 		- Use case: s.b. has recorded something and wants to share it / work on it
 	- Jam session config object versions and migrations
 	- Ask ipfs community for help with connecting to session origin
 		- Post list of connection failures
 	- Export master audio
+	- Sharing links only one line high (it's enough), maybe make them wider? 100% - 2em? left: 1em
+	- Sharing links on project 
+	- Do some manual work and hardcode some offsets for different browsers
+		- chrome, chromium, brave
+		- firefox
+		- safari
+		- mobile 
+			- chrome, brave 
+			- firefox 
+			- safari
+		- try to cover 90% of all used browsers
+		- this make wide adoption possible, it's a major hurdle 
+	- enhance "tracks"-layout and timebar etc. by using a wrapper div and abs posistioning
+		- wrapper
+			- scrolling content
+			- abs positioned stuff
+	- playback delay: 
+		- add the 5 ms on playback, not on the track (possible: delay and offset are both set) 
+		- => this will make sure the track offset equals the default track offset (instead now: track offset = default + 5)
 
 - Hotfixes 
 	- implement a "save-input" button, that 
@@ -44,6 +72,7 @@
 		- releases the fix on blur
 		- so that on mobile bringin up the keyboar would not affect the layout
 		- alternative: fix width on menu entry
+	- ajam => a-jam title
 
 - pre release
 	- D(removed reconstruction from end time + introduced default rec offset): Reduce latency (firefox e.g.) 
