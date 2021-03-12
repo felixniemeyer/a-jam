@@ -13,7 +13,7 @@ This web app lets you
 - record new audio tracks 
 - publish the project and send the sharing link to your fellow musicians
 
-<img src="https://github.com/felixniemeyer/jam/raw/webpack/screenshots/home.png" height="450">  <img src="https://github.com/felixniemeyer/jam/raw/webpack/screenshots/session.png" height="450">
+<img src="https://github.com/felixniemeyer/jam/raw/screenshots/home.png" height="450">  <img src="https://github.com/felixniemeyer/jam/raw/screenshots/session.png" height="450">
 
 ### This app ist built on ipfs
 The web app itself is served from ipfs:
