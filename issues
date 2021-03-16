@@ -65,6 +65,8 @@
 	- playback delay: 
 		- add the 5 ms on playback, not on the track (possible: delay and offset are both set) 
 		- => this will make sure the track offset equals the default track offset (instead now: track offset = default + 5)
+	- bugfixes: stop track on removal
+	- redraw on vue cycle (prevent lags)
 
 - Hotfixes 
 	- implement a "save-input" button, that 

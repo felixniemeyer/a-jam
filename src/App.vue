@@ -1,8 +1,12 @@
 <template>
   <div id="nav">
     <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <router-link to="/session">Session</router-link> |
+    <router-link to="/info">Info</router-link> | 
+    <router-link to="/settings">Settings</router-link>
   </div>
+  <router-view></router-view>
+  <!--
     <Session
       v-if="page === 'session'"
       :sessionToLoad="sessionToLoad"
@@ -22,16 +26,16 @@
       @loadSession="loadSession"
       @gotoSettings="page='settings'"
       @newProject="createNewProject()"/>
-
+    -->
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component'
 
-import Home from '@/components/Home.vue'
-import Session from '@/components/Session.vue'
-import Info from '@/components/Info.vue'
-import Settings from '@/components/Settings.vue'
+// import Home from '@/components/Home.vue'
+// import Session from '@/components/Session.vue'
+// import Info from '@/components/Info.vue'
+// import Settings from '@/components/Settings.vue'
 
 import { ipfsWrapper } from '@/ipfs-wrapper'
 
@@ -64,10 +68,10 @@ class GetParams {
 
 @Options({
   components: {
-    Home,
-    Session,
-    Info,
-    Settings
+  //  Home,
+  //  Session,
+  //  Info,
+  //  Settings
   }
 })
 export default class App extends Vue {
