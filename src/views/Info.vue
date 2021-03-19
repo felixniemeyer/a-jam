@@ -1,5 +1,5 @@
 <template>
-  <div class='cornerbutton back' @click="this.$emit('goHome')">
+  <div class='cornerbutton back' @click="$router.go(-1)">
   </div>
   <div class='container'>
     <h1>a-jam</h1>

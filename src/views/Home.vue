@@ -4,9 +4,9 @@
     <i>asynchronous jamming</i><br/>
     <img class="logo" alt="ajam logo" src="../assets/logo.png" />
     <div v-if="ipfsState === 'initialized'">
-      <div class="project new" @click="this.$emit('newProject')">new project</div>
+      <div class="project new" @click="$router.push('session')">new project</div>
       <h4 v-if="sessionHistory.length > 0">recent projects</h4>
-      <p class="project" v-for="(rse, key) in sessionHistory" :key="key" @click="$emit('loadSession', rse.cid)">
+      <p class="project" v-for="(rse, key) in sessionHistory" :key="key" @click="$router.push('session/'+rse.cid)">
         {{ rse.title }} <br />
         <span class='small'>{{ rse.cid }}</span> <br/>
         <i class='date'>{{ Date(rse.timestamp).toLocaleString() }}</i>
@@ -18,11 +18,8 @@
     <p v-else>
       connecting to ipfs: {{ ipfsState }}
     </p>
-    <div class="cornerbutton info"
-      @click="this.$emit('gotoInfo')"></div>
-    <div class="cornerbutton settings"
-      @click="this.$emit('goto-settings')">
-    </div>
+    <router-link tag="div" to="/info" class="cornerbutton info"></router-link>
+    <router-link tag="div" to="/settings" class="cornerbutton settings"></router-link>
   </div>
 </template>
 

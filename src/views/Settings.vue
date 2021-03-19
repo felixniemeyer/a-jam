@@ -13,7 +13,7 @@
       @dragEnd="resetInitialOffset"
       @update="v => $emit('update-default-recording-offset', v)" />
     <div>
-      <div class="inline-button" @click="$emit('go-home')">done</div>
+      <div class="inline-button" @click="$router.go(-1)">done</div>
     </div>
   </div>
 </template>

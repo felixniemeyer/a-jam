@@ -82,7 +82,7 @@
     />
   <div v-else
     class="session">
-    <div class="cornerbutton back" @click="leaveSession()"></div>
+    <div class="cornerbutton back" @click="$router.go(-1)"></div>
     <div class="title" @click="renameSession()">
       <div class="text">
         {{ title }}
