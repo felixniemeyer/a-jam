@@ -1,32 +1,4 @@
 <template>
-  <div v-if="askForAC"
-    class="dialogue">
-    <h1>start audio context</h1>
-    <p>ajam needs an AudioContext for handling audio data and for sound playback. </p>
-    <div class="button"
-      @click="acceptAudioContext">
-      click here to enable AudioContext
-    </div>
-  </div>
-  <div v-else-if="showLeavePromt"
-    class="dialogue">
-    <h1>save your changes</h1>
-    <p>you have made changes to the session.</p>
-    <p>if you leave they will be lost. </p>
-    <p>publish the session to persist changes </p>
-    <div class="inline-button"
-      @click="confirmLeave">
-      still leave
-    </div>
-    <div class="inline-button"
-      @click="showLeavePromt = false">
-      stay
-    </div>
-    <div class="inline-button"
-      @click="showLeavePromt = false; publish()">
-      publish session
-    </div>
-  </div>
   <div v-else-if="loading"
     class="loading">
     <h1> loading... </h1>
@@ -133,11 +105,10 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
-import { Prop } from 'vue-property-decorator'
+import { defineComponent } from '@vue/composition-api'
 
 import TrackC from '@/components/Track.vue'
-import TrackSettings from '@/components/TrackSettings.vue'
+import TrackSettings from '@/views/TrackSettings.vue'
 import Log, { LogEntry } from '@/components/Log.vue'
 import Copyable from '@/components/Copyable.vue'
 
@@ -148,71 +119,93 @@ import Track from '@/datamodel/Track'
 import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
 import { reactive } from 'vue'
 
-@Options({
+export default defineComponent({
   components: {
     TrackC,
     TrackSettings,
     Log,
     Copyable
   },
-  emits: ['goHome']
-})
-export default class Session extends Vue {
-  @Prop() sessionToLoad: string | undefined
-  @Prop() defaultRecordingOffset = 0.060
+  data() {
+    return {
+      // move to vuex
+      dirty = false // let's see how to implement this concept in vuex
+      title = 'new session'
 
-  dirty = false
-  showLeavePromt = false
-  publishing = 'no'
-  publishingError: null | string = null
-  publishingLog: LogEntry[] = []
-  loading = false
-  loadingLog: LogEntry[] = []
-  loadingError: string | null = null
-  renaming = false
-  editTrackIndex: number | null = null
-  title = 'new session'
-  playing = false
-  playtime = 0
-  recording = false
-  tracks: Track[] = []
-  nextLocalTrackId = 0
-  maxTrackDuration = 10
-  recordingChunks: Blob[] = []
-  recordingStopTime = 0
-  playbackStartTime = 0
-  base: string | undefined
-  baseDate: number | undefined
-  mediaRecorder: MediaRecorder | undefined
-  stopTimeout: NodeJS.Timeout | undefined
-  playtimeInterval: NodeJS.Timeout | undefined
-  ac: AudioContext = ac
-  acceptAudioContext: CallableFunction = () => {} // eslint-disable-line
-  askForAC = false
-  tracksCssSize = '100%'
-  playbackDelay = 0.005
+        // playback and recording
+      playing = false
+      playtime = 0
+      recording = false
+      tracks: Track[] = []
+      nextLocalTrackId = 0
+      maxTrackDuration = 10
+      recordingChunks: Blob[] = []
+      recordingStopTime = 0
+      playbackStartTime = 0
 
+      base: string | undefined
+      baseDate: number | undefined
+      mediaRecorder: MediaRecorder | undefined
+      stopTimeout: NodeJS.Timeout | undefined
+      playtimeInterval: NodeJS.Timeout | undefined
+
+      // turn into router views
+      showLeavePromt = false
+      publishing = 'no'
+      publishingError: null | string = null
+      publishingLog: LogEntry[] = []
+      loading = false
+      loadingLog: LogEntry[] = []
+      loadingError: string | null = null
+      renaming = false
+      editTrackIndex: number | null = null
+
+
+
+      // ?
+      ac: AudioContext = ac
+      acceptAudioContext: CallableFunction = () => {} // eslint-disable-line
+      askForAC = false
+
+      tracksCssSize = '100%' // this can be resolved through html/css
+      playbackDelay = 0.005
+
+    }
+  }
   beforeCreate () {
     if (this.sessionToLoad !== undefined) {
       this.loading = true
     }
-  }
-
-  mounted () {
-    this.checkAudioContext().then(
-      () => {
-        if (this.sessionToLoad !== undefined) {
-          this.loadSession(this.sessionToLoad)
+  },
+  beforeRouteUpdate() {
+    console.log("before route update")
+    if(this.$route.params.cid !== undefined) {
+      this.checkAudioContext().then(
+        () => {
+          this.loadSession(this.$route.params.cid as string)
+        },
+        () => {
+          this.loadingError = 'Audio Context wasn\'t allowed to start but is required even for session loading.'
         }
-        this.initUserMedia()
-      },
-      () => {
-        this.loadingError = 'Audio Context wasn\'t allowed to start.'
-      }
-    )
+      )
+    }
+  },
+  mounted () {
+    this.initUserMedia()
     document.addEventListener('keydown', this.handleKeydown)
     this.updateTracksCssSize()
   }
+  methods: {
+
+  }
+})
+
+@Options({
+})
+export class Session extends Vue {
+  @Prop() sessionToLoad: string | undefined
+  @Prop() defaultRecordingOffset = 0.060
+
 
   initUserMedia () {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {

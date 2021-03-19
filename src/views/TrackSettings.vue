@@ -47,32 +47,28 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
-import { Prop } from 'vue-property-decorator'
-import Track from '@/datamodel/Track'
+import { defineComponent } from 'vue'
 
+import Track from '@/datamodel/Track'
 import Slider from '@/components/Slider.vue'
 import Copyable from '@/components/Copyable.vue'
+import { useStore } from '@/store'
 
-@Options({
+export default defineComponent({
   components: {
     Slider,
     Copyable
   },
-  emits: [
-    'back',
-    'change-name',
-    'update-volume',
-    'update-panning',
-    'update-offset',
-    'remove'
-  ]
-})
-export default class TrackSettings extends Vue {
-  @Prop(Track) track!: Track
-  initialOffset: number = this.track.offset
-  confirmRemove = false
 
+  data() {
+    const store = useStore()
+    const trackId = parseInt(this.$route.params.track_id as string)
+    return {
+      trackId,
+      initialOffset: store.state.tracks[trackId],
+      confirmRemove: false
+    }
+  },
   mounted () {
     (this.$refs.name as HTMLInputElement).select()
   }

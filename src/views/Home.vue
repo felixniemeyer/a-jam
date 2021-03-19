@@ -24,23 +24,14 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
+import { defineComponent } from 'vue'
 
 import { ipfsWrapper } from '@/ipfs-wrapper'
 
 import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
 
-@Options({
-  components: {},
-  emits: ['newProject', 'gotoInfo', 'loadSession', 'goto-settings']
+export default defineComponent({
 })
-export default class Home extends Vue {
-  ipfsState = ipfsWrapper.state
-  sessionHistory: RecentSessionEntry[] = []
-  mounted () {
-    this.sessionHistory = RecentSessionEntry.getHistory()
-  }
-}
 </script>
 
 <style lang="scss">

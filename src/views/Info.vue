@@ -18,17 +18,14 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
+import { defineComponent } from 'vue'
 import Copyable from '@/components/Copyable.vue'
 
-@Options({
+export default defineComponent({
   components: {
     Copyable
   },
-  emits: ['goHome']
 })
-export default class Info extends Vue {
-}
 </script>
 
 <style lang="scss">

@@ -19,8 +19,8 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
-import { Prop } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
+
 import Copyable from '@/components/Copyable.vue'
 import Slider from '@/components/Slider.vue'
 
