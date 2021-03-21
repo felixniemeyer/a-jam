@@ -1,9 +1,13 @@
 export interface Session {
   title: string
-  date: number
+  publication: Publication | undefined
+  previousCid: string | undefined
   trackIds: number[]
+}
 
-  clone(Session: Session) : Session
+export interface Publication {
+  cid: string
+  date: number
 }
 
 export interface Track {
@@ -12,8 +16,12 @@ export interface Track {
   panning: number // -1 left, 1 right
   offset: number
   effectiveDuration: number
-  recordingId: number
+  recordingId: RecordingId
 }
+
+export type cid = string
+export type localId = number
+export type RecordingId = cid | localId
 
 export interface Recording {
   cid: string | undefined
@@ -27,9 +35,7 @@ export interface Playback {
   gain: GainNode
 }
 
-export interface RecentSessionEntry {
-  createdByMe: boolean,
-  cid: string,
-  title: string,
-  timestamp: number
+export interface LogEntry {
+  type: 'msg' | 'copyable'
+  s: string
 }

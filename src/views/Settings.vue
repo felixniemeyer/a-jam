@@ -1,6 +1,10 @@
 <template>
   <div class="settings">
     <h1>settings</h1>
+    <div>
+      <div class="inline-button" @click="exportSettings">exportSettings</div>
+      <div class="inline-button" @click="importSettings">importSettings</div>
+    </div>
     <Slider
       name="default recording offset in ms"
       left="more delayed"
@@ -10,8 +14,8 @@
       :from="initialOffset-0.100"
       :to="initialOffset+0.100"
       :value="defaultRecordingOffset"
-      @dragEnd="resetInitialOffset"
-      @update="v => $emit('update-default-recording-offset', v)" />
+      @dragEnd="resetInitialRecordingOffset"
+      @update="updateDefaultRecordingOffset" />
     <div>
       <div class="inline-button" @click="$router.go(-1)">done</div>
     </div>
@@ -23,22 +27,29 @@ import { defineComponent } from 'vue'
 
 import Copyable from '@/components/Copyable.vue'
 import Slider from '@/components/Slider.vue'
+import { useStore } from '@/store'
 
-@Options({
+const store = useStore()
+
+export default defineComponent({
   components: {
     Copyable,
     Slider
   },
-  emits: ['go-home', 'update-default-recording-offset']
-})
-export default class Info extends Vue {
-  @Prop() defaultRecordingOffset!: number
-  initialOffset: number = this.defaultRecordingOffset
-
-  resetInitialOffset () {
-    this.initialOffset = this.defaultRecordingOffset
+  data() {
+    return {
+      persistDefaultRecordingOffsetTimeout: undefined as NodeJS.Timeout | undefined,
+      initialRecordingOffset: store.state.settings.defaultRecordingOffset
+    }
+  },
+  resetInitialRecordingOffset() {
+    this.initialRecordingOffset = store.state.settings.defaultRecordingOffset
+  },
+  updateDefaultRecordingOffset (v: number) {
+    store.dispatch('setDefaultRecordingOffset', v)
   }
-}
+})
+
 </script>
 
 <style lang="scss">

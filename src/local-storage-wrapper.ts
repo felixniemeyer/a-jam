@@ -1,8 +1,7 @@
 const HIST_LENGTH = 100
 
-export default class RecentSessionEntry {
+export class RecentSessionEntry {
   constructor (
-    public createdByMe: boolean,
     public cid: string,
     public title: string,
     public timestamp = Date.now()
@@ -13,11 +12,25 @@ export default class RecentSessionEntry {
   static fromString (jsonString: string) {
     const o = JSON.parse(jsonString)
     return new RecentSessionEntry(
-      o.m, o.c, o.t, o.d
+      o.c, o.t, o.d
     )
   }
 
-  static getHistory () {
+  toString () {
+    return JSON.stringify({
+      c: this.cid,
+      t: this.title,
+      d: this.timestamp
+    })
+  }
+}
+
+
+export const storageWrapper = {
+  setDefaultRecordingOffset(v: number) {
+    localStorage.setItem('defaultRecordingOffset', v.toString())
+  },
+  getRecentSessions() {
     const result = []
     /**
      * we traverse from the next_id-1 to the smallest possible id
@@ -56,9 +69,8 @@ export default class RecentSessionEntry {
       localStorage.setItem('smallest_history_id', newSmallestId.toString())
     }
     return result
-  }
-
-  static append (rse: RecentSessionEntry) {
+  },
+  addRecentSession (rse: RecentSessionEntry) {
     let i
     if ('next_history_id' in localStorage) {
       i = Number(localStorage.getItem('next_history_id'))
@@ -67,14 +79,22 @@ export default class RecentSessionEntry {
     }
     localStorage.setItem('recent_session_' + i, rse.toString())
     localStorage.setItem('next_history_id', (i + 1).toString())
-  }
+  },
+  getSettings() : Settings {
+    const settings = {
+      defaultRecordingOffset: 65,
+    }
 
-  toString () {
-    return JSON.stringify({
-      m: this.createdByMe,
-      c: this.cid,
-      t: this.title,
-      d: this.timestamp
-    })
+    if ('defaultRecordingOffset' in localStorage) {
+      settings.defaultRecordingOffset = Number(localStorage.getItem('defaultRecordingOffset'))
+    }
+
+    return settings
   }
 }
+
+export interface Settings {
+  defaultRecordingOffset: number,
+  // pinningServices: PinningService[],
+}
+

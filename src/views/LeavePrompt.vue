@@ -2,12 +2,12 @@
   <div v-if="showLeavePromt"
     class="dialogue">
     <h1>save your changes</h1>
-    <p>you have made changes to the session.</p>
-    <p>if you leave they will be lost. </p>
+    <p>you have made changes to this session.</p>
+    <p>if you close the editor they will be lost. </p>
     <p>publish the session to persist changes </p>
     <div class="inline-button"
       @click="confirmLeave">
-      still leave
+      still close
     </div>
     <div class="inline-button"
       @click="showLeavePromt = false">

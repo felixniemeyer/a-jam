@@ -19,7 +19,7 @@ export class TrackConfig {
 export class SessionConfig {
   constructor (
     public title: string,
-    public origin: string | undefined,
+    public origin: string | undefined, // cid of the session this one builds upon
     public localTime: number,
     public tracks: TrackConfig[]
   ) {}
@@ -115,7 +115,7 @@ class IPFSWrapper {
     })
   }
 
-  loadTrackAudio (cid: string) {
+  loadAudio (cid: string) {
     return new Promise<AudioBuffer>((resolve, reject) => {
       if (this.node !== undefined) {
         (async node => {
@@ -146,3 +146,5 @@ class IPFSWrapper {
 }
 
 export const ipfsWrapper = new IPFSWrapper()
+
+ipfsWrapper.initialize()

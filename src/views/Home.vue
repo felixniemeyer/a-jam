@@ -3,21 +3,15 @@
     <h1>a-jam</h1>
     <i>asynchronous jamming</i><br/>
     <img class="logo" alt="ajam logo" src="../assets/logo.png" />
-    <div v-if="ipfsState === 'initialized'">
-      <div class="project new" @click="$router.push('session')">new project</div>
+    <div>
+      <div class="project new" @click="createSession">new project</div>
       <h4 v-if="sessionHistory.length > 0">recent projects</h4>
-      <p class="project" v-for="(rse, key) in sessionHistory" :key="key" @click="$router.push('session/'+rse.cid)">
+      <p class="project" v-for="rse in sessionHistory" :key="rse.cid" @click="loadSession(rse.cid)">
         {{ rse.title }} <br />
         <span class='small'>{{ rse.cid }}</span> <br/>
         <i class='date'>{{ Date(rse.timestamp).toLocaleString() }}</i>
       </p>
     </div>
-    <p v-else-if="ipfsState === 'failed'" class='error'>
-      failed to connect to ipfs
-    </p>
-    <p v-else>
-      connecting to ipfs: {{ ipfsState }}
-    </p>
     <router-link tag="div" to="/info" class="cornerbutton info"></router-link>
     <router-link tag="div" to="/settings" class="cornerbutton settings"></router-link>
   </div>
@@ -26,11 +20,26 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import { ipfsWrapper } from '@/ipfs-wrapper'
+import { useStore } from '@/store'
 
-import RecentSessionEntry from '@/datamodel/RecentSessionEntry'
+const store = useStore()
 
 export default defineComponent({
+  methods: {
+    loadSession(cid: string) {
+      this.$router.push('loadSession')
+      store.dispatch('loadSession', cid).then(
+        localId => this.$router.replace(`session/${localId}`)
+      )
+    },
+    createSession() {
+      store.dispatch('createSession').then(
+        localId => {
+          this.$router.push(`session/${localId}`)
+        }
+      )
+    }
+  }
 })
 </script>
 

@@ -49,7 +49,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import Track from '@/datamodel/Track'
+import { Track } from '@/model/types'
 import Slider from '@/components/Slider.vue'
 import Copyable from '@/components/Copyable.vue'
 import { useStore } from '@/store'

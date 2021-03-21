@@ -37,6 +37,7 @@
 		- Configure pinning service in settings
 		- Promt for pinning service on publish
 	- IPFS
+		- try to connect to a local node before spawning a in process node https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#getting-started
 		- pin a foreign project on local ipfs node on load
 			- enable automatic in settings (default: auto) 
 			- manually in session settings

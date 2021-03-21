@@ -4,7 +4,7 @@
     <h1>start audio context</h1>
     <p>ajam needs an AudioContext for handling audio data and for sound playback. </p>
     <div class="button"
-      @click="acceptAudioContext">
+      @click="$route.go(-1)">
       click here to enable AudioContext
     </div>
   </div>
@@ -14,9 +14,6 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  setup() {
-
-  },
 })
 </script>
 

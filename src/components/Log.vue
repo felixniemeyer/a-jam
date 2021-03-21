@@ -18,16 +18,6 @@ import { Prop } from 'vue-property-decorator'
 
 import Copyable from '@/components/Copyable.vue'
 
-class LogEntry {
-  constructor (
-    public type: 'msg' | 'copyable',
-    public s: string
-  ) {
-    setTimeout(() => {
-      window.scrollTo(0, document.body.scrollHeight)
-    }, 100)
-  }
-}
 
 @Options({
   components: {
