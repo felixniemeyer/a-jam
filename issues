@@ -68,6 +68,7 @@
 		- => this will make sure the track offset equals the default track offset (instead now: track offset = default + 5)
 	- bugfixes: stop track on removal
 	- redraw on vue cycle (prevent lags)
+	- Choose recording device in the settings and/or on first recording: mediaDevices.enumerateDevices
 
 - Hotfixes 
 	- implement a "save-input" button, that 

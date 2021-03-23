@@ -6,6 +6,7 @@ import { State, state } from '@/state'
 import { IPFSWrapper } from '@/ipfs-wrapper'
 import { Recorder } from '@/recorder'
 import { Player } from '@/player'
+import { storageWrapper } from '@/local-storage-wrapper'
   
 const ac = new AudioContext()
 const ipfsWrapper = new IPFSWrapper(ac)
@@ -16,6 +17,7 @@ createApp(App)
     Object.assign(config.globalProperties, {
       state: reactive(state), 
       ipfsWrapper, 
+      storageWrapper, 
       ac, 
       recorder: new Recorder(), 
       player: new Player()
