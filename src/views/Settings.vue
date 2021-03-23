@@ -46,7 +46,13 @@ export default defineComponent({
     this.initialRecordingOffset = store.state.settings.defaultRecordingOffset
   },
   updateDefaultRecordingOffset (v: number) {
-    store.dispatch('setDefaultRecordingOffset', v)
+    this.state.settings.defaultRecordingOffset = v
+    if (this.persistDefaultRecordingOffsetTimeout !== undefined) {
+      clearTimeout(this.persistDefaultRecordingOffsetTimeout)
+    }
+    this.persistDefaultRecordingOffsetTimeout = setTimeout(() => {
+      localStorage.setDefaultRecordingOffset(v)
+    }, 500)
   }
 })
 

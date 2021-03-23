@@ -2,8 +2,6 @@ import { Ref, ref } from 'vue'
 import ipfs from 'ipfs'
 import { BaseName } from 'multibase'
 
-import ac from '@/audio-context'
-
 const NO_CONNECTION_ERROR = Error('ipfs not connected')
 
 export class TrackConfig {
@@ -29,12 +27,15 @@ export class SessionConfig {
   }
 }
 
-class IPFSWrapper {
+export class IPFSWrapper {
   state: Ref<string> = ref('uninitialized')
   node: ipfs.IPFS | undefined = undefined
   baseName: BaseName = 'base32'
   gatewayURL = 'gateway.ipfs.io'
   appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
+
+  constructor(public ac: AudioContext) {}
+
   initialize () {
     return new Promise((resolve, reject) => {
       if (this.node === undefined && this.state.value !== 'initializing') {
@@ -115,7 +116,7 @@ class IPFSWrapper {
     })
   }
 
-  loadAudio (cid: string) {
+  loadRecording (cid: string) {
     return new Promise<AudioBuffer>((resolve, reject) => {
       if (this.node !== undefined) {
         (async node => {
@@ -129,7 +130,7 @@ class IPFSWrapper {
           fileReader.onloadend = () => {
             const arrayBuffer = fileReader.result
             if (arrayBuffer instanceof ArrayBuffer) {
-              ac.decodeAudioData(arrayBuffer).then(
+              this.ac.decodeAudioData(arrayBuffer).then(
                 audioBuffer => { resolve(audioBuffer) }
               )
             } else {
@@ -145,6 +146,3 @@ class IPFSWrapper {
   }
 }
 
-export const ipfsWrapper = new IPFSWrapper()
-
-ipfsWrapper.initialize()

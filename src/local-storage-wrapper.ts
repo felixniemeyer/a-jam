@@ -30,8 +30,8 @@ export const storageWrapper = {
   setDefaultRecordingOffset(v: number) {
     localStorage.setItem('defaultRecordingOffset', v.toString())
   },
-  getRecentSessions() {
-    const result = []
+  getRecentSessions() : RecentSessionEntry[] {
+    const result = [] as RecentSessionEntry[]
     /**
      * we traverse from the next_id-1 to the smallest possible id
      * we skip entries that have a cid, that was already encountered
@@ -84,17 +84,11 @@ export const storageWrapper = {
     const settings = {
       defaultRecordingOffset: 65,
     }
-
     if ('defaultRecordingOffset' in localStorage) {
       settings.defaultRecordingOffset = Number(localStorage.getItem('defaultRecordingOffset'))
     }
-
     return settings
   }
 }
 
-export interface Settings {
-  defaultRecordingOffset: number,
-  // pinningServices: PinningService[],
-}
 

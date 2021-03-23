@@ -4,7 +4,7 @@
     <i>asynchronous jamming</i><br/>
     <img class="logo" alt="ajam logo" src="../assets/logo.png" />
     <div>
-      <div class="project new" @click="createSession">new project</div>
+      <div class="project new" @click="createNewSession">new project</div>
       <h4 v-if="sessionHistory.length > 0">recent projects</h4>
       <p class="project" v-for="rse in sessionHistory" :key="rse.cid" @click="loadSession(rse.cid)">
         {{ rse.title }} <br />
@@ -22,23 +22,11 @@ import { defineComponent } from 'vue'
 
 import { useStore } from '@/store'
 
-const store = useStore()
-
 export default defineComponent({
+  inject: ['state'], 
+  mounted() {
+  }
   methods: {
-    loadSession(cid: string) {
-      this.$router.push('loadSession')
-      store.dispatch('loadSession', cid).then(
-        localId => this.$router.replace(`session/${localId}`)
-      )
-    },
-    createSession() {
-      store.dispatch('createSession').then(
-        localId => {
-          this.$router.push(`session/${localId}`)
-        }
-      )
-    }
   }
 })
 </script>

@@ -57,11 +57,10 @@ import { defineComponent } from 'vue'
 import { useStore } from '@/store'
 
 import TrackC from '@/components/Track.vue'
-import TrackSettings from '@/views/TrackSettings.vue'
+import TrackSettings from '@/views/Session/TrackSettings.vue'
 import Log, { LogEntry } from '@/components/Log.vue'
 import Copyable from '@/components/Copyable.vue'
-
-const store = useStore()
+import { Track } from '@/types'
 
 export default defineComponent({
   components: {
@@ -74,18 +73,15 @@ export default defineComponent({
     const store = useStore()
     const localSessionId = parseInt(this.$route.params.localSessionId as string)
     return {
+      playing: false, 
       localSessionId,
       session: store.state.sessions.local[localSessionId],
-      // move to vuex
-      dirty: false, // let's see how to implement this concept in vuex
-        // playback and recording
       playtime: 0,
     }
-
   },
   computed: {
     title() {
-      return session.title
+      return this.session.title
     },
     maxTrackDuration() {
       let maxDuration = 10
@@ -97,37 +93,278 @@ export default defineComponent({
       return maxDuration
     }
   },
-  openSettings() {
-    this.$router.push(`/session/${this.localSessionId}/settings`)
-  },
-  publish() {
-
-  },
-  beforeCreate () {
-  },
-  beforeRouteUpdate() {
-    console.log("before route update")
-    if(this.$route.params.cid !== undefined) {
-      this.checkAudioContext().then(
-        () => {
-          this.loadSession(this.$route.params.cid as string)
-        },
-        () => {
-          this.loadingError = 'Audio Context wasn\'t allowed to start but is required even for session loading.'
-        }
-      )
-    }
-  },
   mounted () {
-    this.initUserMedia()
     document.addEventListener('keydown', this.handleKeydown)
-    this.updateTracksCssSize()
   },
   beforeUnmount () {
-    this.stopAllSources()
+    this.stopAllPlaybacks()
+    this.stopRecording()
     document.removeEventListener('keydown', this.handleKeydown)
   },
   methods: {
+    openSettings() {
+      this.$router.push(`/session/${this.localSessionId}/settings`)
+    },
+    formatTime (seconds: number) {
+      const s = (seconds % 60).toFixed(1)
+      const m = Math.floor(seconds / 60)
+      return `${m.toString().padStart(2, '0')}:${s.padStart(4, '0')}`
+    }, 
+    handleKeydown ($event: KeyboardEvent) {
+      if ($event.key === ' ') {
+        this.togglePlay()
+      }
+      if ($event.key === 'r') {
+        this.toggleRecord()
+      }
+      if ($event.key === 'Escape') {
+        this.leaveSession()
+      }
+    }, 
+    togglePlay () {
+      if (this.playing) {
+        this.stopAllPlaybacks()
+      } else {
+        if (!this.recorder.state.recording) {
+          this.playAllTracks()
+          this.stopTimeout = setTimeout(
+            this.stopAllPlaybacks.bind(this),
+            this.maxTrackDuration * 1000 + this.state.settings.playbackDelay
+          )
+          this.playing = true
+        }
+      }
+    }, 
+    playAllTracks () {
+      this.stopAllPlaybacks()
+      this.tracks.forEach(track => {
+        track.source = this.ac.createBufferSource()
+        track.source.buffer = track.audioBuffer
+        track.panner = this.ac.createStereoPanner()
+        track.panner.pan.value = track.panning
+        track.gain = this.ac.createGain()
+        track.gain.gain.value = track.volume
+        track.source
+          .connect(track.gain)
+          .connect(track.panner)
+          .connect(this.ac.destination)
+      })
+      this.playbackStartTime = this.ac.currentTime + this.playbackDelay
+      this.tracks.forEach(track => {
+        if (track.source !== undefined) {
+          if (track.offset > 0) {
+            track.source.start(this.playbackStartTime, track.offset)
+          } else {
+            track.source.start(this.playbackStartTime - track.offset)
+          }
+        }
+      })
+      this.playtime = 0
+      this.playtimeInterval = setInterval(this.updatePlaytime.bind(this), 1000 / 24)
+    }, 
+    updatePlaytime () {
+      this.playtime = this.ac.currentTime - this.playbackStartTime
+      if (this.recording && this.playtime > this.maxTrackDuration) {
+        this.maxTrackDuration = this.playtime
+      }
+    }, 
+    stopAllPlaybacks () {
+      if (this.playtimeInterval !== undefined) {
+        clearInterval(this.playtimeInterval)
+        this.playtimeInterval = undefined
+      }
+      if (this.stopTimeout !== undefined) {
+        clearTimeout(this.stopTimeout)
+        this.stopTimeout = undefined
+      }
+      this.tracks.forEach(track => {
+        if (track.source !== undefined) {
+          track.source.stop()
+        }
+      })
+      this.playing = false
+      this.playtime = 0
+    }, 
+    toggleRecord () {
+      if (this.recorder.state.recording.value === true) {
+        this.recorder.stop()
+        this.stopAllPlaybacks()
+      } else {
+        if (!this.recorder.initialized) {
+          await this.recorder.init()
+        }
+        this.prepareRecording()
+        this.stopAllPlaybacks()
+      } 
+      if (this.recorder.state.recording.value === true) {
+      } else {
+        this.playAllTracks()
+        this.mediaRecorder.start()
+        this.recorder.record(this.createTrackFromRecording)
+        this.recording = true
+        this.dirty = true
+      }
+      } else {
+        console.error('mediaRecorder undefined -> recording not possible')
+      }
+    }, 
+    createTrackFromRecording(audioBlob: Blob) {
+      const fileReader = new FileReader()
+      fileReader.onloadend = () => {
+        const arrayBuffer = fileReader.result
+        if (arrayBuffer instanceof ArrayBuffer) {
+          this.ac.decodeAudioData(arrayBuffer).then(
+            (audioBuffer) => {
+              this.session.tracks.push(new Track(this.state.settings.defaultRecordingOffset, {
+                audioBlob, 
+                audioBuffer
+              }))
+            },
+            (err) => {
+              console.error('failed to decode audio data:', err)
+            }
+          )
+        } else {
+          console.error('arrayBuffer is not an ArrayBuffer')
+        }
+      }
+      fileReader.readAsArrayBuffer(audio)
+    },
+    pLog (msg: string) {
+      this.publishingLog.push(
+        new LogEntry(
+          'msg',
+          msg
+        )
+      )
+    }, 
+    pLogCopyable (cid: string) {
+      this.publishingLog.push(
+        new LogEntry(
+          'copyable',
+          cid
+        )
+      )
+    }, 
+    publish () {
+      if (ipfsWrapper.state.value === 'initialized') {
+        this.publishing = 'ongoing'
+        this.publishingError = null
+        this.publishingLog = []
+        const scrollDown = () => {
+          setTimeout(() => {
+            window.scrollTo(0, document.body.scrollHeight)
+          }, 100)
+        }
+        this.publishTracks().then(
+          () => {
+            const getIpfsNodeIdPromise = ipfsWrapper.getIpfsNodeId()
+            const publishTracksPromise = this.publishSession()
+            Promise.all([getIpfsNodeIdPromise, publishTracksPromise]).then(
+              values => {
+                const ipfsNodeId = values[0]
+                const cid = values[1]
+                this.base = cid
+                RecentSessionEntry.append(new RecentSessionEntry(true, cid, this.title))
+                this.logLinks(cid, ipfsNodeId)
+                this.publishing = 'done'
+                this.dirty = false
+                scrollDown()
+              },
+              err => {
+                this.publishingError = String(err)
+                this.publishing = 'done'
+                scrollDown()
+                return err
+              }
+            )
+          },
+          err => err
+        )
+      }
+    }, 
+    logLinks (cid: string, ipfsNodeId: string) {
+      const params = [
+        `loadSession=${cid}`,
+        `loadSessionOrigin=${ipfsNodeId}`
+      ]
+      const paramString = params.join('&')
+      this.pLog('jam session is now public on ipfs at:')
+      this.pLogCopyable(cid)
+      this.pLog('link for browsers that support ipfs: ')
+      this.pLogCopyable(`ipns://${ipfsWrapper.appIPNSIdentifier}/?${paramString}`)
+      this.pLog('link for all browsers: ')
+      this.pLogCopyable(`https://${ipfsWrapper.gatewayURL}/ipns/${ipfsWrapper.appIPNSIdentifier}/?${paramString}`)
+      this.pLog('(click any link to copy)')
+    }, 
+    publishTracks () {
+      return new Promise((resolve, reject) => {
+        const promises: Promise<void>[] = []
+        this.tracks.forEach(track => {
+          if (track.cid === undefined) {
+            this.pLog(`publishing track ${track.localId}...`)
+            promises.push(this.publishTrack(track))
+          }
+        })
+        if (promises.length === 0) {
+          this.pLog('no tracks to publish.')
+        }
+        Promise.all(promises).then(
+          resolve,
+          reject
+        )
+      })
+    }, 
+    publishTrack (track: Track) {
+      return new Promise<void>((resolve, reject) => {
+        if (track.audioBlob !== undefined) {
+          ipfsWrapper.saveTrackAudio(track.audioBlob).then(
+            cid => {
+              this.pLog(`track ${track.localId} is now public on ipfs at:`)
+              this.pLogCopyable(cid)
+              track.cid = cid
+              delete track.localId
+              resolve()
+            },
+            reject
+          )
+        } else {
+          reject(Error("couldn't save track audio: audioBlob undefined"))
+        }
+      })
+    }, 
+    publishSession () {
+      const sc = new SessionConfig(
+        this.title,
+        this.base,
+        Date.now(),
+        []
+      )
+      this.tracks.forEach(track => {
+        if (track.cid !== undefined) {
+          sc.addTrack(new TrackConfig(
+            track.cid,
+            track.name,
+            track.volume,
+            track.panning,
+            track.offset
+          ))
+        }
+      })
+      this.pLog('publishing session...')
+      return ipfsWrapper.saveSessionConfig(sc)
+    }, 
+    renameSession () {
+      this.renaming = true
+      this.$nextTick(() => {
+        (this.$refs.newSessionTitle as HTMLInputElement).select()
+      })
+    }, 
+    updateName () {
+      this.title = (this.$refs.newSessionTitle as HTMLInputElement).value
+      this.renaming = false
+      this.dirty = true
+    }, 
   }
 })
 
