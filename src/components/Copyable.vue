@@ -41,12 +41,13 @@ export default class Copyable extends Vue {
     padding: 0.5em;
     border-radius: 0.3em;
     box-sizing: border-box;
+    height: 2em;
     width: 100%;
   }
   .copy-hint{
     position: absolute;
     right: 1em;
-    top: 0.5em;
+    bottom: 0.5em;
     padding: 0.6em 0.8em;
     border-radius: 1em;
     background-color: #1e5daf;
