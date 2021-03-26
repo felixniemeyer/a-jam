@@ -49,7 +49,7 @@
         {{ publishingError }}
       </p>
       <a href="https://unstoppabledomains.com/r/ac3b8968ad7245e" target="_blank" class="ud-affiliate">
-        Want a blockchain domain so that users can easily find your music on the decentralized web? <b>Click here.</b>
+        Want a blockchain domain so that users can easily find your music on the decentralized web? <b class="clickhere">Click here.</b>
       </a>
       <div class="button" @click="confirmPublishResults()">
         return to session
@@ -744,6 +744,9 @@ export default class Session extends Vue {
   .inline-button{
     @include clickable-surface;
     display: inline-block;
+  }
+  .clickhere{
+    white-space: nowrap
   }
   .ud-affiliate {
     display: block;
