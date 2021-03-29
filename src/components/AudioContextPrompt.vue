@@ -1,7 +1,7 @@
 <template>
   <div v-if="askForAC"
     class="dialogue">
-    <h1>start audio context</h1>
+    <h2>start audio context</h2>
     <p>ajam needs an AudioContext for handling audio data and for sound playback. </p>
     <div class="button"
       @click="$emit('clicked')">

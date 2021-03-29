@@ -1,5 +1,6 @@
+import { reactive } from 'vue'
 import { RecentSessionEntry, Settings } from './local-storage-wrapper'
-import { LocalSession, Process, PublicSession, Recording } from './types'
+import { LocalSession, PublicSession, Recording } from './types'
 
 export interface State {
   sessions: {
@@ -7,25 +8,21 @@ export interface State {
     public: {[cid: string]: PublicSession},
     local: {[localId: number]: LocalSession},
     nextLocalSessionId: number
-    loadingProcesses: {[cid: string]: Process}
-    publishingProcesses: {[localId: number]: Process}
   }
   recordings: {[cid: string]: Recording}
   settings: Settings
 }
 
-export const state = {
+export const state = reactive({
   sessions: {
     recent: [],
-    public: {}, 
-    local: {}, 
-    nextLocalSessionId: 0, 
-    loadingProcesses: {}, 
-    publishingProcesses: {}
-  }, 
-  recordings: {}, 
+    public: {},
+    local: {},
+    nextLocalSessionId: 0,
+  },
+  recordings: {},
   settings: {
-    defaultRecordingOffset: 0, 
+    defaultRecordingOffset: 0,
     playbackDelay: 50
-  }, 
-} as State
+  },
+} as State)

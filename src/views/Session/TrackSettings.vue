@@ -49,10 +49,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import { Track } from '@/model/types'
 import Slider from '@/components/Slider.vue'
 import Copyable from '@/components/Copyable.vue'
-import { useStore } from '@/store'
 
 export default defineComponent({
   components: {
@@ -61,36 +59,36 @@ export default defineComponent({
   },
 
   data() {
-    const store = useStore()
-    const trackId = parseInt(this.$route.params.track_id as string)
+    const sessionId = parseInt(this.$route.params.sessionId as string)
+    const trackId = parseInt(this.$route.params.trackId as string)
     return {
       trackId,
-      initialOffset: store.state.tracks[trackId],
+      initialOffset: this.state.sessions[trackId],
       confirmRemove: false
     }
   },
   mounted () {
     (this.$refs.name as HTMLInputElement).select()
-  }, 
+  },
   methods: {
     submitOnEnter ($event: KeyboardEvent) {
       if ($event.key === 'Enter') {
         this.changeName()
       }
-    }, 
+    },
     remove () {
       if (this.confirmRemove) {
         this.$emit('remove')
       } else {
         this.confirmRemove = true
       }
-    }, 
+    },
     resetInitialOffset () {
       this.initialOffset = this.track.offset
-    }, 
+    },
     changeName () {
       this.$emit('change-name', (this.$refs.name as HTMLInputElement).value)
-    }, 
+    },
     editTrack (index: number) {
       this.editTrackIndex = index
     },
@@ -107,7 +105,7 @@ export default defineComponent({
           this.dirty = true
         }
       }
-    }, 
+    },
     removeTrack () {
       if (this.editTrackIndex !== null) {
         const trackToBeDeleted = this.tracks[this.editTrackIndex]
@@ -115,7 +113,7 @@ export default defineComponent({
         this.tracks = this.tracks.filter(track => track !== trackToBeDeleted)
         this.maxTrackDuration = this.checkForHigherTrackDuration()
       }
-    }, 
+    },
     updateTrackVolume (v: number) {
       if (this.editTrackIndex !== null) {
         const track = this.tracks[this.editTrackIndex]
@@ -124,7 +122,7 @@ export default defineComponent({
           track.gain.gain.value = v
         }
       }
-    }, 
+    },
     updateTrackPanning (v: number) {
       if (this.editTrackIndex !== null) {
         const track = this.tracks[this.editTrackIndex]
@@ -133,7 +131,7 @@ export default defineComponent({
           track.panner.pan.value = v
         }
       }
-    }, 
+    },
     updateTrackOffset (v: number) {
       if (this.editTrackIndex !== null) {
         const track = this.tracks[this.editTrackIndex]

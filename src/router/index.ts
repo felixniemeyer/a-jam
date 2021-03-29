@@ -24,13 +24,18 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "settings" */ '@/views/Settings.vue')
   },
   {
-    path: '/session/:cid?',
+    path: '/session/:localId',
     name: 'Session',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "session" */ '@/views/Session.vue')
   },
+  {
+    path: 'sessionLoading/:cid',
+    name: 'SessionLoading',
+    component: () => import(/* webpackChunkName: sessionloading */ '@/views/SessionLoading.vue')
+  }
 ]
 
 const router = createRouter({

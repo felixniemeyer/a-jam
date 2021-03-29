@@ -1,5 +1,10 @@
 const HIST_LENGTH = 100
 
+export interface Settings {
+  defaultRecordingOffset: number
+  playbackDelay: number
+}
+
 export class RecentSessionEntry {
   constructor (
     public cid: string,
@@ -24,7 +29,6 @@ export class RecentSessionEntry {
     })
   }
 }
-
 
 export const storageWrapper = {
   setDefaultRecordingOffset(v: number) {
@@ -70,7 +74,7 @@ export const storageWrapper = {
     }
     return result
   },
-  addRecentSession (rse: RecentSessionEntry) {
+  addRecentSession(rse: RecentSessionEntry, list: RecentSessionEntry[]) {
     let i
     if ('next_history_id' in localStorage) {
       i = Number(localStorage.getItem('next_history_id'))
@@ -79,16 +83,26 @@ export const storageWrapper = {
     }
     localStorage.setItem('recent_session_' + i, rse.toString())
     localStorage.setItem('next_history_id', (i + 1).toString())
+    if(list !== undefined) {
+      const deduplicated = list.filter(e => e.cid !== rse.cid)
+      return [rse].concat(deduplicated)
+    } else {
+      return [rse]
+    }
   },
-  getSettings() : Settings {
+  getSettings() {
     const settings = {
       defaultRecordingOffset: 65,
+      playbackDelay: 10,
+    }
+    if ('playbackDelay' in localStorage) {
+      settings.playbackDelay = Number(localStorage.getItem('playbackDelay'))
     }
     if ('defaultRecordingOffset' in localStorage) {
       settings.defaultRecordingOffset = Number(localStorage.getItem('defaultRecordingOffset'))
     }
     return settings
-  }
+  },
 }
 
 

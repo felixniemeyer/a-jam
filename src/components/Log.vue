@@ -13,23 +13,25 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
-import { Prop } from 'vue-property-decorator'
+import { defineComponent, PropType } from 'vue'
 
 import Copyable from '@/components/Copyable.vue'
 
-
-@Options({
-  components: {
-    Copyable
-  }
-})
-default class Log extends Vue {
-  @Prop() entries: LogEntry[] = []
+export interface LogEntry {
+  type: 'msg' | 'copyable'
+  s: string
 }
 
-export { Log as default, LogEntry }
-
+export default defineComponent({
+  components: {
+    Copyable
+  },
+  props: {
+    entries: {
+      type: Array as PropType<LogEntry[]>
+    }
+  }
+})
 </script>
 
 <style lang="scss">

@@ -12,18 +12,18 @@ export class LocalSession extends Session {
     publication.title = this.title
     publication.tracks = this.tracks.map(track => track.clone())
     publication.previousCid = this.previousCid
-    return publication 
+    return publication
   }
 }
 
 export class PublicSession extends Session {
   constructor(
-    public cid: string, // TODO: are these fields here correctly initialized despite non-empty constructor 
+    public cid: string, // TODO: are these fields here correctly initialized despite non-empty constructor
     public date: number
   ) {
-    super() 
+    super()
   }
-  
+
   copyToLocal() : LocalSession {
     const derivative = new LocalSession()
     derivative.title = this.title
@@ -31,12 +31,6 @@ export class PublicSession extends Session {
     derivative.previousCid = this.previousCid
     return derivative
   }
-}
-
-export interface Process {
-  log: LogEntry[]
-  errors: string[]
-  done: boolean
 }
 
 export interface Publication {
@@ -57,12 +51,12 @@ export class Track {
   ) {
     this.effectiveDuration = this.recording.audioBuffer.duration - this.offset
   }
-  
+
   clone() : Track {
     const clone = new Track(
-      this.offset, 
+      this.offset,
       this.recording
-    ) 
+    )
     clone.name = this.name
     clone.volume = this.volume
     clone.panning = this.panning
@@ -75,14 +69,9 @@ export interface Recording {
   audioBlob: Blob | undefined
   audioBuffer: AudioBuffer
 }
- 
+
 export interface Playback {
   source: AudioBufferSourceNode
   panner: StereoPannerNode
   gain: GainNode
-}
-
-export interface LogEntry {
-  type: 'msg' | 'copyable'
-  s: string
 }
