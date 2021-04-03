@@ -14,6 +14,7 @@
     eth address
     <Copyable text="0xc077b94DdA5358074F519C38b7237b17167a2394"/>
     (click to copy)
+    <p>There are affiliate links to unstoppable domains in this web app.</p>
   </div>
 </template>
 
