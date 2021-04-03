@@ -14,12 +14,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import { storageWrapper } from '@/local-storage-wrapper'
-
 export default defineComponent({
   beforeMount () {
-    this.state.sessions.recent = storageWrapper.getRecentSessions()
-    this.state.settings = storageWrapper.getSettings()
+    this.state.sessions.recent = this.storageWrapper.getRecentSessions()
+    this.state.settings = this.storageWrapper.getSettings()
   }
 })
 </script>

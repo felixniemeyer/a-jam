@@ -27,7 +27,7 @@ export default defineComponent({
     createNewSession () {
       const localSessionId = this.state.sessions.nextLocalSessionId++
       this.state.sessions.local[localSessionId] = new LocalSession()
-      this.$router.replace(`session/${localSessionId}`)
+      this.$router.push(`/session/${localSessionId}`)
     }
   }
 })

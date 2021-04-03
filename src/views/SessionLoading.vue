@@ -16,7 +16,6 @@ import { defineComponent } from 'vue'
 
 import { TrackConfig } from '@/ipfs-wrapper'
 import { LocalSession, PublicSession, Track } from '@/types'
-import { storageWrapper } from '@/local-storage-wrapper'
 
 import Log from '@/components/Log.vue'
 
@@ -58,7 +57,7 @@ export default defineComponent({
       const localSessionId = this.state.sessions.nextLocalSessionId++
       this.state.sessions.local[localSessionId] = this.copyToLocalSession(publicSession)
       this.$router.replace(`session/${localSessionId}`)
-      this.state.sessions.recent = storageWrapper.addRecentSession({
+      this.state.sessions.recent = this.storageWrapper.addRecentSession({
         title: publicSession.title,
         cid: publicSession.cid,
         timestamp: publicSession.date
@@ -113,6 +112,22 @@ export default defineComponent({
 })
 </script>
 
-<style lang="sass">
-
+<style lang="scss">
+.loading {
+  .button {
+    @include clickable-surface;
+  }
+  .inline-button{
+    @include clickable-surface;
+    display: inline-block;
+  }
+  .ud-affiliate {
+    display: block;
+    text-decoration: none;
+    @include clickable-surface;
+    color: #4c46f7;
+    border: 0.1em solid #4c46f7;
+    box-shadow: 0 0 0.5em #4c46f799;
+  }
+}
 </style>

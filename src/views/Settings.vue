@@ -11,11 +11,11 @@
       right="earlier"
       :factor="1000"
       :decimalPlaces="0"
-      :from="initialOffset-0.100"
-      :to="initialOffset+0.100"
-      :value="defaultRecordingOffset"
+      :from="sliderOrigin.defaultRecordingOffset - 0.100"
+      :to="sliderOrigin.defaultRecordingOffset + 0.100"
+      :value="state.settings.defaultRecordingOffset"
       @dragEnd="resetInitialRecordingOffset"
-      @update="updateDefaultRecordingOffset" />
+      @update="updateDefaultRecordingOffset"/>
     <div>
       <div class="inline-button" @click="$router.go(-1)">done</div>
     </div>
@@ -33,21 +33,19 @@ export default defineComponent({
   },
   data () {
     return {
-      persistDefaultRecordingOffsetTimeout: undefined as NodeJS.Timeout | undefined,
-      initialRecordingOffset: this.state.settings.defaultRecordingOffset
+      sliderOrigin: {
+        defaultRecordingOffset: this.state.settings.defaultRecordingOffset
+      }
     }
   },
-  resetInitialRecordingOffset () {
-    this.initialRecordingOffset = this.state.settings.defaultRecordingOffset
-  },
-  updateDefaultRecordingOffset (v: number) {
-    this.state.settings.defaultRecordingOffset = v
-    if (this.persistDefaultRecordingOffsetTimeout !== undefined) {
-      clearTimeout(this.persistDefaultRecordingOffsetTimeout)
+  methods: {
+    resetInitialRecordingOffset () {
+      this.sliderOrigin.defaultRecordingOffset = this.state.settings.defaultRecordingOffset
+      this.storageWrapper.setDefaultRecordingOffset(this.state.settings.defaultRecordingOffset)
+    },
+    updateDefaultRecordingOffset (v: number) {
+      this.state.settings.defaultRecordingOffset = v
     }
-    this.persistDefaultRecordingOffsetTimeout = setTimeout(() => {
-      localStorage.setDefaultRecordingOffset(v)
-    }, 500)
   }
 })
 

@@ -1,6 +1,5 @@
 <template>
-  <div v-if="askForAC"
-    class="dialogue">
+  <div class="ac-dialogue">
     <h2>start audio context</h2>
     <p>ajam needs an AudioContext for handling audio data and for sound playback. </p>
     <div class="button"
@@ -19,5 +18,9 @@ export default defineComponent({
 </script>
 
 <style lang="sass">
-
+.ac-dialogue{
+  .button {
+    @include clickable-surface;
+  }
+}
 </style>

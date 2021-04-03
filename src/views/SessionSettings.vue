@@ -1,5 +1,5 @@
 <template>
-  <div class="renaming">
+  <div class="track-settings">
     <div v-if="base !== undefined">
       <p> this jam is based on: </p>
       <Copyable :text="base"/>
@@ -52,5 +52,23 @@ export default defineComponent({
 </script>
 
 <style lang="sass">
+
+.track-settings{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(100% - 1em);
+  transform: translate(-50%, -50%);
+  input {
+    padding: 1em;
+  }
+  .small {
+    font-size: 0.7em;
+  }
+  .inline-button{
+    @include clickable-surface;
+    display: inline-block;
+  }
+}
 
 </style>

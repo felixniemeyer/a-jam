@@ -4,7 +4,7 @@ import router from './router'
 
 import { State, state } from '@/state'
 import { IPFSWrapper } from '@/ipfs-wrapper'
-import { storageWrapper } from '@/local-storage-wrapper'
+import { LocalStorageWrapper, StorageWrapper } from '@/local-storage-wrapper'
 
 const ac = new AudioContext()
 const ipfsWrapper = new IPFSWrapper(ac)
@@ -15,7 +15,7 @@ createApp(App)
     Object.assign(config.globalProperties, {
       state: reactive(state),
       ipfsWrapper,
-      storageWrapper,
+      storageWrapper: new LocalStorageWrapper(),
       ac
     })
   })
@@ -27,5 +27,6 @@ declare module '@vue/runtime-core' {
     state: State;
     ipfsWrapper: IPFSWrapper;
     ac: AudioContext;
+    storageWrapper: StorageWrapper;
   }
 }

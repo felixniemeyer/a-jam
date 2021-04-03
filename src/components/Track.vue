@@ -10,27 +10,36 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
-import { Prop } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
 import ColorHash from 'color-hash'
 
-@Options({
-  components: {},
-  emits: ['editTrack']
-})
-export default class Track extends Vue {
-  @Prop(String) cid: string | undefined
-  @Prop({ default: 1 }) relativeDuration!: number
-  @Prop(String) name!: string;
-  get color () {
-    if (this.cid) {
-      const ch = new ColorHash({ lightness: 0.4 })
-      return ch.hex(this.cid)
-    } else {
-      return '#999999'
+export default defineComponent({
+  emits: ['editTrack'],
+  props: {
+    cid: {
+      type: String,
+      required: false
+    },
+    relativeDuration: {
+      type: Number,
+      required: true
+    },
+    name: {
+      type: String,
+      required: true
+    }
+  },
+  computed: {
+    color (): string {
+      if (this.cid) {
+        const ch = new ColorHash({ lightness: 0.4 })
+        return ch.hex(this.cid)
+      } else {
+        return '#999999'
+      }
     }
   }
-}
+})
 </script>
 
 <style lang="scss">

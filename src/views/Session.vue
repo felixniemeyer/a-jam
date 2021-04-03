@@ -3,32 +3,34 @@
     <div class="cornerbutton back" @click="$router.go(-1)"></div>
     <div class="title" @click="openSettings()">
       <div class="text">
-        {{ title }}
+        {{ session.title }}
       </div>
       <span class="edit"></span>
     </div>
     <div class="cornerbutton publish" @click="publish()"></div>
-    <div ref="tracksref" class="tracks">
-      <TrackC
-        v-for="(track, key) in tracks"
-        :key="key"
-        :cid="track.cid"
-        :name="track.name"
-        :relativeDuration="track.effectiveDuration / maxTrackDuration"
-        @editTrack="$router.push(`/session/${this.localId}/track/${key}`)"
-        />
-      <div
-        v-if="recording"
-        class="recording-placeholder"
-        :style="{width: `calc(3em + ${playtime / maxTrackDuration} * (100% - 3.4em)`}">
+    <div class="trackArea">
+      <div class="trackList">
+        <TrackC
+          v-for="(track, key) in session.tracks"
+          :key="key"
+          :cid="track.cid"
+          :name="track.name"
+          :relativeDuration="track.effectiveDuration / maxTrackDuration"
+          @editTrack="$router.push(`/session/${this.localId}/track/${key}`)"
+          />
+        <div
+          v-if="recording"
+          class="recording-placeholder"
+          :style="{width: `calc(3em + ${playProgress} * (100% - 3.4em)`}">
+        </div>
+        <div class='spacer'/>
       </div>
-      <div class='spacer'/>
+      <div class='time'
+        :style="{visibility: playing || recording ? 'visible' : 'hidden', left: `calc(3.15em + ${playProgress} * (100% - 3.5em))`}">
+      </div>
+      <div class="from-time">{{ formatTime(playtime) }}</div>
+      <div class="to-time">{{ formatTime(maxTrackDuration)}}</div>
     </div>
-    <div class='time'
-      :style="{visibility: playing || recording ? 'visible' : 'hidden', left: `calc(3.15em + ${Math.min(1, playtime / maxTrackDuration)} * (${tracksCssSize} - 3.5em))`}">
-    </div> <!-- solve this with html and css -->
-    <div class="from-time">{{ formatTime(playtime) }}</div>
-    <div class="to-time">{{ formatTime(maxTrackDuration)}}</div>
 
     <div class="controls">
       <span class="shortcut-hint play">
@@ -57,6 +59,8 @@ import { defineComponent } from 'vue'
 import TrackC from '@/components/Track.vue'
 import { Track } from '@/types'
 
+import { debug } from '@/tools'
+
 export default defineComponent({
   components: {
     TrackC
@@ -64,7 +68,11 @@ export default defineComponent({
   data () {
     const localId = parseInt(this.$route.params.localId as string) // TODO it would be safer to reset these in beforeRouteUpdate
     const session = this.state.sessions.local[localId]
-    const data = {
+    if (session === undefined) {
+      this.$router.replace('/')
+      this.$router.push('/error/noSuchLocalSession')
+    }
+    return {
       localId,
       session,
       // playback
@@ -77,11 +85,14 @@ export default defineComponent({
       stopTimeout: undefined as NodeJS.Timeout | undefined,
       recording: false
     }
-    this.setSession(data)
-    return data
   },
   computed: {
-    maxTrackDuration () {
+    playProgress (): number {
+      const p = this.playtime
+      const d = this.maxTrackDuration
+      return Math.min(1, p / d)
+    },
+    maxTrackDuration (): number {
       let maxDuration = 10
       this.session.tracks.forEach(track => {
         if (track.effectiveDuration > maxDuration) {
@@ -189,7 +200,7 @@ export default defineComponent({
     },
 
     async toggleRecord () {
-      if (this.mediaRecorder !== undefined) {
+      if (this.mediaRecorder === undefined) {
         await this.initMediaRecorder()
       }
       if (this.recording) {
@@ -200,12 +211,15 @@ export default defineComponent({
         this.stopAllPlaybacks()
         this.recordingChunks = []
         this.playAllTracks()
-        this.mediaRecorder?.start() // eslint-disable-line
+        if (this.mediaRecorder) {
+          this.mediaRecorder.start()
+        }
         this.recording = true
         this.session.dirty = true
       }
     },
     async initMediaRecorder () {
+      debug('initializing media recorder')
       const stream = await this.initUserMedia()
       this.mediaRecorder = new MediaRecorder(stream)
       this.mediaRecorder.ondataavailable = (e) => {
@@ -253,53 +267,15 @@ export default defineComponent({
       }
       fileReader.readAsArrayBuffer(audioBlob)
     }
-
-    //
-    // publishing
-    //
   }
 })
 
 </script>
 
 <style lang="scss">
-/* {
+ * {
   outline: 1px solid green;
 } /** */
-.publishing, .loading, .dialogue{
-  .button {
-    @include clickable-surface;
-  }
-  .inline-button{
-    @include clickable-surface;
-    display: inline-block;
-  }
-  .ud-affiliate {
-    display: block;
-    text-decoration: none;
-    @include clickable-surface;
-    color: #4c46f7;
-    border: 0.1em solid #4c46f7;
-    box-shadow: 0 0 0.5em #4c46f799;
-  }
-}
-.renaming {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: calc(100% - 1em);
-  transform: translate(-50%, -50%);
-  input {
-    padding: 1em;
-  }
-  .small {
-    font-size: 0.7em;
-  }
-  .inline-button{
-    @include clickable-surface;
-    display: inline-block;
-  }
-}
 .session {
   width: 100%;
   height: 100%;
@@ -331,7 +307,7 @@ export default defineComponent({
     top: 1em;
   }
 
-  .tracks {
+  .trackArea {
     position: absolute;
     background: linear-gradient(178deg, #ddd, #fff, #eee);
     text-align: left;
@@ -339,8 +315,11 @@ export default defineComponent({
     top: 5em;
     height: calc(100% - 10em);
     width: 100%;
-    overflow-y: scroll;
-    overflow-x: hidden;
+    .trackList{
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
     .recording-placeholder {
       height: 1em;
       margin: 1em 0.2em;
@@ -350,31 +329,30 @@ export default defineComponent({
     .spacer {
       height: 2em;
     }
-  }
-
-  .time {
-    position: fixed;
-    z-index: 50;
-    top:5em;
-    height: calc(100% - 10em);
-    background: linear-gradient(90deg, rgba(255, 85, 85, 0), rgb(255, 85, 85) 49%, #fff 50%, #fff0);
-    left: 3em;
-    width: 0.3em;
-    opacity: 0.75;
-  }
-  .from-time, .to-time {
-    position: fixed;
-    z-index: 51;
-    bottom: 5.2em;
-    background-color: #fffb;
-    color: #777;
-    padding: 0.2em;
-  }
-  .from-time {
-    left: 0.2em;
-  }
-  .to-time {
-    right: 0.2em;
+    .time {
+      position: fixed;
+      z-index: 50;
+      top:5em;
+      height: calc(100% - 10em);
+      background: linear-gradient(90deg, rgba(255, 85, 85, 0), rgb(255, 85, 85) 49%, #fff 50%, #fff0);
+      left: 3em;
+      width: 0.3em;
+      opacity: 0.75;
+    }
+    .from-time, .to-time {
+      position: absolute;
+      z-index: 51;
+      bottom: 0.2em;
+      background-color: #fffb;
+      color: #777;
+      padding: 0.2em;
+    }
+    .from-time {
+      left: 0.2em;
+    }
+    .to-time {
+      right: 0.2em;
+    }
   }
 
   .controls {

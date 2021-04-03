@@ -81,7 +81,7 @@ export default defineComponent({
     },
     remove () {
       if (this.confirmRemove) {
-        this.track.playback?.source.stop()
+        this.track.playback?.source.stop() // eslint-disable-line
         delete this.session.tracks[this.trackKey]
         this.leave()
       } else {

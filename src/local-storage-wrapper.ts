@@ -30,10 +30,18 @@ export class RecentSessionEntry {
   }
 }
 
-export const storageWrapper = {
+export interface StorageWrapper {
+  setDefaultRecordingOffset (v: number): void;
+  getRecentSessions (): RecentSessionEntry[];
+  addRecentSession (rse: RecentSessionEntry, list: RecentSessionEntry[]): RecentSessionEntry[];
+  getSettings (): Settings;
+}
+
+export class LocalStorageWrapper implements StorageWrapper {
   setDefaultRecordingOffset (v: number) {
     localStorage.setItem('defaultRecordingOffset', v.toString())
-  },
+  }
+
   getRecentSessions (): RecentSessionEntry[] {
     const result = [] as RecentSessionEntry[]
     /**
@@ -73,7 +81,8 @@ export const storageWrapper = {
       localStorage.setItem('smallest_history_id', newSmallestId.toString())
     }
     return result
-  },
+  }
+
   addRecentSession (rse: RecentSessionEntry, list: RecentSessionEntry[]) {
     let i
     if ('next_history_id' in localStorage) {
@@ -89,11 +98,12 @@ export const storageWrapper = {
     } else {
       return [rse]
     }
-  },
+  }
+
   getSettings () {
     const settings = {
-      defaultRecordingOffset: 65,
-      playbackDelay: 10
+      defaultRecordingOffset: 0.065,
+      playbackDelay: 0.010
     }
     if ('playbackDelay' in localStorage) {
       settings.playbackDelay = Number(localStorage.getItem('playbackDelay'))
