@@ -15,7 +15,7 @@
         :cid="track.cid"
         :name="track.name"
         :relativeDuration="track.effectiveDuration / maxTrackDuration"
-        @editTrack="editTrack(key)"
+        @editTrack="$router.push(`/session/${this.localId}/track/${key}`)"
         />
       <div
         v-if="recording"
@@ -55,19 +55,13 @@
 import { defineComponent } from 'vue'
 
 import TrackC from '@/components/Track.vue'
-import TrackSettings from '@/views/Session/TrackSettings.vue'
-import Copyable from '@/components/Copyable.vue'
 import { Track } from '@/types'
-import { SessionConfig, TrackConfig } from '@/ipfs-wrapper'
-import { RecentSessionEntry, storageWrapper } from '@/local-storage-wrapper'
 
 export default defineComponent({
   components: {
-    TrackC,
-    TrackSettings,
-    Copyable
+    TrackC
   },
-  data() {
+  data () {
     const localId = parseInt(this.$route.params.localId as string) // TODO it would be safer to reset these in beforeRouteUpdate
     const session = this.state.sessions.local[localId]
     const data = {
@@ -87,10 +81,10 @@ export default defineComponent({
     return data
   },
   computed: {
-    maxTrackDuration() {
+    maxTrackDuration () {
       let maxDuration = 10
       this.session.tracks.forEach(track => {
-        if(track.effectiveDuration > maxDuration) {
+        if (track.effectiveDuration > maxDuration) {
           maxDuration = track.effectiveDuration
         }
       })
@@ -102,11 +96,11 @@ export default defineComponent({
   },
   beforeUnmount () {
     this.stopAllPlaybacks()
-    this.mediaRecorder?.stop()
+    this.mediaRecorder?.stop() // eslint-disable-line
     document.removeEventListener('keydown', this.handleKeydown)
   },
   methods: {
-    openSettings() {
+    openSettings () {
       this.$router.push(`/session/${this.localId}/settings`)
     },
     formatTime (seconds: number) {
@@ -129,7 +123,7 @@ export default defineComponent({
       if (this.playing) {
         this.stopAllPlaybacks()
       } else {
-        if (!this.recorder.state.recording) {
+        if (!this.recording) {
           this.playAllTracks()
           this.stopTimeout = setTimeout(
             this.stopAllPlaybacks.bind(this),
@@ -155,7 +149,7 @@ export default defineComponent({
       this.playtime = 0
       this.updatePlaytime()
     },
-    createPlayback(track: Track) {
+    createPlayback (track: Track) {
       const source = this.ac.createBufferSource()
       source.buffer = track.recording.audioBuffer
       const panner = this.ac.createStereoPanner()
@@ -173,7 +167,7 @@ export default defineComponent({
       }
     },
     updatePlaytime () {
-      if(this.playing) {
+      if (this.playing) {
         this.playtime = this.ac.currentTime - this.playbackStartTime
         if (this.recording && this.playtime > this.maxTrackDuration) {
           this.maxTrackDuration = this.playtime
@@ -187,7 +181,7 @@ export default defineComponent({
         this.stopTimeout = undefined
       }
       this.session.tracks.forEach(track => {
-        track.playback?.source.stop()
+        track.playback?.source.stop() // eslint-disable-line
         delete track.playback
       })
       this.playing = false
@@ -199,14 +193,14 @@ export default defineComponent({
         await this.initMediaRecorder()
       }
       if (this.recording) {
-        this.mediaRecorder?.stop() // triggers onstop callback
+        this.mediaRecorder?.stop() // eslint-disable-line
         this.stopAllPlaybacks()
         this.recording = false
       } else {
         this.stopAllPlaybacks()
         this.recordingChunks = []
         this.playAllTracks()
-        this.mediaRecorder?.start()
+        this.mediaRecorder?.start() // eslint-disable-line
         this.recording = true
         this.session.dirty = true
       }
@@ -224,7 +218,7 @@ export default defineComponent({
         this.createTrack(audio)
       }
     },
-    async initUserMedia() {
+    async initUserMedia () {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         return await navigator.mediaDevices.getUserMedia({ // todo mediaDevices.enumerateDevices and let user choose his preferred mic (super for mobile devices)
           audio: {
@@ -236,7 +230,7 @@ export default defineComponent({
         throw Error('getUserMedia not supported on your browser!')
       }
     },
-    createTrack(audioBlob: Blob) {
+    createTrack (audioBlob: Blob) {
       const fileReader = new FileReader()
       fileReader.onloadend = () => {
         const arrayBuffer = fileReader.result
@@ -258,14 +252,13 @@ export default defineComponent({
         }
       }
       fileReader.readAsArrayBuffer(audioBlob)
-    },
+    }
 
     //
     // publishing
     //
   }
 })
-
 
 </script>
 

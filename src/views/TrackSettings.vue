@@ -11,7 +11,7 @@
     </div>
     <input :value="track.name" ref="name" @keyup="submitOnEnter">
     <div>
-      <div class="inline-button" @click="changeName">rename track</div>
+      <div class="inline-button" @click="rename">rename track</div>
     </div>
     <Slider
       name="volume"
@@ -39,9 +39,9 @@
       :to="initialOffset+0.100"
       :value="track.offset"
       @dragEnd="resetInitialOffset"
-      @update="v => $emit('update-offset', v)" />
+      @update="updateTrackOffset" />
     <div>
-      <div class="inline-button" @click="$emit('back')">back to session</div>
+      <div class="inline-button" @click="leave">back to session</div>
     </div>
   </div>
 </template>
@@ -58,12 +58,15 @@ export default defineComponent({
     Copyable
   },
 
-  data() {
-    const sessionId = parseInt(this.$route.params.sessionId as string)
-    const trackId = parseInt(this.$route.params.trackId as string)
+  data () {
+    // "$router.push(`/session/${this.localId}/track/${key}`)"
+    const sessionId = parseInt(this.$route.params.localId as string)
+    const session = this.state.sessions.local[sessionId]
+    const trackKey = parseInt(this.$route.params.trackKey as string)
     return {
-      trackId,
-      initialOffset: this.state.sessions[trackId],
+      trackKey,
+      session,
+      track: session.tracks[trackKey],
       confirmRemove: false
     }
   },
@@ -73,74 +76,42 @@ export default defineComponent({
   methods: {
     submitOnEnter ($event: KeyboardEvent) {
       if ($event.key === 'Enter') {
-        this.changeName()
+        this.rename()
       }
     },
     remove () {
       if (this.confirmRemove) {
-        this.$emit('remove')
+        this.track.playback?.source.stop()
+        delete this.session.tracks[this.trackKey]
+        this.leave()
       } else {
         this.confirmRemove = true
       }
     },
-    resetInitialOffset () {
-      this.initialOffset = this.track.offset
+    leave () {
+      this.$router.go(-1)
     },
-    changeName () {
-      this.$emit('change-name', (this.$refs.name as HTMLInputElement).value)
-    },
-    editTrack (index: number) {
-      this.editTrackIndex = index
-    },
-    changeTrackName (name: string | undefined) {
-      if (this.editTrackIndex !== null) {
-        let somethingChanged = false
-        const track = this.tracks[this.editTrackIndex]
-        if (name !== undefined) {
-          track.name = name
-          somethingChanged = true
-        }
-        this.editTrackIndex = null
-        if (somethingChanged) {
-          this.dirty = true
-        }
-      }
-    },
-    removeTrack () {
-      if (this.editTrackIndex !== null) {
-        const trackToBeDeleted = this.tracks[this.editTrackIndex]
-        this.editTrackIndex = null
-        this.tracks = this.tracks.filter(track => track !== trackToBeDeleted)
-        this.maxTrackDuration = this.checkForHigherTrackDuration()
-      }
+    rename () {
+      this.track.name = (this.$refs.name as HTMLInputElement).value
     },
     updateTrackVolume (v: number) {
-      if (this.editTrackIndex !== null) {
-        const track = this.tracks[this.editTrackIndex]
-        track.volume = v
-        if (track.gain !== undefined) {
-          track.gain.gain.value = v
-        }
+      this.track.volume = v
+      if (this.track.playback) {
+        this.track.playback.gain.gain.value = v
       }
     },
     updateTrackPanning (v: number) {
-      if (this.editTrackIndex !== null) {
-        const track = this.tracks[this.editTrackIndex]
-        track.panning = v
-        if (track.panner !== undefined) {
-          track.panner.pan.value = v
-        }
+      this.track.panning = v
+      if (this.track.playback) {
+        this.track.playback.panner.pan.value = v
       }
     },
     updateTrackOffset (v: number) {
-      if (this.editTrackIndex !== null) {
-        const track = this.tracks[this.editTrackIndex]
-        track.offset = v
-        track.effectiveDuration = track.audioBuffer.duration - v
-      }
+      this.track.offset = v
+      this.track.effectiveDuration = this.track.recording.audioBuffer.duration - v
     }
   }
-}
+})
 </script>
 
 <style lang="scss">

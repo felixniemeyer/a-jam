@@ -34,7 +34,7 @@ export class IPFSWrapper {
   gatewayURL = 'gateway.ipfs.io'
   appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
 
-  constructor(public ac: AudioContext) {}
+  constructor (public ac: AudioContext) {}
 
   initialize () {
     return new Promise((resolve, reject) => {
@@ -145,4 +145,3 @@ export class IPFSWrapper {
     })
   }
 }
-

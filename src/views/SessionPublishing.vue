@@ -19,19 +19,18 @@
 </template>
 
 <script lang="ts">
-import { LogEntry } from '@/components/Log.vue'
+import Log, { LogEntry } from '@/components/Log.vue'
 import { defineComponent } from 'vue'
 
-import Log from '@/components/Log.vue'
-import { Track } from '@/types'
+import { PublicSession, Track } from '@/types'
 import { SessionConfig, TrackConfig } from '@/ipfs-wrapper'
 import { storageWrapper } from '@/local-storage-wrapper'
 
 export default defineComponent({
-  setup() {
+  setup () {
 
   },
-  data() {
+  data () {
     const localId = Number(this.$route.params.localId as string)
     return {
       log: [] as LogEntry[],
@@ -44,31 +43,30 @@ export default defineComponent({
   components: {
     Log
   },
-  mounted() {
+  mounted () {
     this.publish()
   },
   methods: {
     async publish () {
       this.$router.push(`session/${this.localId}/publish`)
       try {
-        this.log.push({type: 'msg', s: 'publishing session...'})
+        this.log.push({ type: 'msg', s: 'publishing session...' })
         await this.publishRecordings()
         await this.publishSession()
-      } catch(e) {
+      } catch (e) {
         this.errors.push(e)
       }
-
     },
-    async publishRecordings() {
+    async publishRecordings () {
       const promises: Promise<void>[] = []
       this.session.tracks.forEach(track => {
         if (track.recording.cid === undefined) {
-          this.log.push({type: 'msg', s: `publishing track ${track.name}...`})
+          this.log.push({ type: 'msg', s: `publishing track ${track.name}...` })
           promises.push(this.publishRecording(track))
         }
       })
       if (promises.length === 0) {
-        this.log.push({type: 'msg', s: 'no tracks to publish.'})
+        this.log.push({ type: 'msg', s: 'no tracks to publish.' })
       }
       await Promise.all(promises).then()
     },
@@ -76,7 +74,7 @@ export default defineComponent({
       const recording = track.recording
       if (recording.audioBlob !== undefined) {
         const cid = await this.ipfsWrapper.saveTrackAudio(recording.audioBlob)
-        this.log.push({type: 'msg', s: `track ${track.name} is now public on ipfs at:`})
+        this.log.push({ type: 'msg', s: `track ${track.name} is now public on ipfs at:` })
         this.log.push({ type: 'copyable', s: cid })
         recording.cid = cid
         this.state.recordings[cid] = track.recording
@@ -115,17 +113,24 @@ export default defineComponent({
     },
     logLinks (cid: string) {
       const params = [
-        `loadSession=${cid}`,
+        `loadSession=${cid}`
       ]
       const paramString = params.join('&')
-      this.log.push({type: 'msg', s: 'jam session is now public on ipfs at:'})
+      this.log.push({ type: 'msg', s: 'jam session is now public on ipfs at:' })
       this.log.push({ type: 'copyable', s: cid })
-      this.log.push({type: 'msg', s: 'link for browsers that support ipfs: '})
-      this.log.push({ type: 'copyable', s: `ipns://${this.ipfsWrapper.appIPNSIdentifier}/?${paramString}`})
-      this.log.push({type: 'msg', s: 'link for all browsers: '})
-      this.log.push({ type: 'copyable', s: `https://${this.ipfsWrapper.gatewayURL}/ipns/${this.ipfsWrapper.appIPNSIdentifier}/?${paramString}`})
-      this.log.push({type: 'msg', s: '(click any link to copy)'})
+      this.log.push({ type: 'msg', s: 'link for browsers that support ipfs: ' })
+      this.log.push({ type: 'copyable', s: `ipns://${this.ipfsWrapper.appIPNSIdentifier}/?${paramString}` })
+      this.log.push({ type: 'msg', s: 'link for all browsers: ' })
+      this.log.push({ type: 'copyable', s: `https://${this.ipfsWrapper.gatewayURL}/ipns/${this.ipfsWrapper.appIPNSIdentifier}/?${paramString}` })
+      this.log.push({ type: 'msg', s: '(click any link to copy)' })
     },
+    copyToPublicSession (cid: string, date: number): PublicSession {
+      const publication = new PublicSession(cid, date)
+      publication.title = this.session.title
+      publication.tracks = this.session.tracks.map(track => track.clone())
+      publication.previousCid = this.session.previousCid
+      return publication
+    }
   }
 })
 </script>

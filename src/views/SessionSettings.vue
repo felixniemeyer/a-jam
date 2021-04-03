@@ -19,31 +19,31 @@ import { defineComponent } from 'vue'
 import WidthFreezer from '@/mixins/WidthFreezer'
 
 export default defineComponent({
-  mixins: [WidthFreezer], 
-  mounted() {
+  mixins: [WidthFreezer],
+  mounted () {
     this.$nextTick(() => {
       (this.$refs.newSessionTitle as HTMLInputElement).select()
     })
-  }, 
-  data() {
-    const localId = parseInt(this.$route.params.localId as string) 
+  },
+  data () {
+    const localId = parseInt(this.$route.params.localId as string)
     const session = this.state.sessions.local[localId]
     return {
-      localId, 
-      session, 
+      localId,
+      session
     }
-  }, 
+  },
   methods: {
-    saveAndLeave() {
+    saveAndLeave () {
       this.session.title = (this.$refs.newSessionTitle as HTMLInputElement).value
       this.session.dirty = false
       this.leave()
-    }, 
-    leave() {
+    },
+    leave () {
       this.$router.go(-1)
-    }, 
-    checkForEnterKey($event: KeyboardEvent) {
-      if($event.key === 'Enter'){
+    },
+    checkForEnterKey ($event: KeyboardEvent) {
+      if ($event.key === 'Enter') {
         this.saveAndLeave()
       }
     }

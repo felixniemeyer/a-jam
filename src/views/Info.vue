@@ -24,7 +24,7 @@ import Copyable from '@/components/Copyable.vue'
 export default defineComponent({
   components: {
     Copyable
-  },
+  }
 })
 </script>
 

@@ -5,8 +5,8 @@
     <img class="logo" alt="ajam logo" src="../assets/logo.png" />
     <div>
       <div class="project new" @click="createNewSession">new project</div>
-      <h4 v-if="sessionHistory.length > 0">recent projects</h4>
-      <p class="project" v-for="rse in sessionHistory" :key="rse.cid" @click="loadSession(rse.cid)">
+      <h4 v-if="state.sessions.recent.length > 0">recent projects</h4>
+      <p class="project" v-for="rse in state.sessions.recent" :key="rse.cid" @click="loadSession(rse.cid)">
         {{ rse.title }} <br />
         <span class='small'>{{ rse.cid }}</span> <br/>
         <i class='date'>{{ Date(rse.timestamp).toLocaleString() }}</i>
@@ -20,11 +20,15 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
+import { LocalSession } from '@/types'
+
 export default defineComponent({
-  inject: ['state'],
-  mounted() {
-  },
   methods: {
+    createNewSession () {
+      const localSessionId = this.state.sessions.nextLocalSessionId++
+      this.state.sessions.local[localSessionId] = new LocalSession()
+      this.$router.replace(`session/${localSessionId}`)
+    }
   }
 })
 </script>

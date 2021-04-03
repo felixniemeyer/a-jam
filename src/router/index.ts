@@ -32,9 +32,14 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "session" */ '@/views/Session.vue')
   },
   {
-    path: 'sessionLoading/:cid',
+    path: '/sessionLoading/:cid',
     name: 'SessionLoading',
     component: () => import(/* webpackChunkName: sessionloading */ '@/views/SessionLoading.vue')
+  },
+  {
+    path: '/session/:localId/track/:trackKey',
+    name: 'TrackSettings',
+    component: () => import(/* webpackChunkName: trackSettings */ '@/views/TrackSettings.vue')
   }
 ]
 

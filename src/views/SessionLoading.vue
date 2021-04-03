@@ -15,30 +15,30 @@
 import { defineComponent } from 'vue'
 
 import { TrackConfig } from '@/ipfs-wrapper'
-import { PublicSession, Track } from '@/types'
+import { LocalSession, PublicSession, Track } from '@/types'
 import { storageWrapper } from '@/local-storage-wrapper'
 
 import Log from '@/components/Log.vue'
 
 export default defineComponent({
-  data() {
+  data () {
     return {
       requireInteraction: false,
       log: [
         { type: 'msg', s: 'retrieving session with cid:' },
         { type: 'copyable', s: this.$route.params.cid }
       ],
-      errors: [],
+      errors: []
     }
   },
   components: {
     Log
   },
-  mounted() {
+  mounted () {
     this.loadSession()
   },
   methods: {
-    abort() {
+    abort () {
       this.$router.go(-1)
     },
     checkAudioContext () {
@@ -48,15 +48,15 @@ export default defineComponent({
         this.loadSession()
       }
     },
-    async loadSession() {
+    async loadSession () {
       const cid = this.$route.params.cid as string
       this.$router.push(`loadSession/${cid}`)
       let publicSession = this.state.sessions.public[cid]
-      if(publicSession === undefined) {
+      if (publicSession === undefined) {
         publicSession = await this.retrieveSessionFromIPFS(cid)
       }
       const localSessionId = this.state.sessions.nextLocalSessionId++
-      this.state.sessions.local[localSessionId] = publicSession.copyToLocal()
+      this.state.sessions.local[localSessionId] = this.copyToLocalSession(publicSession)
       this.$router.replace(`session/${localSessionId}`)
       this.state.sessions.recent = storageWrapper.addRecentSession({
         title: publicSession.title,
@@ -64,19 +64,27 @@ export default defineComponent({
         timestamp: publicSession.date
       }, this.state.sessions.recent)
     },
-    async retrieveSessionFromIPFS(cid: string){
-      let sessionConfig = await this.ipfsWrapper.loadSessionConfig(cid)
+    copyToLocalSession (publicSession: PublicSession): LocalSession {
+      const derivative = new LocalSession()
+      derivative.title = publicSession.title
+      derivative.tracks = publicSession.tracks.map(track => track.clone())
+      derivative.previousCid = publicSession.previousCid
+      return derivative
+    },
+    async retrieveSessionFromIPFS (cid: string) {
+      const sessionConfig = await this.ipfsWrapper.loadSessionConfig(cid)
       const session = new PublicSession(cid, sessionConfig.localTime)
       session.title = sessionConfig.title
       session.previousCid = sessionConfig.origin
       session.tracks = await this.createTracks(sessionConfig.tracks)
-      return this.state.sessions.public[cid] = session
+      this.state.sessions.public[cid] = session
+      return session
     },
-    async createTracks(trackConfigs: TrackConfig[]) {
+    async createTracks (trackConfigs: TrackConfig[]) {
       return Promise.all<Track>(
         trackConfigs.map(async trackConfig => {
           let recording = this.state.recordings[trackConfig.cid]
-          if(recording === undefined) {
+          if (recording === undefined) {
             recording = await this.retrieveRecordingFromIPFS(trackConfig.cid)
           }
           const track = new Track(
@@ -90,16 +98,17 @@ export default defineComponent({
         })
       )
     },
-    async retrieveRecordingFromIPFS(cid: string) {
-      this.log.push({ type: 'msg', s: `retrieving recording with cid:`})
+    async retrieveRecordingFromIPFS (cid: string) {
+      this.log.push({ type: 'msg', s: 'retrieving recording with cid:' })
       this.log.push({ type: 'copyable', s: cid })
       const audioBuffer = await this.ipfsWrapper.loadRecording(cid)
-      return this.state.recordings[cid] = {
+      const recording = this.state.recordings[cid] = {
         cid,
         audioBuffer,
         audioBlob: undefined
       }
-    },
+      return recording
+    }
   }
 })
 </script>

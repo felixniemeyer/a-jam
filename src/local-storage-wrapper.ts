@@ -1,8 +1,8 @@
 const HIST_LENGTH = 100
 
 export interface Settings {
-  defaultRecordingOffset: number
-  playbackDelay: number
+  defaultRecordingOffset: number;
+  playbackDelay: number;
 }
 
 export class RecentSessionEntry {
@@ -31,10 +31,10 @@ export class RecentSessionEntry {
 }
 
 export const storageWrapper = {
-  setDefaultRecordingOffset(v: number) {
+  setDefaultRecordingOffset (v: number) {
     localStorage.setItem('defaultRecordingOffset', v.toString())
   },
-  getRecentSessions() : RecentSessionEntry[] {
+  getRecentSessions (): RecentSessionEntry[] {
     const result = [] as RecentSessionEntry[]
     /**
      * we traverse from the next_id-1 to the smallest possible id
@@ -74,7 +74,7 @@ export const storageWrapper = {
     }
     return result
   },
-  addRecentSession(rse: RecentSessionEntry, list: RecentSessionEntry[]) {
+  addRecentSession (rse: RecentSessionEntry, list: RecentSessionEntry[]) {
     let i
     if ('next_history_id' in localStorage) {
       i = Number(localStorage.getItem('next_history_id'))
@@ -83,17 +83,17 @@ export const storageWrapper = {
     }
     localStorage.setItem('recent_session_' + i, rse.toString())
     localStorage.setItem('next_history_id', (i + 1).toString())
-    if(list !== undefined) {
+    if (list !== undefined) {
       const deduplicated = list.filter(e => e.cid !== rse.cid)
       return [rse].concat(deduplicated)
     } else {
       return [rse]
     }
   },
-  getSettings() {
+  getSettings () {
     const settings = {
       defaultRecordingOffset: 65,
-      playbackDelay: 10,
+      playbackDelay: 10
     }
     if ('playbackDelay' in localStorage) {
       settings.playbackDelay = Number(localStorage.getItem('playbackDelay'))
@@ -102,7 +102,5 @@ export const storageWrapper = {
       settings.defaultRecordingOffset = Number(localStorage.getItem('defaultRecordingOffset'))
     }
     return settings
-  },
+  }
 }
-
-

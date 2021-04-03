@@ -7,7 +7,7 @@ export default defineComponent({
   beforeCreate () {
     document.body.style.setProperty('width', `${document.body.clientWidth}px`)
   },
-  unmounted() {
+  unmounted () {
     document.body.style.removeProperty('width')
-  },
+  }
 })

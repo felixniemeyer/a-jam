@@ -25,21 +25,19 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import Copyable from '@/components/Copyable.vue'
 import Slider from '@/components/Slider.vue'
 
 export default defineComponent({
   components: {
-    Copyable,
     Slider
   },
-  data() {
+  data () {
     return {
       persistDefaultRecordingOffsetTimeout: undefined as NodeJS.Timeout | undefined,
       initialRecordingOffset: this.state.settings.defaultRecordingOffset
     }
   },
-  resetInitialRecordingOffset() {
+  resetInitialRecordingOffset () {
     this.initialRecordingOffset = this.state.settings.defaultRecordingOffset
   },
   updateDefaultRecordingOffset (v: number) {

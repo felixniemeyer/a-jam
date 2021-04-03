@@ -4,13 +4,13 @@ import { LocalSession, PublicSession, Recording } from './types'
 
 export interface State {
   sessions: {
-    recent: RecentSessionEntry[],
-    public: {[cid: string]: PublicSession},
-    local: {[localId: number]: LocalSession},
-    nextLocalSessionId: number
-  }
-  recordings: {[cid: string]: Recording}
-  settings: Settings
+    recent: RecentSessionEntry[];
+    public: {[cid: string]: PublicSession};
+    local: {[localId: number]: LocalSession};
+    nextLocalSessionId: number;
+  };
+  recordings: {[cid: string]: Recording};
+  settings: Settings;
 }
 
 export const state = reactive({
@@ -18,11 +18,11 @@ export const state = reactive({
     recent: [],
     public: {},
     local: {},
-    nextLocalSessionId: 0,
+    nextLocalSessionId: 0
   },
   recordings: {},
   settings: {
     defaultRecordingOffset: 0,
     playbackDelay: 50
-  },
+  }
 } as State)

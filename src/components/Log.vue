@@ -18,8 +18,8 @@ import { defineComponent, PropType } from 'vue'
 import Copyable from '@/components/Copyable.vue'
 
 export interface LogEntry {
-  type: 'msg' | 'copyable'
-  s: string
+  type: 'msg' | 'copyable';
+  s: string;
 }
 
 export default defineComponent({
