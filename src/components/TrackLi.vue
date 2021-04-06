@@ -64,6 +64,7 @@ export default defineComponent({
     }
     .edit {
       @include centered-background-image;
+      cursor: pointer;
       vertical-align: middle;
       display: inline-block;
       width: 2em;

@@ -1,4 +1,4 @@
-import { debug } from "./tools"
+import { debug } from './tools'
 
 const HIST_LENGTH = 100
 
@@ -54,7 +54,7 @@ export class LocalStorageWrapper implements StorageWrapper {
      */
     if ('next_history_id' in localStorage) {
       let i = Number(localStorage.getItem('next_history_id'))
-      debug("next_history_id = " + i)
+      debug('next_history_id = ' + i)
       const smallestId = Number(localStorage.getItem('smallest_history_id')) | 0
       let found = 0
       let newSmallestId = smallestId
@@ -67,7 +67,7 @@ export class LocalStorageWrapper implements StorageWrapper {
             localStorage.removeItem(key)
           } else {
             const rseString = localStorage.getItem(key)
-            debug("rse string = " + rseString)
+            debug('rse string = ' + rseString)
             if (rseString !== null) {
               const rse = RecentSessionEntry.fromString(rseString)
               if (rse.cid in cids) {

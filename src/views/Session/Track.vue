@@ -35,8 +35,8 @@
       right="earlier"
       :factor="1000"
       :decimalPlaces="0"
-      :from="initialOffset-0.100"
-      :to="initialOffset+0.100"
+      :from="offsetOrigin-0.100"
+      :to="offsetOrigin+0.100"
       :value="track.offset"
       @dragEnd="resetInitialOffset"
       @update="updateTrackOffset" />
@@ -63,11 +63,13 @@ export default defineComponent({
     const sessionId = parseInt(this.$route.params.localId as string)
     const session = this.state.sessions.local[sessionId]
     const trackKey = parseInt(this.$route.params.trackKey as string)
+    const track = session.tracks[trackKey]
     return {
       trackKey,
       session,
-      track: session.tracks[trackKey],
-      confirmRemove: false
+      track,
+      confirmRemove: false,
+      offsetOrigin: track.offset
     }
   },
   mounted () {
@@ -82,7 +84,7 @@ export default defineComponent({
     remove () {
       if (this.confirmRemove) {
         this.track.playback?.source.stop() // eslint-disable-line
-        delete this.session.tracks[this.trackKey]
+        this.session.tracks.splice(this.trackKey, 1)
         this.leave()
       } else {
         this.confirmRemove = true
@@ -105,6 +107,9 @@ export default defineComponent({
       if (this.track.playback) {
         this.track.playback.panner.pan.value = v
       }
+    },
+    resetInitialOffset () {
+      this.offsetOrigin = this.track.offset
     },
     updateTrackOffset (v: number) {
       this.track.offset = v

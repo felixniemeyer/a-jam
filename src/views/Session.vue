@@ -10,7 +10,7 @@
     <div class="cornerbutton publish" @click="publish"></div>
     <div class="trackArea">
       <div class="trackList">
-        <TrackC
+        <TrackLi
           v-for="(track, key) in session.tracks"
           :key="key"
           :cid="track.cid"
@@ -25,11 +25,13 @@
         </div>
         <div class='spacer'/>
       </div>
-      <div class='time'
-        :style="{visibility: playing || recording ? 'visible' : 'hidden', left: `calc(3.15em + ${playProgress} * (100% - 3.5em))`}">
+      <div class="hoverstuff">
+        <div class='time'
+          :style="{visibility: playing || recording ? 'visible' : 'hidden', left: `calc(3.15em + ${playProgress} * (100% - 3.5em))`}">
+        </div>
+        <div class="from-time">{{ formatTime(playtime) }}</div>
+        <div class="to-time">{{ formatTime(maxTrackDuration)}}</div>
       </div>
-      <div class="from-time">{{ formatTime(playtime) }}</div>
-      <div class="to-time">{{ formatTime(maxTrackDuration)}}</div>
     </div>
 
     <div class="controls">
@@ -56,14 +58,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import TrackC from '@/components/Track.vue'
+import TrackLi from '@/components/TrackLi.vue'
 import { Track } from '@/types'
 
-import { debug } from '@/tools'
+import { debug, sleep } from '@/tools'
 
 export default defineComponent({
   components: {
-    TrackC
+    TrackLi
   },
   data () {
     const localId = parseInt(this.$route.params.localId as string) // TODO it would be safer to reset these in beforeRouteUpdate
@@ -93,12 +95,18 @@ export default defineComponent({
       return Math.min(1, p / d)
     },
     maxTrackDuration (): number {
-      let maxDuration = 10
+      let maxDuration = 0
       this.session.tracks.forEach(track => {
         if (track.effectiveDuration > maxDuration) {
           maxDuration = track.effectiveDuration
         }
       })
+      if (maxDuration == 0) {
+        maxDuration = 10
+      }
+      if (this.recording && this.playtime > maxDuration) {
+        maxDuration = this.playtime
+      }
       return maxDuration
     }
   },
@@ -111,11 +119,11 @@ export default defineComponent({
     document.removeEventListener('keydown', this.handleKeydown)
   },
   methods: {
-    publish() {
-      this.$router.push(`publish`)
-    }, 
+    publish () {
+      this.$router.push('publish')
+    },
     openSettings () {
-      this.$router.push(`settings`)
+      this.$router.push('settings')
     },
     formatTime (seconds: number) {
       const s = (seconds % 60).toFixed(1)
@@ -161,6 +169,7 @@ export default defineComponent({
         }
       })
       this.playtime = 0
+      this.playing = true
       this.updatePlaytime()
     },
     createPlayback (track: Track) {
@@ -181,11 +190,9 @@ export default defineComponent({
       }
     },
     updatePlaytime () {
+      debug('updating playtime, playing: ', this.playing)
       if (this.playing) {
         this.playtime = this.ac.currentTime - this.playbackStartTime
-        if (this.recording && this.playtime > this.maxTrackDuration) {
-          this.maxTrackDuration = this.playtime
-        }
         requestAnimationFrame(this.updatePlaytime.bind(this))
       }
     },
@@ -214,9 +221,7 @@ export default defineComponent({
         this.stopAllPlaybacks()
         this.recordingChunks = []
         this.playAllTracks()
-        if (this.mediaRecorder) {
-          this.mediaRecorder.start()
-        }
+        this.mediaRecorder?.start() // eslint-disable-line
         this.recording = true
         this.session.dirty = true
       }
@@ -228,7 +233,7 @@ export default defineComponent({
       this.mediaRecorder.ondataavailable = (e) => {
         this.recordingChunks.push(e.data)
       }
-      this.mediaRecorder.onstop = () => {
+      this.mediaRecorder.onstop = async () => {
         const audio = new Blob(this.recordingChunks, {
           type: 'audio/ogg; codecs=opus' // possible source of bugs: unsure whether this is correct on all platforms
         })
@@ -322,21 +327,21 @@ export default defineComponent({
       height: 100%;
       overflow-y: auto;
       overflow-x: hidden;
-    }
-    .recording-placeholder {
-      height: 1em;
-      margin: 1em 0.2em;
-      background-color: #c00;
-      border-radius: 0.5em;
-    }
-    .spacer {
-      height: 2em;
+      .recording-placeholder {
+        height: 1em;
+        margin: 1em 0.2em;
+        background-color: #c00;
+        border-radius: 0.5em;
+      }
+      .spacer {
+        height: 2em;
+      }
     }
     .time {
-      position: fixed;
+      position: absolute;
       z-index: 50;
-      top:5em;
-      height: calc(100% - 10em);
+      top:0em;
+      height: calc(100%);
       background: linear-gradient(90deg, rgba(255, 85, 85, 0), rgb(255, 85, 85) 49%, #fff 50%, #fff0);
       left: 3em;
       width: 0.3em;
