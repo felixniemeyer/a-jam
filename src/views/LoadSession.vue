@@ -18,6 +18,7 @@ import { TrackConfig } from '@/ipfs-wrapper'
 import { LocalSession, PublicSession, Track } from '@/types'
 
 import Log from '@/components/Log.vue'
+import { RecentSessionEntry } from '@/local-storage-wrapper'
 
 export default defineComponent({
   data () {
@@ -57,11 +58,12 @@ export default defineComponent({
       const localSessionId = this.state.sessions.nextLocalSessionId++
       this.state.sessions.local[localSessionId] = this.copyToLocalSession(publicSession)
       this.$router.replace(`session/${localSessionId}`)
-      this.state.sessions.recent = this.storageWrapper.addRecentSession({
-        title: publicSession.title,
-        cid: publicSession.cid,
-        timestamp: publicSession.date
-      }, this.state.sessions.recent)
+      const rse = new RecentSessionEntry(
+        publicSession.cid,
+        publicSession.title,
+        publicSession.date
+      )
+      this.state.sessions.recent = this.storageWrapper.addRecentSession(rse, this.state.sessions.recent)
     },
     copyToLocalSession (publicSession: PublicSession): LocalSession {
       const derivative = new LocalSession()

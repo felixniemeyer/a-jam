@@ -7,7 +7,7 @@
       </div>
       <span class="edit"></span>
     </div>
-    <div class="cornerbutton publish" @click="publish()"></div>
+    <div class="cornerbutton publish" @click="publish"></div>
     <div class="trackArea">
       <div class="trackList">
         <TrackC
@@ -111,8 +111,11 @@ export default defineComponent({
     document.removeEventListener('keydown', this.handleKeydown)
   },
   methods: {
+    publish() {
+      this.$router.push(`publish`)
+    }, 
     openSettings () {
-      this.$router.push(`/session/${this.localId}/settings`)
+      this.$router.push(`settings`)
     },
     formatTime (seconds: number) {
       const s = (seconds % 60).toFixed(1)

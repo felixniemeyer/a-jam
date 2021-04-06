@@ -24,6 +24,7 @@ import { defineComponent } from 'vue'
 
 import { PublicSession, Track } from '@/types'
 import { SessionConfig, TrackConfig } from '@/ipfs-wrapper'
+import { RecentSessionEntry } from '@/local-storage-wrapper'
 
 export default defineComponent({
   data () {
@@ -101,11 +102,12 @@ export default defineComponent({
       this.session.previousCid = cid
       this.session.dirty = false
       this.logLinks(cid)
-      this.state.sessions.recent = this.storageWrapper.addRecentSession({
+      const rse = new RecentSessionEntry(
         cid,
-        title: this.session.title,
-        timestamp: sc.localTime
-      }, this.state.sessions.recent)
+        this.session.title,
+        sc.localTime
+      )
+      this.state.sessions.recent = this.storageWrapper.addRecentSession(rse, this.state.sessions.recent)
     },
     logLinks (cid: string) {
       const params = [

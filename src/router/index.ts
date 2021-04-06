@@ -18,28 +18,27 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/settings',
     name: 'Settings',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "settings" */ '@/views/Settings.vue')
   },
   {
     path: '/session/:localId',
     name: 'Session',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "session" */ '@/views/Session.vue')
   },
   {
-    path: '/sessionLoading/:cid',
-    name: 'SessionLoading',
-    component: () => import(/* webpackChunkName: "sessionloading" */ '@/views/SessionLoading.vue')
+    path: '/session/loadSession/:cid',
+    name: 'LoadSession',
+    component: () => import(/* webpackChunkName: "sessionLoading " */ '@/views/LoadSession.vue')
+  },
+  {
+    path: '/session/:localId/publish',
+    name: 'SessionPublishing',
+    component: () => import(/* webpackChunkName: "sessionPublishing " */ '@/views/Session/Publish.vue')
   },
   {
     path: '/session/:localId/track/:trackKey',
-    name: 'TrackSettings',
-    component: () => import(/* webpackChunkName: "trackSettings" */ '@/views/TrackSettings.vue')
+    name: 'SessionTrack',
+    component: () => import(/* webpackChunkName: "sessionTrack" */ '@/views/Session/Track.vue')
   },
   {
     path: '/error/:type',
