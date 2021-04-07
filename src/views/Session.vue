@@ -70,10 +70,6 @@ export default defineComponent({
   data () {
     const localId = parseInt(this.$route.params.localId as string) // TODO it would be safer to reset these in beforeRouteUpdate
     const session = this.state.sessions.local[localId]
-    if (session === undefined) {
-      this.$router.replace('/')
-      this.$router.push('/error/noSuchLocalSession')
-    }
     return {
       localId,
       session,
@@ -115,7 +111,9 @@ export default defineComponent({
   },
   beforeUnmount () {
     this.stopAllPlaybacks()
-    this.mediaRecorder?.stop() // eslint-disable-line
+    if(this.mediaRecorder?.state !== 'inactive') {
+      this.mediaRecorder!.stop() // eslint-disable-line
+    }
     document.removeEventListener('keydown', this.handleKeydown)
   },
   methods: {
@@ -230,14 +228,8 @@ export default defineComponent({
       debug('initializing media recorder')
       const stream = await this.initUserMedia()
       this.mediaRecorder = new MediaRecorder(stream)
-      this.mediaRecorder.ondataavailable = (e) => {
-        this.recordingChunks.push(e.data)
-      }
-      this.mediaRecorder.onstop = async () => {
-        const audio = new Blob(this.recordingChunks, {
-          type: 'audio/ogg; codecs=opus' // possible source of bugs: unsure whether this is correct on all platforms
-        })
-        this.createTrack(audio)
+      this.mediaRecorder.onstop = () => {
+        this.mediaRecorder!.requestData(this.createTrack.bind(this))
       }
     },
     async initUserMedia () {
