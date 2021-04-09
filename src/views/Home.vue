@@ -6,16 +6,16 @@
     <div class="sessions">
       <div class="sessionButton new" @click="createNewSession">create new session</div>
       <h4 v-if="Object.keys(state.sessions.local).length > 0">open sessions</h4>
-      <p class="sessionButton" v-for="(ls, key) in state.sessions.local" :key="key" @click="openSession(key)">
+      <div class="sessionButton" v-for="(ls, key) in state.sessions.local" :key="key" @click="openSession(key)">
         {{ key }}: {{ ls.title }}
-        <div class="close" @click="closeSession(key)">X</div>
-      </p>
+        <div class="close" @click="closeSession(key)"> X </div>
+      </div>
       <h4 v-if="state.sessions.recent.length > 0">recent sessions</h4>
-      <p class="sessionButton" v-for="rse in state.sessions.recent" :key="rse.cid" @click="loadSession(rse.cid)">
+      <div class="sessionButton" v-for="rse in state.sessions.recent" :key="rse.cid" @click="loadSession(rse.cid)">
         {{ rse.title }} <br />
         <span class='small'>{{ rse.cid }}</span> <br/>
         <i class='date'>{{ Date(rse.timestamp).toLocaleString() }}</i>
-      </p>
+      </div>
     </div>
     <router-link tag="div" to="/info" class="cornerbutton info"></router-link>
     <router-link tag="div" to="/settings" class="cornerbutton settings"></router-link>
@@ -35,7 +35,7 @@ export default defineComponent({
       this.$router.push(`/session/${localSessionId}`)
     },
     openSession (localId: number) {
-      if(localId in this.state.sessions.local) {
+      if (localId in this.state.sessions.local) {
         this.$router.push(`/session/${localId}`)
       }
     },
@@ -78,9 +78,9 @@ export default defineComponent({
       font-size: 0.5em;
     }
     .close {
-      position: absolute; 
-      top: 50%; 
-      right: 1em; 
+      position: absolute;
+      top: 50%;
+      right: 1em;
       transform: translate(0, -50%);
       width: 2em;
       height: 2em;
@@ -88,7 +88,7 @@ export default defineComponent({
       border-radius: 0.3em;
       background-color: $danger;
       font-weight: bold;
-      color: #fff; 
+      color: #fff;
     }
   }
   .cornerbutton{

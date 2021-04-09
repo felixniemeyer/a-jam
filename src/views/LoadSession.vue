@@ -35,18 +35,26 @@ export default defineComponent({
     Log
   },
   mounted () {
-    this.loadSession()
+    this.checkAcAndLoad()
   },
   methods: {
     abort () {
       this.$router.go(-1)
     },
-    checkAudioContext () {
+    checkAcAndLoad () {
       if (this.ac.state === 'suspended') {
-        this.requireInteraction = true
-      } else {
+        this.ac.resume()
+        if (this.ac.state === 'suspended') {
+          this.requireInteraction = true
+        }
+      }
+      if (!this.requireInteraction) {
         this.loadSession()
       }
+    },
+    resumeAcAndLoad () {
+      this.ac.resume()
+      this.loadSession()
     },
     async loadSession () {
       const cid = this.$route.params.cid as string

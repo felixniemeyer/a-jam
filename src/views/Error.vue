@@ -25,8 +25,8 @@ export default defineComponent({
           ]
         case 'unknownPath':
           return [
-            'The path', 
-            this.$route.query.path as string, 
+            'The path',
+            this.$route.query.path as string,
             'could not be matched.'
           ]
         default:

@@ -41,12 +41,12 @@
       <div
         class="play button"
         v-bind:class="{ playing }"
-        @click="this.ac.resume().then(togglePlay.bind(this))"
+        @click="togglePlay"
       ></div>
       <div
         class="record button"
         v-bind:class="{ recording }"
-        @click="this.ac.resume().then(toggleRecord.bind(this))"
+        @click="toggleRecord"
       ></div>
       <span class="shortcut-hint record">
         (r)
@@ -139,11 +139,17 @@ export default defineComponent({
         this.$router.go(-1)
       }
     },
-    togglePlay () {
+    async ensureAcIsRunning () {
+      if (this.ac.state !== 'running') {
+        return this.ac.resume()
+      }
+    },
+    async togglePlay () {
       if (this.playing) {
         this.stopAllPlaybacks()
       } else {
         if (!this.recording) {
+          await this.ensureAcIsRunning()
           this.playAllTracks()
           this.stopTimeout = setTimeout(
             this.stopAllPlaybacks.bind(this),
@@ -188,7 +194,6 @@ export default defineComponent({
       }
     },
     updatePlaytime () {
-      debug('updating playtime, playing: ', this.playing)
       if (this.playing) {
         this.playtime = this.ac.currentTime - this.playbackStartTime
         requestAnimationFrame(this.updatePlaytime.bind(this))
@@ -212,12 +217,12 @@ export default defineComponent({
       }
       if (this.recording) {
         if (this.mediaRecorder !== undefined && this.mediaRecorder.state === 'recording') {
-          await this.mediaRecorder.requestData()
           this.mediaRecorder.stop()
         }
         this.stopAllPlaybacks()
         this.recording = false
       } else {
+        await this.ensureAcIsRunning()
         this.stopAllPlaybacks()
         this.recordingChunks = []
         this.playAllTracks()
@@ -232,6 +237,7 @@ export default defineComponent({
       this.mediaRecorder = new MediaRecorder(stream)
       this.mediaRecorder.ondataavailable = event => {
         this.recordingChunks.push(event.data)
+        debug('added recording chunk')
       }
       this.mediaRecorder.onstop = async () => {
         const audio = new Blob(this.recordingChunks, {
@@ -243,12 +249,15 @@ export default defineComponent({
     },
     async initUserMedia () {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        return await navigator.mediaDevices.getUserMedia({ // todo mediaDevices.enumerateDevices and let user choose his preferred mic (super for mobile devices)
+        const constraints: MediaStreamConstraints = {
           audio: {
             echoCancellation: false,
-            noiseSuppression: false
-          }
-        })
+            noiseSuppression: false,
+            autoGainControl: false
+          },
+          video: false // wäre eigentlich geil, das auch zu ermöglichen => V4 ;)
+        }
+        return await navigator.mediaDevices.getUserMedia(constraints) // todo mediaDevices.enumerateDevices and let user choose his preferred mic (super for mobile devices)
       } else {
         throw Error('getUserMedia not supported on your browser!')
       }
