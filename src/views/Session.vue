@@ -61,7 +61,7 @@ import { defineComponent } from 'vue'
 import TrackLi from '@/components/TrackLi.vue'
 import { Track } from '@/types'
 
-import { debug, sleep } from '@/tools'
+import { debug } from '@/tools'
 
 export default defineComponent({
   components: {
@@ -97,7 +97,7 @@ export default defineComponent({
           maxDuration = track.effectiveDuration
         }
       })
-      if (maxDuration == 0) {
+      if (maxDuration === 0) {
         maxDuration = 10
       }
       if (this.recording && this.playtime > maxDuration) {
@@ -111,17 +111,17 @@ export default defineComponent({
   },
   beforeUnmount () {
     this.stopAllPlaybacks()
-    if(this.mediaRecorder?.state !== 'inactive') {
+    if (this.mediaRecorder !== undefined && this.mediaRecorder?.state !== 'inactive') {
       this.mediaRecorder!.stop() // eslint-disable-line
     }
     document.removeEventListener('keydown', this.handleKeydown)
   },
   methods: {
     publish () {
-      this.$router.push('publish')
+      this.$router.push(`/session/${this.localId}/publish`)
     },
     openSettings () {
-      this.$router.push('settings')
+      this.$router.push(`/session/${this.localId}/settings`)
     },
     formatTime (seconds: number) {
       const s = (seconds % 60).toFixed(1)
@@ -206,13 +206,15 @@ export default defineComponent({
       this.playing = false
       this.playtime = 0
     },
-
     async toggleRecord () {
       if (this.mediaRecorder === undefined) {
         await this.initMediaRecorder()
       }
       if (this.recording) {
-        this.mediaRecorder?.stop() // eslint-disable-line
+        if (this.mediaRecorder !== undefined && this.mediaRecorder.state === 'recording') {
+          await this.mediaRecorder.requestData()
+          this.mediaRecorder.stop()
+        }
         this.stopAllPlaybacks()
         this.recording = false
       } else {
@@ -228,8 +230,15 @@ export default defineComponent({
       debug('initializing media recorder')
       const stream = await this.initUserMedia()
       this.mediaRecorder = new MediaRecorder(stream)
-      this.mediaRecorder.onstop = () => {
-        this.mediaRecorder!.requestData(this.createTrack.bind(this))
+      this.mediaRecorder.ondataavailable = event => {
+        this.recordingChunks.push(event.data)
+      }
+      this.mediaRecorder.onstop = async () => {
+        const audio = new Blob(this.recordingChunks, {
+          type: 'audio/ogg; codecs=opus' // possible source of bugs: unsure whether this is correct on all platforms
+        })
+        debug('audio blob', audio)
+        this.createTrack(audio)
       }
     },
     async initUserMedia () {
@@ -273,9 +282,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
- * {
-  outline: 1px solid green;
-} /** */
 .session {
   width: 100%;
   height: 100%;

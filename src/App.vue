@@ -23,7 +23,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-/* {
+* {
   outline: 1px solid pink;
 } /**/
 body {

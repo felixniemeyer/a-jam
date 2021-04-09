@@ -21,29 +21,35 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "settings" */ '@/views/Settings.vue')
   },
   {
-    path: '/session/:localId',
-    name: 'Session',
-    component: () => import(/* webpackChunkName: "session" */ '@/views/Session.vue')
-  },
-  {
     path: '/session/loadSession/:cid',
     name: 'LoadSession',
     component: () => import(/* webpackChunkName: "sessionLoading " */ '@/views/LoadSession.vue')
   },
   {
-    path: '/session/:localId/publish',
-    name: 'SessionPublishing',
-    component: () => import(/* webpackChunkName: "sessionPublishing " */ '@/views/Session/Publish.vue')
-  },
-  {
-    path: '/session/:localId/track/:trackKey',
-    name: 'SessionTrack',
-    component: () => import(/* webpackChunkName: "sessionTrack" */ '@/views/Session/Track.vue')
+    path: '/session/:localId',
+    name: 'Session',
+    component: () => import(/* webpackChunkName: "session" */ '@/views/Session.vue'),
+    children: [
+      {
+        path: 'publish',
+        name: 'SessionPublishing',
+        component: () => import(/* webpackChunkName: "sessionPublishing " */ '@/views/Session/Publish.vue')
+      },
+      {
+        path: 'trackKey',
+        name: 'SessionTrack',
+        component: () => import(/* webpackChunkName: "sessionTrack" */ '@/views/Session/Track.vue')
+      }
+    ]
   },
   {
     path: '/error/:type',
     name: 'Error',
     component: () => import(/* webpackChunkName: "error" */ '@/views/Error.vue')
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: to => ({ path: '/error/unknownPath', query: { extra: to.fullPath } })
   }
 ]
 

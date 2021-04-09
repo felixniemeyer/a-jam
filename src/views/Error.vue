@@ -4,7 +4,7 @@
     <p v-for="(msg, key) in msgs" :key="key">
       {{msg}}
     </p>
-    <div class="button" @click="$router.replace('/')">done</div>
+    <div class="button" @click="$router.replace('/')">ok</div>
   </div>
 </template>
 
@@ -18,9 +18,16 @@ export default defineComponent({
       switch (type) {
         case 'noSuchLocalSession':
           return [
-            'The url contained a local session id for which no local session was in memory.',
+            'The route contained a local session id for which no local session was in memory:',
+            this.$route.query.localId as string,
             'Local sessions get swiped when you reload the app.',
             'Make sure to publish changes, that you want persited.'
+          ]
+        case 'unknownPath':
+          return [
+            'The path', 
+            this.$route.query.path as string, 
+            'could not be matched.'
           ]
         default:
           return ['Unknown Error:', type]
@@ -33,7 +40,7 @@ export default defineComponent({
 <style lang="scss">
 .errorPage{
   p {
-    color: $warn;
+    color: $danger;
   }
   .button {
     @include clickable-surface;

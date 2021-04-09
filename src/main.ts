@@ -2,18 +2,40 @@ import { createApp, reactive } from 'vue'
 import App from './App.vue'
 import router from './router'
 
-import { State, state } from '@/state'
+import { State } from '@/state'
 import { IPFSWrapper } from '@/ipfs-wrapper'
 import { LocalStorageWrapper, StorageWrapper } from '@/local-storage-wrapper'
 
+const state = reactive({
+  sessions: {
+    recent: [],
+    public: {},
+    local: {},
+    nextLocalSessionId: 0
+  },
+  recordings: {},
+  settings: {
+    defaultRecordingOffset: 0,
+    playbackDelay: 50
+  }
+} as State)
 const ac = new AudioContext()
 const ipfsWrapper = new IPFSWrapper(ac)
+const storageWrapper = new LocalStorageWrapper()
 ipfsWrapper.initialize()
 
 router.beforeEach((to, from, next) => {
   const sessionExists = (to.params.localId as string) in state.sessions.local
-  if(to.name === 'Session' && !sessionExists) {
-    next('/error/noSuchLocalSession')
+  if (to.name === 'Session' && !sessionExists) {
+    next({
+      name: 'Error',
+      params: {
+        type: 'noSuchLocalSession'
+      },
+      query: {
+        localId: to.params.localId
+      }
+    })
   } else {
     next()
   }
@@ -22,10 +44,10 @@ router.beforeEach((to, from, next) => {
 createApp(App)
   .use(({ config }) => {
     Object.assign(config.globalProperties, {
-      state: state,
+      state,
+      ac,
       ipfsWrapper,
-      storageWrapper: new LocalStorageWrapper(),
-      ac
+      storageWrapper
     })
   })
   .use(router)
@@ -34,8 +56,8 @@ createApp(App)
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     state: State;
-    ipfsWrapper: IPFSWrapper;
     ac: AudioContext;
+    ipfsWrapper: IPFSWrapper;
     storageWrapper: StorageWrapper;
   }
 }

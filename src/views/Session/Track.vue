@@ -126,7 +126,7 @@ export default defineComponent({
     @include clickable-surface;
     display: inline-block;
     &.danger {
-      background-color: $warn;
+      background-color: $danger;
       color: #fff;
     }
   }

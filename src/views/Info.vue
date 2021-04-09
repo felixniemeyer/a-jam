@@ -38,7 +38,7 @@ export default defineComponent({
     color: rgb(18, 92, 134)
   }
   .local-storage{
-    color: $warn;
+    color: $danger;
   }
   .author{
     .address{
