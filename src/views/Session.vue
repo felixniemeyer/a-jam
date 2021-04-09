@@ -1,5 +1,6 @@
 <template>
   <div class="session">
+    <a ref="hiddenDownload" class="hiddenDownload"/>
     <div class="cornerbutton back" @click="$router.go(-1)"></div>
     <div class="title" @click="openSettings()">
       <div class="text">
@@ -35,22 +36,26 @@
     </div>
 
     <div class="controls">
+      <div class="download button"
+        @click="renderAndDownload">exp</div>
       <span class="shortcut-hint play">
         (space)
       </span>
       <div
         class="play button"
-        v-bind:class="{ playing }"
+        :class="{ playing }"
         @click="togglePlay"
       ></div>
       <div
         class="record button"
-        v-bind:class="{ recording }"
+        :class="{ recording }"
         @click="toggleRecord"
       ></div>
       <span class="shortcut-hint record">
         (r)
       </span>
+      <div class="mic button"
+        @click="chooseMic">mic</div>
     </div>
   </div>
 </template>
@@ -62,6 +67,8 @@ import TrackLi from '@/components/TrackLi.vue'
 import { Track } from '@/types'
 
 import { debug } from '@/tools'
+
+import toWav from 'audiobuffer-to-wav'
 
 export default defineComponent({
   components: {
@@ -159,10 +166,34 @@ export default defineComponent({
         }
       }
     },
+    async renderAndDownload() {
+      const renderStartTime = 0.5
+      const oac = new OfflineAudioContext(2, (this.maxTrackDuration + renderStartTime) * 44100, 44100)
+      this.session.tracks.forEach(track => {
+        const playback = this.createPlayback(track, oac)
+        if (track.offset > 0) {
+          playback.source.start(renderStartTime, track.offset)
+        } else {
+          playback.source.start(renderStartTime - track.offset)
+        }
+        debug("started playback for offline ac")
+      })
+      const renderedBuffer = await oac.startRendering()
+      const wav = toWav(renderedBuffer)
+      const blob = new Blob([wav], {type: "audio/wav"});
+
+      const link = this.$refs.hiddenDownload as HTMLLinkElement
+      link.setAttribute('href', URL.createObjectURL(blob))
+      link.setAttribute('download', this.session.title)
+      link.click()
+    },
     playAllTracks () {
       this.stopAllPlaybacks()
-      this.session.tracks.forEach(this.createPlayback)
+      this.session.tracks.forEach(track => {
+        track.playback = this.createPlayback(track, this.ac)
+      })
       this.playbackStartTime = this.ac.currentTime + this.state.settings.playbackDelay
+      debug(this.playbackStartTime)
       this.session.tracks.forEach(track => {
         if (track.playback !== undefined) {
           if (track.offset > 0) {
@@ -176,18 +207,18 @@ export default defineComponent({
       this.playing = true
       this.updatePlaytime()
     },
-    createPlayback (track: Track) {
-      const source = this.ac.createBufferSource()
+    createPlayback (track: Track, ac: AudioContext | OfflineAudioContext) {
+      const source = ac.createBufferSource()
       source.buffer = track.recording.audioBuffer
-      const panner = this.ac.createStereoPanner()
+      const panner = ac.createStereoPanner()
       panner.pan.value = track.panning
-      const gain = this.ac.createGain()
+      const gain = ac.createGain()
       gain.gain.value = track.volume
       source
         .connect(gain)
         .connect(panner)
-        .connect(this.ac.destination)
-      track.playback = {
+        .connect(ac.destination)
+      return {
         source,
         panner,
         gain
@@ -249,8 +280,10 @@ export default defineComponent({
     },
     async initUserMedia () {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        debug("micDeviceId", this.state.settings.micDeviceId)
         const constraints: MediaStreamConstraints = {
           audio: {
+            deviceId: this.state.settings.micDeviceId,
             echoCancellation: false,
             noiseSuppression: false,
             autoGainControl: false
@@ -292,6 +325,13 @@ export default defineComponent({
 
 <style lang="scss">
 .session {
+  .hiddenDownload {
+    position: fixed;
+    width: 1px;
+    height: 1px;
+    top: 0;
+    left: 0;
+  }
   width: 100%;
   height: 100%;
   .title {
@@ -387,6 +427,7 @@ export default defineComponent({
       background-position: center;
       border-radius: 2em;
       box-shadow: 0 0 0.5em #0008;
+      cursor: pointer;
       &.record {
         background-image: url("~@/assets/icons/record.svg");
         cursor: pointer;
@@ -402,6 +443,10 @@ export default defineComponent({
         &.playing {
           background-image: url("~@/assets/icons/stop-play.svg");
         }
+      }
+      &.download,
+      &.mic {
+        line-height: 4em;
       }
       vertical-align: middle;
     }

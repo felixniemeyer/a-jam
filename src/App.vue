@@ -15,15 +15,11 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  beforeMount () {
-    this.state.sessions.recent = this.storageWrapper.getRecentSessions()
-    this.state.settings = this.storageWrapper.getSettings()
-  }
 })
 </script>
 
 <style lang="scss">
-* {
+/* {
   outline: 1px solid pink;
 } /**/
 body {

@@ -124,10 +124,9 @@ export default defineComponent({
 $dotsize: 3em;
 
 .slider {
-  width: 96%;
-  margin: 1em 2%;
+  margin: 1em;
   border-radius: 0.2em;
-  box-shadow: 0 0 0.5em #8888;
+  box-shadow: $standard-box-shadow;
   padding: 0.5em 0;
   .bar{
     position: relative;
@@ -145,7 +144,7 @@ $dotsize: 3em;
       top: 50%;
       transform: translate(-50%, -50%);
       border-radius: $dotsize / 2;
-      background-color: rgb(132, 205, 223);
+      background-color: $selected;
       box-sizing: border-box;
       border: 0.4em solid rgb(9, 112, 138);
     }

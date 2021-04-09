@@ -1,9 +1,12 @@
 $danger: rgb(204, 61, 17);
+$selected:rgb(132, 205, 223);
+
+$standard-box-shadow: 0 0 1em #0004;
 
 @mixin clickable-surface {
   cursor: pointer;
   user-select: none;
-  box-shadow: 0 0 1em #0004;
+  box-shadow: $standard-box-shadow;
   border-radius: 0.3em;
   padding: 1em;
   margin: 1em;

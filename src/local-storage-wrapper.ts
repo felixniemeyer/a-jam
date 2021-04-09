@@ -5,6 +5,7 @@ const HIST_LENGTH = 100
 export interface Settings {
   defaultRecordingOffset: number;
   playbackDelay: number;
+  micDeviceId: string | undefined;
 }
 
 export class RecentSessionEntry {
@@ -34,12 +35,22 @@ export class RecentSessionEntry {
 
 export interface StorageWrapper {
   setDefaultRecordingOffset (v: number): void;
+  setPlaybackDelay (v: number): void;
+  setMicDeviceId (micId: string): void;
   getRecentSessions (): RecentSessionEntry[];
   addRecentSession (rse: RecentSessionEntry, list: RecentSessionEntry[]): RecentSessionEntry[];
   getSettings (): Settings;
 }
 
 export class LocalStorageWrapper implements StorageWrapper {
+  setPlaybackDelay (v: number): void {
+    localStorage.setItem('playbackDelay', v.toString())
+  }
+
+  setMicDeviceId (micId: string): void {
+    localStorage.setItem('micDeviceId', micId)
+  }
+
   setDefaultRecordingOffset (v: number) {
     localStorage.setItem('defaultRecordingOffset', v.toString())
   }
@@ -107,13 +118,17 @@ export class LocalStorageWrapper implements StorageWrapper {
   getSettings () {
     const settings = {
       defaultRecordingOffset: 0.065,
-      playbackDelay: 0.010
+      playbackDelay: 0.010,
+      micDeviceId: undefined
     }
     if ('playbackDelay' in localStorage) {
       settings.playbackDelay = Number(localStorage.getItem('playbackDelay'))
     }
     if ('defaultRecordingOffset' in localStorage) {
       settings.defaultRecordingOffset = Number(localStorage.getItem('defaultRecordingOffset'))
+    }
+    if ('micDeviceId' in localStorage) {
+      settings.defaultRecordingOffset = Number(localStorage.getItem('micDeviceId'))
     }
     return settings
   }

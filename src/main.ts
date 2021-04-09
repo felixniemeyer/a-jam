@@ -6,22 +6,19 @@ import { State } from '@/state'
 import { IPFSWrapper } from '@/ipfs-wrapper'
 import { LocalStorageWrapper, StorageWrapper } from '@/local-storage-wrapper'
 
+const storageWrapper = new LocalStorageWrapper()
 const state = reactive({
   sessions: {
-    recent: [],
+    recent: storageWrapper.getRecentSessions(),
     public: {},
     local: {},
     nextLocalSessionId: 0
   },
   recordings: {},
-  settings: {
-    defaultRecordingOffset: 0,
-    playbackDelay: 50
-  }
+  settings: storageWrapper.getSettings()
 } as State)
 const ac = new AudioContext()
 const ipfsWrapper = new IPFSWrapper(ac)
-const storageWrapper = new LocalStorageWrapper()
 ipfsWrapper.initialize()
 
 router.beforeEach((to, from, next) => {
