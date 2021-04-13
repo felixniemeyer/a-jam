@@ -51,7 +51,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="sass">
+<style lang="scss">
 
 .track-settings{
   position: absolute;

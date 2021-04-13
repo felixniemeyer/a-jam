@@ -31,9 +31,20 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "session" */ '@/views/Session.vue'),
     children: [
       {
+        path: 'edit',
+        name: 'SessionEditor',
+        component: () => import(/* webpackChunkName: "sessionEditor" */ '@/views/Session/Editor.vue')
+
+      },
+      {
         path: 'publish',
-        name: 'SessionPublishing',
+        name: 'SessionPublish',
         component: () => import(/* webpackChunkName: "sessionPublishing " */ '@/views/Session/Publish.vue')
+      },
+      {
+        path: 'settings',
+        name: 'SessionSettings',
+        component: () => import(/* webpackChunkName: "sessionTrack" */ '@/views/Session/Settings.vue')
       },
       {
         path: 'trackKey',
