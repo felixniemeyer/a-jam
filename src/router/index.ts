@@ -29,19 +29,17 @@ const routes: Array<RouteRecordRaw> = [
     path: '/session/:localId',
     name: 'Session',
     component: () => import(/* webpackChunkName: "session" */ '@/views/Session.vue'),
-    children: [
-      {
-        path: 'publish',
-        name: 'SessionPublishing',
-        component: () => import(/* webpackChunkName: "sessionPublishing " */ '@/views/Session/Publish.vue')
-      },
-      {
-        path: 'trackKey',
-        name: 'SessionTrack',
-        component: () => import(/* webpackChunkName: "sessionTrack" */ '@/views/Session/Track.vue')
-      }
-    ]
   },
+  {
+    path: '/session/:localId/publish',
+    name: 'SessionPublish',
+    component: () => import(/* webpackChunkName: "sessionPublish " */ '@/views/Session/Publish.vue')
+  },
+  {
+    path: '/session/:localId/track/:key',
+    name: 'SessionTrack',
+    component: () => import(/* webpackChunkName: "sessionTrack" */ '@/views/Session/Track.vue')
+  }, 
   {
     path: '/error/:type',
     name: 'Error',
@@ -49,7 +47,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: to => ({ path: '/error/unknownPath', query: { extra: to.fullPath } })
+    redirect: to => ({ path: '/error/unknownPath', query: { path: to.fullPath } })
   }
 ]
 

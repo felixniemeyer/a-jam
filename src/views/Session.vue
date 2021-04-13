@@ -125,10 +125,16 @@ export default defineComponent({
   },
   methods: {
     publish () {
-      this.$router.push(`/session/${this.localId}/publish`)
+      debug(this.$route.path)
+      this.$router.push({
+        name: "SessionPublish", 
+        params: {
+          localId: this.localId
+        }
+      })
     },
     openSettings () {
-      this.$router.push(`/session/${this.localId}/settings`)
+      this.$router.push(this.$route.path + `/settings`)
     },
     formatTime (seconds: number) {
       const s = (seconds % 60).toFixed(1)
@@ -166,7 +172,7 @@ export default defineComponent({
         }
       }
     },
-    async renderAndDownload() {
+    async renderAndDownload () {
       const renderStartTime = 0.5
       const oac = new OfflineAudioContext(2, (this.maxTrackDuration + renderStartTime) * 44100, 44100)
       this.session.tracks.forEach(track => {
@@ -176,11 +182,11 @@ export default defineComponent({
         } else {
           playback.source.start(renderStartTime - track.offset)
         }
-        debug("started playback for offline ac")
+        debug('started playback for offline ac')
       })
       const renderedBuffer = await oac.startRendering()
       const wav = toWav(renderedBuffer)
-      const blob = new Blob([wav], {type: "audio/wav"});
+      const blob = new Blob([wav], { type: 'audio/wav' })
 
       const link = this.$refs.hiddenDownload as HTMLLinkElement
       link.setAttribute('href', URL.createObjectURL(blob))
@@ -280,7 +286,7 @@ export default defineComponent({
     },
     async initUserMedia () {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        debug("micDeviceId", this.state.settings.micDeviceId)
+        debug('micDeviceId', this.state.settings.micDeviceId)
         const constraints: MediaStreamConstraints = {
           audio: {
             deviceId: this.state.settings.micDeviceId,

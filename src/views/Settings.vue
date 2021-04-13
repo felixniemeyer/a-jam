@@ -70,7 +70,7 @@ export default defineComponent({
     },
     requestMediaDevices () {
       navigator.mediaDevices.enumerateDevices().then(devices => {
-        const audioInputs = devices.filter(device => (debug(device), device.kind === 'audioinput'))
+        const audioInputs = devices.filter(device => device.kind === 'audioinput')
         audioInputs.forEach(mic => {
           if (!(mic.groupId in this.mics)) {
             this.mics[mic.groupId] = {}
