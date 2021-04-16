@@ -120,15 +120,16 @@ export class LocalStorageWrapper implements StorageWrapper {
       defaultRecordingOffset: 0.065,
       playbackDelay: 0.010,
       micDeviceId: undefined
-    }
+    } as Settings
     if ('playbackDelay' in localStorage) {
       settings.playbackDelay = Number(localStorage.getItem('playbackDelay'))
     }
     if ('defaultRecordingOffset' in localStorage) {
       settings.defaultRecordingOffset = Number(localStorage.getItem('defaultRecordingOffset'))
     }
-    if ('micDeviceId' in localStorage) {
-      settings.defaultRecordingOffset = Number(localStorage.getItem('micDeviceId'))
+    const micDeviceId = localStorage.getItem('micDeviceId')
+    if (micDeviceId !== null) {
+      settings.micDeviceId = micDeviceId
     }
     return settings
   }

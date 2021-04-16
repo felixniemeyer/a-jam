@@ -91,6 +91,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+
 .settings{
   word-wrap: break-word;
   .inline-button{

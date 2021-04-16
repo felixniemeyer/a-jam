@@ -1,6 +1,6 @@
 import { createApp, reactive } from 'vue'
 import App from './App.vue'
-import router from './router'
+import makeRouter from './router'
 
 import { State } from '@/state'
 import { IPFSWrapper } from '@/ipfs-wrapper'
@@ -21,23 +21,6 @@ const ac = new AudioContext()
 const ipfsWrapper = new IPFSWrapper(ac)
 ipfsWrapper.initialize()
 
-router.beforeEach((to, from, next) => {
-  const sessionExists = (to.params.localId as string) in state.sessions.local
-  if (to.name === 'Session' && !sessionExists) {
-    next({
-      name: 'Error',
-      params: {
-        type: 'noSuchLocalSession'
-      },
-      query: {
-        localId: to.params.localId
-      }
-    })
-  } else {
-    next()
-  }
-})
-
 createApp(App)
   .use(({ config }) => {
     Object.assign(config.globalProperties, {
@@ -47,7 +30,7 @@ createApp(App)
       storageWrapper
     })
   })
-  .use(router)
+  .use(makeRouter(state))
   .mount('#app')
 
 declare module '@vue/runtime-core' {

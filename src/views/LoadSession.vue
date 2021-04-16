@@ -58,14 +58,13 @@ export default defineComponent({
     },
     async loadSession () {
       const cid = this.$route.params.cid as string
-      this.$router.push(`loadSession/${cid}`)
       let publicSession = this.state.sessions.public[cid]
       if (publicSession === undefined) {
         publicSession = await this.retrieveSessionFromIPFS(cid)
       }
       const localSessionId = this.state.sessions.nextLocalSessionId++
       this.state.sessions.local[localSessionId] = this.copyToLocalSession(publicSession)
-      this.$router.replace(`session/${localSessionId}`)
+      this.$router.replace(`session/${localSessionId}/edit`)
       const rse = new RecentSessionEntry(
         publicSession.cid,
         publicSession.title,

@@ -8,11 +8,11 @@
       <a v-if="errors.length > 0" href="https://unstoppabledomains.com/r/ac3b8968ad7245e" target="_blank" class="ud-affiliate">
         Want a blockchain domain so that users can easily find your music on the decentralized web? <b class="nowrap">Click here.</b>
       </a>
-      <div class="button" @click="this.router.go(-1)">
+      <div class="button" @click="this.$router.go(-1)">
         return to session
       </div>
     </div>
-    <div v-else class="button" @click="this.router.go(-1)">
+    <div v-else class="button" @click="this.$router.go(-1)">
       abort
     </div>
   </div>
@@ -45,7 +45,6 @@ export default defineComponent({
   },
   methods: {
     async publish () {
-      this.$router.push(`session/${this.localId}/publish`)
       try {
         this.log.push({ type: 'msg', s: 'publishing session...' })
         await this.publishRecordings()
@@ -102,6 +101,7 @@ export default defineComponent({
       this.session.previousCid = cid
       this.session.dirty = false
       this.logLinks(cid)
+      this.done = true
       const rse = new RecentSessionEntry(
         cid,
         this.session.title,
@@ -131,6 +131,7 @@ export default defineComponent({
     }
   }
 })
+
 </script>
 
 <style lang="scss">
