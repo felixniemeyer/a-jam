@@ -14,7 +14,7 @@
         <TrackLi
           v-for="(track, key) in session.tracks"
           :key="key"
-          :cid="track.cid"
+          :cid="track.recording.cid"
           :name="track.name"
           :relativeDuration="track.effectiveDuration / maxTrackDuration"
           @editTrack="$router.push(`/session/${this.localId}/track/${key}`)"
