@@ -36,7 +36,6 @@ function makeRoutes (state: State): Array<RouteRecordRaw> {
           path: 'edit',
           name: 'SessionEditor',
           component: () => import(/* webpackChunkName: "sessionEditor" */ '@/views/Session/Editor.vue')
-
         },
         {
           path: 'publish',

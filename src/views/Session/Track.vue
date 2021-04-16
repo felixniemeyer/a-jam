@@ -20,7 +20,7 @@
       :from="0.0"
       :to="2.0"
       :value="track.volume"
-      @update="v => $emit('update-volume', v)" />
+      @update="updateVolume" />
     <Slider
       name="panning"
       left="left"
@@ -28,7 +28,7 @@
       :from="-1.0"
       :to="1.0"
       :value="track.panning"
-      @update="v => $emit('update-panning', v)" />
+      @update="updatePanning" />
     <Slider
       name="offset in ms (requires re-play)"
       left="delayed"
@@ -39,7 +39,7 @@
       :to="offsetOrigin+0.100"
       :value="track.offset"
       @dragEnd="resetInitialOffset"
-      @update="updateTrackOffset" />
+      @update="updateOffset" />
     <div>
       <div class="inline-button" @click="leave">back to session</div>
     </div>
@@ -59,10 +59,9 @@ export default defineComponent({
   },
 
   data () {
-    // "$router.push(`/session/${this.localId}/track/${key}`)"
     const sessionId = parseInt(this.$route.params.localId as string)
     const session = this.state.sessions.local[sessionId]
-    const trackKey = parseInt(this.$route.params.trackKey as string)
+    const trackKey = parseInt(this.$route.params.key as string)
     const track = session.tracks[trackKey]
     return {
       trackKey,
@@ -96,13 +95,13 @@ export default defineComponent({
     rename () {
       this.track.name = (this.$refs.name as HTMLInputElement).value
     },
-    updateTrackVolume (v: number) {
+    updateVolume (v: number) {
       this.track.volume = v
       if (this.track.playback) {
         this.track.playback.gain.gain.value = v
       }
     },
-    updateTrackPanning (v: number) {
+    updatePanning (v: number) {
       this.track.panning = v
       if (this.track.playback) {
         this.track.playback.panner.pan.value = v
@@ -111,7 +110,7 @@ export default defineComponent({
     resetInitialOffset () {
       this.offsetOrigin = this.track.offset
     },
-    updateTrackOffset (v: number) {
+    updateOffset (v: number) {
       this.track.offset = v
       this.track.effectiveDuration = this.track.recording.audioBuffer.duration - v
     }

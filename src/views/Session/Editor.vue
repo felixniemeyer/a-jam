@@ -114,14 +114,14 @@ export default defineComponent({
     }
   },
   mounted () {
-    document.addEventListener('keydown', this.handleKeydown)
+    document.addEventListener('keyup', this.handleKeydown)
   },
   beforeUnmount () {
     this.stopAllPlaybacks()
     if (this.mediaRecorder !== undefined && this.mediaRecorder?.state !== 'inactive') {
       this.mediaRecorder!.stop() // eslint-disable-line
     }
-    document.removeEventListener('keydown', this.handleKeydown)
+    document.removeEventListener('keyup', this.handleKeydown)
   },
   methods: {
     publish () {
