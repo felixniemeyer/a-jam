@@ -17,7 +17,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="sass">
+<style lang="scss">
 .ac-dialogue{
   .button {
     @include clickable-surface;

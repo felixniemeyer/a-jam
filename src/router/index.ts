@@ -23,7 +23,7 @@ function makeRoutes (state: State): Array<RouteRecordRaw> {
       component: () => import(/* webpackChunkName: "settings" */ '@/views/Settings.vue')
     },
     {
-      path: '/session/loadSession/:cid',
+      path: '/loadSession/:cid',
       name: 'LoadSession',
       component: () => import(/* webpackChunkName: "sessionLoading " */ '@/views/LoadSession.vue')
     },
@@ -54,7 +54,7 @@ function makeRoutes (state: State): Array<RouteRecordRaw> {
         }
       ],
       beforeEnter (to, from, next) {
-        const sessionExists = (to.params.localId as string) in state.sessions.local
+        const sessionExists = Number(to.params.localId as string) in state.sessions.local
         if (!sessionExists) {
           next({
             name: 'Error',
@@ -77,7 +77,15 @@ function makeRoutes (state: State): Array<RouteRecordRaw> {
     },
     {
       path: '/:pathMatch(.*)*',
-      redirect: to => ({ path: '/error/unknownPath', query: { path: to.fullPath } })
+      redirect: to => ({
+        name: 'Error',
+        params: {
+          type: 'unknownPath'
+        },
+        query: {
+          path: to.fullPath
+        }
+      })
     }
   ]
 }

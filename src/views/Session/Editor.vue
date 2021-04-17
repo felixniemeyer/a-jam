@@ -69,8 +69,10 @@ import { Track } from '@/types'
 import { debug } from '@/tools'
 
 import toWav from 'audiobuffer-to-wav'
+import Keyhandler from '@/mixins/Keyhandler'
 
 export default defineComponent({
+  mixins: [Keyhandler],
   components: {
     TrackLi
   },
@@ -113,15 +115,11 @@ export default defineComponent({
       return maxDuration
     }
   },
-  mounted () {
-    document.addEventListener('keyup', this.handleKeydown)
-  },
   beforeUnmount () {
     this.stopAllPlaybacks()
     if (this.mediaRecorder !== undefined && this.mediaRecorder?.state !== 'inactive') {
       this.mediaRecorder!.stop() // eslint-disable-line
     }
-    document.removeEventListener('keyup', this.handleKeydown)
   },
   methods: {
     publish () {
@@ -146,7 +144,7 @@ export default defineComponent({
       const m = Math.floor(seconds / 60)
       return `${m.toString().padStart(2, '0')}:${s.padStart(4, '0')}`
     },
-    handleKeydown ($event: KeyboardEvent) {
+    handleKeyup ($event: KeyboardEvent) {
       if ($event.key === ' ') {
         this.togglePlay()
       }
@@ -283,7 +281,7 @@ export default defineComponent({
       }
       this.mediaRecorder.onstop = async () => {
         const audio = new Blob(this.recordingChunks, {
-          type: 'audio/ogg; codecs=opus' // possible source of bugs: unsure whether this is correct on all platforms
+          type: 'audio/ogg; codecs=opus'
         })
         debug('audio blob', audio)
         this.createTrack(audio)
@@ -313,6 +311,7 @@ export default defineComponent({
         if (arrayBuffer instanceof ArrayBuffer) {
           this.ac.decodeAudioData(arrayBuffer).then(
             (audioBuffer) => {
+              debug(audioBuffer)
               this.session.tracks.push(new Track(this.state.settings.defaultRecordingOffset, {
                 cid: undefined,
                 audioBlob,

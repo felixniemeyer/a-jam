@@ -16,6 +16,7 @@
         <span class='small'>{{ rse.cid }}</span> <br/>
         <i class='date'>{{ Date(rse.timestamp).toLocaleString() }}</i>
       </div>
+      <div class='spacer'/>
     </div>
     <router-link tag="div" to="/info" class="cornerbutton info"></router-link>
     <router-link tag="div" to="/settings" class="cornerbutton settings"></router-link>
@@ -43,12 +44,7 @@ export default defineComponent({
       delete this.state.sessions.local[localId]
     },
     loadSession (cid: string) {
-      this.$router.push({
-        path: '/loadSession',
-        query: {
-          cid
-        }
-      })
+      this.$router.push(`/loadSession/${cid}`)
     }
   }
 })
@@ -64,31 +60,36 @@ export default defineComponent({
   h1 {
     margin-bottom: 0.1em;
   }
-  .sessionButton{
-    position: relative;
-    @include clickable-surface;
-    &.new{
-      padding: 1.5em 1em;
-      margin-bottom: 2.5em;
+  .sessions{
+    .sessionButton{
+      position: relative;
+      @include clickable-surface;
+      &.new{
+        padding: 1.5em 1em;
+        margin-bottom: 2.5em;
+      }
+      .small {
+        font-size: 0.5em;
+      }
+      .date {
+        font-size: 0.5em;
+      }
+      .close {
+        position: absolute;
+        top: 50%;
+        right: 1em;
+        transform: translate(0, -50%);
+        width: 2em;
+        height: 2em;
+        line-height: 2em;
+        border-radius: 0.3em;
+        background-color: $danger;
+        font-weight: bold;
+        color: #fff;
+      }
     }
-    .small {
-      font-size: 0.5em;
-    }
-    .date {
-      font-size: 0.5em;
-    }
-    .close {
-      position: absolute;
-      top: 50%;
-      right: 1em;
-      transform: translate(0, -50%);
-      width: 2em;
-      height: 2em;
-      line-height: 2em;
-      border-radius: 0.3em;
-      background-color: $danger;
-      font-weight: bold;
-      color: #fff;
+    .spacer{
+      height: 3em;
     }
   }
   .cornerbutton{

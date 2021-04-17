@@ -36,7 +36,7 @@ export default defineComponent({
     }
   },
   methods: {
-    handleKeydown ($event: KeyboardEvent) {
+    handleKeyup ($event: KeyboardEvent) {
       if ($event.key === 'Escape') {
         this.leave()
       }

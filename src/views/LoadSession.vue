@@ -1,11 +1,13 @@
 <template>
   <div class="loading">
-    <h1> loading... </h1>
-    <AudioContextPrompt v-if="requireInteraction !== undefined" @clicked='loadSession'/>
-    <Log
-      :entries="log"/>
-    <p v-for="(error, i) in errors" :key="i" class="error">{{ error }}</p>
-    <div class="button" @click="abort">
+    <AudioContextPrompt v-if="requireInteraction" @clicked='loadSession'/>
+    <div v-else>
+      <h1> loading... </h1>
+      <Log
+        :entries="log"/>
+      <p v-for="(error, i) in errors" :key="i" class="error">{{ error }}</p>
+    </div>
+    <div class="button" @click="leave">
       {{ errors.length > 0 ? 'ok' : 'abort' }}
     </div>
   </div>
@@ -18,6 +20,7 @@ import { TrackConfig } from '@/ipfs-wrapper'
 import { LocalSession, PublicSession, Track } from '@/types'
 
 import Log from '@/components/Log.vue'
+import AudioContextPrompt from '@/components/AudioContextPrompt.vue'
 import { RecentSessionEntry } from '@/local-storage-wrapper'
 
 export default defineComponent({
@@ -32,13 +35,14 @@ export default defineComponent({
     }
   },
   components: {
+    AudioContextPrompt,
     Log
   },
   mounted () {
     this.checkAcAndLoad()
   },
   methods: {
-    abort () {
+    leave () {
       this.$router.go(-1)
     },
     checkAcAndLoad () {
@@ -49,6 +53,7 @@ export default defineComponent({
         }
       }
       if (!this.requireInteraction) {
+        this.requireInteraction = false
         this.loadSession()
       }
     },
@@ -60,11 +65,19 @@ export default defineComponent({
       const cid = this.$route.params.cid as string
       let publicSession = this.state.sessions.public[cid]
       if (publicSession === undefined) {
+        this.log.push({ type: 'msg', s: 'loading from ipfs.' })
         publicSession = await this.retrieveSessionFromIPFS(cid)
+      } else {
+        this.log.push({ type: 'msg', s: 'found session in memory.' })
       }
       const localSessionId = this.state.sessions.nextLocalSessionId++
       this.state.sessions.local[localSessionId] = this.copyToLocalSession(publicSession)
-      this.$router.replace(`session/${localSessionId}/edit`)
+      this.$router.replace({
+        name: 'SessionEditor',
+        params: {
+          localId: localSessionId
+        }
+      })
       const rse = new RecentSessionEntry(
         publicSession.cid,
         publicSession.title,
