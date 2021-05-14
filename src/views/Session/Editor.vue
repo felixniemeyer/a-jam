@@ -19,12 +19,23 @@
           :relativeDuration="track.effectiveDuration / maxTrackDuration"
           @editTrack="$router.push(`/session/${this.localId}/track/${key}`)"
           />
+        <div v-if="session.tracks.length === 0 && !recording" class="placeholder">
+          There are no tracks yet. Start with <br/>
+          - recording a track, <br/>
+          - uploading a file or <br/>
+          - importing by cid.
+        </div>
         <div
           v-if="recording"
           class="recording-placeholder"
           :style="{width: `calc(3em + ${playProgress} * (100% - 3.4em)`}">
         </div>
-        <div class='spacer'/>
+        <div
+          class="importers">
+          import recording
+          <div class="button" @click="importRecording">by cid</div>
+          <div class="button">from upload</div>
+        </div>
       </div>
       <div class="hoverstuff">
         <div class='time'
@@ -36,8 +47,6 @@
     </div>
 
     <div class="controls">
-      <div class="download button"
-        @click="renderAndDownload">exp</div>
       <span class="shortcut-hint play">
         (space)
       </span>
@@ -54,8 +63,10 @@
       <span class="shortcut-hint record">
         (r)
       </span>
-      <div class="mic button"
-        @click="chooseMic">mic</div>
+      <div class="button2 download"
+        @click="renderAndDownload"></div>
+      <div class="button2 mic"
+        @click="chooseMic"></div>
     </div>
   </div>
 </template>
@@ -139,12 +150,20 @@ export default defineComponent({
         }
       })
     },
+    importRecording () {
+      this.$router.push({
+        name: 'ByCidImporter',
+        params: {
+          localId: this.localId
+        }
+      })
+    },
     formatTime (seconds: number) {
       const s = (seconds % 60).toFixed(1)
       const m = Math.floor(seconds / 60)
       return `${m.toString().padStart(2, '0')}:${s.padStart(4, '0')}`
     },
-    handleKeyup ($event: KeyboardEvent) {
+    handleKeydown ($event: KeyboardEvent) {
       if ($event.key === ' ') {
         this.togglePlay()
       }
@@ -390,8 +409,27 @@ export default defineComponent({
         background-color: #c00;
         border-radius: 0.5em;
       }
-      .spacer {
-        height: 2em;
+      .placeholder {
+        text-align: center;
+        color: #888;
+        margin: 1em 1em 0.5em 1em;
+      }
+      .importers {
+        height: 4em;
+        width: 100%;
+        text-align: center;
+        .button {
+          cursor: pointer;
+          padding: 0.5em;
+          margin: 0.5em;
+          display: inline-block;
+          background-color: #fff8;
+          border: 0.1em solid #444;
+          border-radius: 0.5em;
+          &:hover {
+            background-color: #fff;
+          }
+        }
       }
     }
     .time {
@@ -427,17 +465,22 @@ export default defineComponent({
     overflow-y: hidden;
     width: 100%;
     margin:0;
-    .button {
+    .button, .button2 {
+      cursor: pointer;
       display: inline-block;
+      background-repeat: no-repeat;
+      background-position: center;
+      box-shadow: 0 0 0.5em #0008;
+      &:hover {
+        box-shadow: 0 0 0.2em #0008;
+      }
+    }
+    .button {
       height: 4em;
       width: 4em;
       margin: 0.5em;
       background-size: 100%;
-      background-repeat: no-repeat;
-      background-position: center;
       border-radius: 2em;
-      box-shadow: 0 0 0.5em #0008;
-      cursor: pointer;
       &.record {
         background-image: url("~@/assets/icons/record.svg");
         cursor: pointer;
@@ -454,11 +497,24 @@ export default defineComponent({
           background-image: url("~@/assets/icons/stop-play.svg");
         }
       }
-      &.download,
-      &.mic {
-        line-height: 4em;
-      }
       vertical-align: middle;
+    }
+    .button2 {
+      position: absolute;
+      top: 1em;
+      border-radius: 0.5em;
+      width: 3em;
+      height: 3em;
+      background-color: #444;
+      background-size: 80%;
+      &.mic {
+        right: 1em;
+        background-image: url("~@/assets/icons/white/mic.svg");
+      }
+      &.download {
+        left: 1em;
+        background-image: url("~@/assets/icons/white/download.svg");
+      }
     }
     .shortcut-hint {
       display: inline-block;

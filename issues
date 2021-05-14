@@ -11,11 +11,12 @@
 
 - V3 
 	- Architectural 
-		- Vuex
-		- Vue Router (to enable browser back and forth buttons, bookmarks...)
-		- Segregate track data and audio nodes
-		- use "defineComponent" instead of classes
+		- D(decided against): Vuex
+		- D: Vue Router (to enable browser back and forth buttons, bookmarks...)
+		- D: Segregate track data and audio nodes
+		- D: use "defineComponent" instead of classes
 	- Features 
+		- D: Export master audio
 		- Merge Sessions
 			- on page trackinfo, click "merge session" 
 			- Show recent sessions
@@ -29,6 +30,8 @@
 		- Mute, Solo tracks
 		- Select playback time
 			- Create start flags
+		- Start new session with file upload
+			- Use case: s.b. has recorded something and wants to share it / work on it
 	- Track Settings
 		- D(in V2): Offset
 		- Filter
@@ -43,12 +46,9 @@
 		- pin a foreign project on local ipfs node on load
 			- enable automatic in settings (default: auto) 
 			- manually in session settings
-	- Start new session with file upload
-		- Use case: s.b. has recorded something and wants to share it / work on it
 	- Jam session config object versions and migrations
 	- Ask ipfs community for help with connecting to session origin
 		- Post list of connection failures
-	- Export master audio
 	- Sharing links only one line high (it's enough), maybe make them wider? 100% - 2em? left: 1em
 	- Sharing links on project 
 	- Do some manual work and hardcode some offsets for different browsers
@@ -65,7 +65,7 @@
 		- wrapper
 			- scrolling content
 			- abs positioned stuff
-	- playback delay: 
+	- Playback delay: 
 		- add the 5 ms on playback, not on the track (possible: delay and offset are both set) 
 		- => this will make sure the track offset equals the default track offset (instead now: track offset = default + 5)
 	- bugfixes: stop track on removal

@@ -30,6 +30,16 @@ export default defineComponent({
     entries: {
       type: Array as PropType<LogEntry[]>
     }
+  },
+  watch: {
+    entries: {
+      handler (oldval, newval) { // eslint-disable-line
+        setTimeout(() => {
+          window.scrollTo(0, document.body.scrollHeight)
+        }, 0)
+      },
+      deep: true
+    }
   }
 })
 </script>

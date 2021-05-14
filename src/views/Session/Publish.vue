@@ -15,6 +15,7 @@
     <div v-else class="button" @click="this.$router.go(-1)">
       abort
     </div>
+    <div class="spacer"></div>
   </div>
 </template>
 
@@ -136,7 +137,7 @@ export default defineComponent({
 
 <style lang="scss">
 
-.publishing, .loading, .dialogue{
+.publishing{
   .button {
     @include clickable-surface;
   }
@@ -150,6 +151,10 @@ export default defineComponent({
   }
   .nowrap {
     white-space: nowrap;
+  }
+  .spacer {
+    width: 1em;
+    height: 5em;
   }
 }
 

@@ -41,7 +41,7 @@ body {
 }
 
 .error {
-  color: rgb(128, 9, 9);
+  color: rgb(128 + 64, 9, 9);
 }
 
 </style>

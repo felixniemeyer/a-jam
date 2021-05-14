@@ -33,7 +33,7 @@ function makeRoutes (state: State): Array<RouteRecordRaw> {
       component: () => import(/* webpackChunkName: "session" */ '@/views/Session.vue'),
       children: [
         {
-          path: 'edit',
+          path: 'editor',
           name: 'SessionEditor',
           component: () => import(/* webpackChunkName: "sessionEditor" */ '@/views/Session/Editor.vue')
         },
@@ -51,6 +51,16 @@ function makeRoutes (state: State): Array<RouteRecordRaw> {
           path: 'track/:key',
           name: 'SessionTrack',
           component: () => import(/* webpackChunkName: "sessionTrack" */ '@/views/Session/Track.vue')
+        },
+        {
+          path: 'byCidImporter',
+          name: 'ByCidImporter',
+          component: () => import(/* webpackChunkName: "sessionTrack" */ '@/views/Session/ByCidImporter.vue')
+        },
+        {
+          path: 'fromUploadImporter',
+          name: 'FromUploadImporter',
+          component: () => import(/* webpackChunkName: "sessionTrack" */ '@/views/Session/FromUploadImporter.vue')
         }
       ],
       beforeEnter (to, from, next) {

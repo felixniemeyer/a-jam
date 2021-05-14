@@ -116,32 +116,30 @@ export class IPFSWrapper {
     })
   }
 
-  loadRecording (cid: string) {
-    return new Promise<AudioBuffer>((resolve, reject) => {
-      if (this.node !== undefined) {
-        (async node => {
-          const data = node.cat(cid)
-          const chunks = []
-          for await (const chunk of data) {
-            chunks.push(chunk)
-          }
-          const audio = new Blob(chunks, { type: 'audio/ogg; codecs=opus' })
-          const fileReader = new FileReader()
-          fileReader.onloadend = () => {
-            const arrayBuffer = fileReader.result
-            if (arrayBuffer instanceof ArrayBuffer) {
-              this.ac.decodeAudioData(arrayBuffer).then(
-                audioBuffer => { resolve(audioBuffer) }
-              )
-            } else {
-              reject(Error('track audio data from ipfs could not be read into an ArrayBuffer'))
-            }
-          }
-          fileReader.readAsArrayBuffer(audio)
-        })(this.node)
-      } else {
-        reject(NO_CONNECTION_ERROR)
+  async loadRecording (cid: string) {
+    if (this.node === undefined) {
+      throw (NO_CONNECTION_ERROR)
+    } else {
+      const data = this.node.cat(cid)
+      const chunks = []
+      for await (const chunk of data) {
+        chunks.push(chunk)
       }
-    })
+      const audio = new Blob(chunks, { type: 'audio/ogg; codecs=opus' })
+      return await new Promise<AudioBuffer>((resolve, reject) => {
+        const fileReader = new FileReader()
+        fileReader.onloadend = () => {
+          const arrayBuffer = fileReader.result
+          if (arrayBuffer instanceof ArrayBuffer) {
+            this.ac.decodeAudioData(arrayBuffer).then(
+              audioBuffer => { resolve(audioBuffer) }
+            )
+          } else {
+            reject(Error('track audio data from ipfs could not be read into an ArrayBuffer'))
+          }
+        }
+        fileReader.readAsArrayBuffer(audio)
+      })
+    }
   }
 }

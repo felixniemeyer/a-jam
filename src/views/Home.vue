@@ -33,11 +33,11 @@ export default defineComponent({
     createNewSession () {
       const localSessionId = this.state.sessions.nextLocalSessionId++
       this.state.sessions.local[localSessionId] = new LocalSession()
-      this.$router.push(`/session/${localSessionId}/edit`)
+      this.$router.push(`/session/${localSessionId}/editor`)
     },
     openSession (localId: number) {
       if (localId in this.state.sessions.local) {
-        this.$router.push(`/session/${localId}/edit`)
+        this.$router.push(`/session/${localId}/editor`)
       }
     },
     closeSession (localId: number) {

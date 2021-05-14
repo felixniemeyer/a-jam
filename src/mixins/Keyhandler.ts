@@ -6,13 +6,13 @@ import { defineComponent } from 'vue'
  */
 export default defineComponent({
   mounted () {
-    document.addEventListener('keyup', this.handleKeyup)
+    document.addEventListener('keydown', this.handleKeydown)
   },
   unmounted () {
-    document.removeEventListener('keyup', this.handleKeyup)
+    document.removeEventListener('keydown', this.handleKeydown)
   },
   methods: {
-    handleKeyup () {
+    handleKeydown () {
       debug('no keyhandler implemented!')
     }
   }

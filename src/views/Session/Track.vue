@@ -1,18 +1,17 @@
 <template>
   <div class="track-settings">
-    <div v-if="track.cid !== undefined">
-      <p> this track refers to this audio file: </p>
-      <Copyable :text="track.cid"/>
+    <div v-if="track.recording.cid !== undefined">
+      <p> recording cid: </p>
+      <Copyable :text="track.recording.cid"/>
     </div>
     <div>
       <div class="danger inline-button" tabindex="0" @click="remove" @blur="confirmRemove = false">
         {{confirmRemove ? "confirm remove track" : "remove track"}}
       </div>
     </div>
-    <input :value="track.name" ref="name" @keyup="submitOnEnter">
-    <div>
-      <div class="inline-button" @click="rename">rename track</div>
-    </div>
+    <p>track name:
+      <input :value="track.name" ref="name">
+    </p>
     <Slider
       name="volume"
       left="mute"
@@ -41,7 +40,7 @@
       @dragEnd="resetInitialOffset"
       @update="updateOffset" />
     <div>
-      <div class="inline-button" @click="leave">back to session</div>
+      <div class="inline-button" @click="renameAndLeave">back to session</div>
     </div>
   </div>
 </template>
@@ -51,13 +50,15 @@ import { defineComponent } from 'vue'
 
 import Slider from '@/components/Slider.vue'
 import Copyable from '@/components/Copyable.vue'
+import Keyhandler from '@/mixins/Keyhandler'
+import WidthFreezer from '@/mixins/WidthFreezer'
 
 export default defineComponent({
   components: {
     Slider,
     Copyable
   },
-
+  mixins: [Keyhandler, WidthFreezer],
   data () {
     const sessionId = parseInt(this.$route.params.localId as string)
     const session = this.state.sessions.local[sessionId]
@@ -75,9 +76,9 @@ export default defineComponent({
     (this.$refs.name as HTMLInputElement).select()
   },
   methods: {
-    submitOnEnter ($event: KeyboardEvent) {
-      if ($event.key === 'Enter') {
-        this.rename()
+    handleKeydown ($event: KeyboardEvent) {
+      if ($event.key === 'Escape' || $event.key === 'Enter') {
+        this.renameAndLeave()
       }
     },
     remove () {
@@ -88,6 +89,10 @@ export default defineComponent({
       } else {
         this.confirmRemove = true
       }
+    },
+    renameAndLeave () {
+      this.rename()
+      this.leave()
     },
     leave () {
       this.$router.go(-1)
