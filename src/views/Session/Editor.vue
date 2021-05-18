@@ -20,10 +20,15 @@
           @editTrack="$router.push(`/session/${this.localId}/track/${key}`)"
           />
         <div v-if="session.tracks.length === 0 && !recording" class="placeholder">
-          There are no tracks yet. Start with <br/>
-          - recording a track, <br/>
-          - uploading a file or <br/>
-          - importing by cid.
+          <p>
+          There are no tracks yet.
+          </p>
+          Start with:
+          <div>
+            - recording a track, <br/>
+            - uploading a local file or <br/>
+            - importing one by cid.
+          </div>
         </div>
         <div
           v-if="recording"
@@ -32,9 +37,9 @@
         </div>
         <div
           class="importers">
-          import recording
-          <div class="button" @click="importRecording">by cid</div>
-          <div class="button">from upload</div>
+          import recording...
+          <div class="button" @click="importRecordingByCid">by cid</div>
+          <div class="button" @click="importRecordingFromFile">from file</div>
         </div>
       </div>
       <div class="hoverstuff">
@@ -150,7 +155,15 @@ export default defineComponent({
         }
       })
     },
-    importRecording () {
+    importRecordingFromFile () {
+      this.$router.push({
+        name: 'FromFileImporter',
+        params: {
+          localId: this.localId
+        }
+      })
+    },
+    importRecordingByCid () {
       this.$router.push({
         name: 'ByCidImporter',
         params: {
@@ -413,6 +426,11 @@ export default defineComponent({
         text-align: center;
         color: #888;
         margin: 1em 1em 0.5em 1em;
+        div {
+          display: inline-block;
+          text-align: left;
+          vertical-align: top;
+        }
       }
       .importers {
         height: 4em;

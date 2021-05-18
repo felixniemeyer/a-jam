@@ -20,9 +20,10 @@ import { defineComponent } from 'vue'
 
 import WidthFreezer from '@/mixins/WidthFreezer'
 import { Track } from '@/types'
+import Keyhandler from '@/mixins/Keyhandler'
 
 export default defineComponent({
-  mixins: [WidthFreezer],
+  mixins: [WidthFreezer, Keyhandler],
   data () {
     return {
       localId: Number(this.$route.params.localId),
@@ -35,6 +36,14 @@ export default defineComponent({
   methods: {
     goBack () {
       this.$router.go(-1)
+    },
+    handleKeydown ($event: KeyboardEvent) {
+      if ($event.key === 'Escape') {
+        this.goBack()
+      }
+      if ($event.key === 'Enter') {
+        this.importRecording()
+      }
     },
     async importRecording () {
       const inputEl = this.$refs.cidInput as HTMLInputElement
@@ -58,14 +67,10 @@ export default defineComponent({
           audioBlob: undefined
         }
       }
-      const track = new Track(
-        0,
-        recording
+      const track = Track.fromRecording(
+        recording,
+        `cid ${cid.slice(0, 4)}...${cid.slice(-4)} (imported)`
       )
-      track.name = `imported from cid ${cid.slice(0, 4)}...${cid.slice(-4)}`
-      track.volume = 1
-      track.panning = 0
-
       this.state.sessions.local[this.localId].tracks.push(track)
 
       this.goBack()

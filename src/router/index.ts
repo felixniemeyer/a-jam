@@ -58,9 +58,9 @@ function makeRoutes (state: State): Array<RouteRecordRaw> {
           component: () => import(/* webpackChunkName: "sessionTrack" */ '@/views/Session/ByCidImporter.vue')
         },
         {
-          path: 'fromUploadImporter',
-          name: 'FromUploadImporter',
-          component: () => import(/* webpackChunkName: "sessionTrack" */ '@/views/Session/FromUploadImporter.vue')
+          path: 'fromFileImporter',
+          name: 'FromFileImporter',
+          component: () => import(/* webpackChunkName: "sessionTrack" */ '@/views/Session/FromFileImporter.vue')
         }
       ],
       beforeEnter (to, from, next) {

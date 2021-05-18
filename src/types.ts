@@ -46,6 +46,17 @@ export class Track {
     clone.panning = this.panning
     return clone
   }
+
+  static fromRecording (rec: Recording, name: string) {
+    const track = new Track(
+      0,
+      rec
+    )
+    track.name = name
+    track.volume = 1
+    track.panning = 0
+    return track
+  }
 }
 
 export interface Recording {
