@@ -2,9 +2,9 @@
 	- most recent entries are added on top
 	- entries can be broken down, which is expressed by indentation
 	- prepending the following prefixes has the following meaning: 
-		- "D([<comment>]): " = done
-		- "R([<comment>]): " = removed
-		- "WIP([<name>]): " = work started by <name> at <date>
+		- "D[(<comment>)]: " = done
+		- "R[(<comment>)]: " = removed
+		- "WIP[(<name>)]: " = work started by <name> at <date>
 */
 
 - Pin 
