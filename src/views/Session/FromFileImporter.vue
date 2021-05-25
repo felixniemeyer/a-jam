@@ -53,10 +53,10 @@ export default defineComponent({
       }
     },
     importRecordings () {
-      if(this.fileList === undefined || this.fileList.length === 0) {
-        this.error = "no files selected"
+      if (this.fileList === undefined || this.fileList.length === 0) {
+        this.error = 'no files selected'
       } else {
-        const promises :Array<Promise<void>> = []
+        const promises: Array<Promise<void>> = []
         Array.from(this.fileList).forEach(file => {
           promises.push(
             this.importRecording(file)
