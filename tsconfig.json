@@ -19,7 +19,8 @@
       "vue-property-decorator", 
       "chai",
       "color-hash",
-      "ipfs"
+      "ipfs", 
+      "audiobuffer-to-wav"
     ],
     "paths": {
       "@/*": [

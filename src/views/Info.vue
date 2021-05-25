@@ -1,5 +1,5 @@
 <template>
-  <div class='cornerbutton back' @click="this.$emit('goHome')">
+  <div class='cornerbutton back' @click="$router.go(-1)">
   </div>
   <div class='container'>
     <h1>a-jam</h1>
@@ -19,17 +19,14 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
+import { defineComponent } from 'vue'
 import Copyable from '@/components/Copyable.vue'
 
-@Options({
+export default defineComponent({
   components: {
     Copyable
-  },
-  emits: ['goHome']
+  }
 })
-export default class Info extends Vue {
-}
 </script>
 
 <style lang="scss">
@@ -41,7 +38,7 @@ export default class Info extends Vue {
     color: rgb(18, 92, 134)
   }
   .local-storage{
-    color: $warn;
+    color: $danger;
   }
   .author{
     .address{

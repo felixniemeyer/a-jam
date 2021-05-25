@@ -13,33 +13,35 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
-import { Prop } from 'vue-property-decorator'
+import { defineComponent, PropType } from 'vue'
 
 import Copyable from '@/components/Copyable.vue'
 
-class LogEntry {
-  constructor (
-    public type: 'msg' | 'copyable',
-    public s: string
-  ) {
-    setTimeout(() => {
-      window.scrollTo(0, document.body.scrollHeight)
-    }, 100)
-  }
+export interface LogEntry {
+  type: 'msg' | 'copyable';
+  s: string;
 }
 
-@Options({
+export default defineComponent({
   components: {
     Copyable
+  },
+  props: {
+    entries: {
+      type: Array as PropType<LogEntry[]>
+    }
+  },
+  watch: {
+    entries: {
+      handler (oldval, newval) { // eslint-disable-line
+        setTimeout(() => {
+          window.scrollTo(0, document.body.scrollHeight)
+        }, 0)
+      },
+      deep: true
+    }
   }
 })
-default class Log extends Vue {
-  @Prop() entries: LogEntry[] = []
-}
-
-export { Log as default, LogEntry }
-
 </script>
 
 <style lang="scss">

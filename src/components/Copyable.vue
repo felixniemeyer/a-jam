@@ -6,27 +6,30 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component'
-import { Prop } from 'vue-property-decorator'
+import { defineComponent } from 'vue'
 
-@Options({
-  components: {
-  }
-})
-export default class Copyable extends Vue {
-  @Prop() text!: string
-  visible = false
-  copyCid (event: Event) {
-    if (event.target instanceof HTMLTextAreaElement) {
-      event.target.select()
-      document.execCommand('copy')
-      this.visible = true
-      setTimeout(() => {
-        this.visible = false
-      }, 1000)
+export default defineComponent({
+  props: {
+    text: String
+  },
+  data () {
+    return {
+      visible: false
+    }
+  },
+  methods: {
+    copyCid (event: Event) {
+      if (event.target instanceof HTMLTextAreaElement) {
+        event.target.select()
+        document.execCommand('copy')
+        this.visible = true
+        setTimeout(() => {
+          this.visible = false
+        }, 1000)
+      }
     }
   }
-}
+})
 </script>
 
 <style lang="scss">
