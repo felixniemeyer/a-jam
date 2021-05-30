@@ -7,7 +7,12 @@
 		- "WIP[(<name>)]: " = work started by <name> at <date>
 */
 
-- Pin 
+- Infrastructure update
+	- raspberry configure ipfs node that can do websocket connections
+		- behind an nginx somehow...
+		- nathanael
+		- test: check whether i can ipfs dht findpeer <the one from the webapp>
+	- implement pinning service 
 
 - V3 
 	- Architectural 

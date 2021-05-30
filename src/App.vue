@@ -9,12 +9,37 @@
   <p v-else-if="ipfsWrapper.state === 'initializing'">
     connecting to ipfs: {{ ipfsWrapper.state }}
   </p>
+  <div v-if="showIpfsInfo" class="ipfs-info" @click="checkIpfsId">
+    ipfs id: {{ipfsId}}
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  data () {
+    return {
+      showIpfsInfo: true,
+      ipfsId: ''
+    }
+  },
+  mounted () {
+    this.checkIpfsId()
+  },
+  methods: {
+    checkIpfsId () {
+      this.ipfsWrapper.getIpfsNodeId().then(
+        id => {
+          if (this.ipfsId !== id) {
+            this.ipfsId = id
+          }
+        }
+      ).catch(() => {
+        this.ipfsId = 'none (ipfs not connected. click to refresh)'
+      })
+    }
+  }
 })
 </script>
 
@@ -22,6 +47,20 @@ export default defineComponent({
 /* {
   outline: 1px solid pink;
 } /**/
+
+.ipfs-info {
+  z-index: 400;
+  position: fixed;
+  bottom: 9em;
+  right: 1em;
+  background-color: #080;
+  color: #fff;
+  opacity: 0.5;
+  width: 20em;
+  text-align: right;
+  word-wrap: break-word;
+}
+
 body {
   position: absolute;
   width: 100%;

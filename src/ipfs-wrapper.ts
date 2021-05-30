@@ -1,6 +1,8 @@
 import { Ref, ref } from 'vue'
 import ipfs from 'ipfs'
 import { BaseName } from 'multibase'
+import PeerId from 'peer-id'
+import Multiaddr from 'multiaddr'
 
 const NO_CONNECTION_ERROR = Error('ipfs not connected')
 
@@ -40,10 +42,25 @@ export class IPFSWrapper {
     return new Promise((resolve, reject) => {
       if (this.node === undefined && this.state.value !== 'initializing') {
         this.state.value = 'initializing'
-        const settings = {
+        const options = {
+          config: {
+            Bootstrap: ['/dns4/nathanael.in/tcp/443/ws'],
+            Addresses: {},
+            Discovery: {
+              MDNS: {},
+              webRTCStar: {}
+            }
+          }
         }
-        ipfs.create(settings).then(
+        ipfs.create().then(
           node => {
+            setInterval(() => {
+              console.log('peers:')
+              node.swarm.peers({}).then(peers => {
+                console.log(peers)
+              })
+            }, 5000)
+            console.log('ipfs node', node)
             this.node = node
             this.state.value = 'initialized'
             resolve(node)
@@ -62,7 +79,10 @@ export class IPFSWrapper {
       if (this.node === undefined) {
         reject(NO_CONNECTION_ERROR)
       } else {
-        return this.node.id().then(identity => { resolve(identity.id) })
+        return this.node.id().then(identity => {
+          console.log(identity)
+          resolve(identity.id)
+        })
       }
     })
   }
