@@ -7,13 +7,6 @@
 		- "WIP[(<name>)]: " = work started by <name> at <date>
 */
 
-- Infrastructure update
-	- raspberry configure ipfs node that can do websocket connections
-		- behind an nginx somehow...
-		- nathanael
-		- test: check whether i can ipfs dht findpeer <the one from the webapp>
-	- implement pinning service 
-
 - V3 
 	- Architectural 
 		- D(decided against): Vuex
@@ -22,6 +15,8 @@
 		- D: use "defineComponent" instead of classes
 	- Features 
 		- D: Export master audio
+		- Loop playback
+			- generate a new recording in every loop, choose the best loop afterwards!
 		- Merge Sessions
 			- on page trackinfo, click "merge session" 
 			- Show recent sessions

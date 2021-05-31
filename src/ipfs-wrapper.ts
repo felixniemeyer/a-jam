@@ -1,7 +1,7 @@
 import { Ref, ref } from 'vue'
 import ipfs from 'ipfs'
 import { BaseName } from 'multibase'
-import PeerId from 'peer-id'
+import { debug, isDev } from './tools'
 import Multiaddr from 'multiaddr'
 
 const NO_CONNECTION_ERROR = Error('ipfs not connected')
@@ -35,6 +35,7 @@ export class IPFSWrapper {
   baseName: BaseName = 'base32'
   gatewayURL = 'gateway.ipfs.io'
   appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
+  home = Multiaddr('/dns4/nathanael.in/tcp/4403/wss/p2p/12D3KooWQ69GBBDf5Pd5t2cZYySaRe17hFV6XgrZKkVGMEjqEeob')
 
   constructor (public ac: AudioContext) {}
 
@@ -42,25 +43,12 @@ export class IPFSWrapper {
     return new Promise((resolve, reject) => {
       if (this.node === undefined && this.state.value !== 'initializing') {
         this.state.value = 'initializing'
-        const options = {
-          config: {
-            Bootstrap: ['/dns4/nathanael.in/tcp/443/ws'],
-            Addresses: {},
-            Discovery: {
-              MDNS: {},
-              webRTCStar: {}
-            }
-          }
-        }
         ipfs.create().then(
           node => {
-            setInterval(() => {
-              console.log('peers:')
-              node.swarm.peers({}).then(peers => {
-                console.log(peers)
-              })
-            }, 5000)
-            console.log('ipfs node', node)
+            debug(node)
+            node.bootstrap.add(this.home)
+            node.swarm.connect(this.home)
+            if(isDev) this.logPeers()
             this.node = node
             this.state.value = 'initialized'
             resolve(node)
@@ -72,6 +60,17 @@ export class IPFSWrapper {
         )
       }
     })
+  }
+
+  logPeers() {
+    setInterval(() => {
+      console.log('peers:')
+      if(this.node !== undefined) {
+        this.node.swarm.peers({}).then(peers => {
+          console.log(peers)
+        })
+      }
+    }, 10000)
   }
 
   getIpfsNodeId () {

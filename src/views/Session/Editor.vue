@@ -193,10 +193,10 @@ export default defineComponent({
       }
     },
     async togglePlay () {
-      if (this.playing) {
-        this.stopAllPlaybacks()
-      } else {
-        if (!this.recording) {
+      if (!this.recording) {
+        if (this.playing) {
+          this.stopAllPlaybacks()
+        } else {
           await this.ensureAcIsRunning()
           this.playAllTracks()
           this.stopTimeout = setTimeout(

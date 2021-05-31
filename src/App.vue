@@ -20,7 +20,7 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   data () {
     return {
-      showIpfsInfo: true,
+      showIpfsInfo: false,
       ipfsId: ''
     }
   },
