@@ -48,7 +48,9 @@ export class IPFSWrapper {
             debug(node)
             node.bootstrap.add(this.home)
             node.swarm.connect(this.home)
-            if(isDev) this.logPeers()
+            if (isDev) {
+              this.logPeers()
+            }
             this.node = node
             this.state.value = 'initialized'
             resolve(node)
@@ -62,10 +64,10 @@ export class IPFSWrapper {
     })
   }
 
-  logPeers() {
+  logPeers () {
     setInterval(() => {
       console.log('peers:')
-      if(this.node !== undefined) {
+      if (this.node !== undefined) {
         this.node.swarm.peers({}).then(peers => {
           console.log(peers)
         })
