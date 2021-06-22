@@ -71,12 +71,12 @@
 	- Choose recording device in the settings and/or on first recording: mediaDevices.enumerateDevices
 
 - Hotfixes 
-	- implement a "save-input" button, that 
+	- D: implement a "save-input" button, that 
 		- fixes body width on focus
 		- releases the fix on blur
 		- so that on mobile bringin up the keyboar would not affect the layout
 		- alternative: fix width on menu entry
-	- ajam => a-jam title
+	- D: ajam => a-jam title
 
 - pre release
 	- D(removed reconstruction from end time + introduced default rec offset): Reduce latency (firefox e.g.) 
