@@ -1,13 +1,9 @@
 <template>
   <div class="log">
     <div v-for="(entry, index) in entries" :key="index">
-      <p class="msg" v-if="entry.type === 'msg'">
-        {{ entry.s }}
-      </p>
-      <div v-else>
-        <Copyable
-          :text="entry.s"/>
-      </div>
+      <h3 class="headline" v-if="entry.type === 'headline'"> {{ entry.s }} </h3>
+      <Copyable v-else-if="entry.type === 'copyable'" :text="entry.s"/>
+      <p class="msg" v-else> {{ entry.s }} </p>
     </div>
   </div>
 </template>
@@ -18,7 +14,7 @@ import { defineComponent, PropType } from 'vue'
 import Copyable from '@/components/Copyable.vue'
 
 export interface LogEntry {
-  type: 'msg' | 'copyable';
+  type: 'msg' | 'copyable' | 'headline';
   s: string;
 }
 
@@ -49,6 +45,9 @@ export default defineComponent({
   font-family: monospace;
   .msg {
     margin: 1em 1em 0 1em;
+  }
+  .headline {
+    margin-top: 2em;
   }
 }
 </style>

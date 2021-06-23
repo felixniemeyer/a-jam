@@ -1,16 +1,16 @@
 <template>
   <div class="publishing">
-    <h1> publishing... </h1>
+    <h1> publishing session... </h1>
     <Log
       :entries="log"/>
     <p v-for="(error, i) in errors" :key="i" class="error">{{ error }}</p>
     <div v-if="done">
-      <a v-if="errors.length > 0" href="https://unstoppabledomains.com/r/ac3b8968ad7245e" target="_blank" class="ud-affiliate">
-        Want a blockchain domain so that users can easily find your music on the decentralized web? <b class="nowrap">Click here.</b>
-      </a>
       <div class="button" @click="this.$router.go(-1)">
         return to session
       </div>
+      <a href="https://unstoppabledomains.com/r/ac3b8968ad7245e" target="_blank" class="ud-affiliate">
+        Want a blockchain domain so that users can easily find your music on the decentralized web? <b class="nowrap">Click here.</b>
+      </a>
     </div>
     <div v-else class="button" @click="this.$router.go(-1)">
       abort
@@ -47,7 +47,6 @@ export default defineComponent({
   methods: {
     async publish () {
       try {
-        this.log.push({ type: 'msg', s: 'publishing session...' })
         await this.publishRecordings()
         await this.publishSession()
       } catch (e) {
@@ -117,11 +116,12 @@ export default defineComponent({
       const paramString = params.join('&')
       this.log.push({ type: 'msg', s: 'jam session is now public on ipfs at:' })
       this.log.push({ type: 'copyable', s: cid })
+      this.log.push({ type: 'headline', s: 'share' })
+      this.log.push({ type: 'msg', s: '(click any link to copy)' })
       this.log.push({ type: 'msg', s: 'link for browsers that support ipfs: ' })
       this.log.push({ type: 'copyable', s: `ipns://${this.ipfsWrapper.appIPNSIdentifier}/?${paramString}` })
       this.log.push({ type: 'msg', s: 'link for all browsers: ' })
       this.log.push({ type: 'copyable', s: `https://${this.ipfsWrapper.gatewayURL}/ipns/${this.ipfsWrapper.appIPNSIdentifier}/?${paramString}` })
-      this.log.push({ type: 'msg', s: '(click any link to copy)' })
     },
     copyToPublicSession (cid: string, date: number): PublicSession {
       const publication = new PublicSession(cid, date)
@@ -140,6 +140,8 @@ export default defineComponent({
 .publishing{
   .button {
     @include clickable-surface;
+    margin-top: 2em;
+    margin-bottom: 2em;
   }
   .ud-affiliate {
     display: block;
