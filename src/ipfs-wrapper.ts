@@ -1,8 +1,7 @@
 import { Ref, ref } from 'vue'
 import ipfs from 'ipfs'
 import { BaseName } from 'multibase'
-import { debug, isDev } from './tools'
-import Multiaddr from 'multiaddr'
+import { debug } from './tools'
 
 const NO_CONNECTION_ERROR = Error('ipfs not connected')
 
@@ -33,9 +32,8 @@ export class IPFSWrapper {
   state: Ref<string> = ref('uninitialized')
   node: ipfs.IPFS | undefined = undefined
   baseName: BaseName = 'base32'
-  gatewayURL = 'gateway.ipfs.io'
+  gatewayURL = 'ipfs.io'
   appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
-  home = Multiaddr('/dns4/nathanael.in/tcp/4403/wss/p2p/12D3KooWQ69GBBDf5Pd5t2cZYySaRe17hFV6XgrZKkVGMEjqEeob')
 
   constructor (public ac: AudioContext) {}
 
@@ -46,11 +44,6 @@ export class IPFSWrapper {
         ipfs.create().then(
           node => {
             debug(node)
-            node.bootstrap.add(this.home)
-            node.swarm.connect(this.home)
-            if (isDev) {
-              this.logPeers()
-            }
             this.node = node
             this.state.value = 'initialized'
             resolve(node)
