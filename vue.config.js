@@ -14,7 +14,7 @@ module.exports = {
   chainWebpack: config => {
     config.plugin('html')
       .tap(args => {
-        args[0].title = "a-jam"
+        args[0].title = 'a-jam'
         return args
       })
   }
