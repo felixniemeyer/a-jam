@@ -117,16 +117,16 @@ export default defineComponent({
       this.log.push({ type: 'headline', s: 'share' })
       this.log.push({ type: 'msg', s: '(click any link to copy)' })
 
-      const path = `/#/loadSession/${cid}`
+      const path = `#/loadSession/${cid}`
       this.log.push({ type: 'msg', s: 'link for browsers that support ipfs: ' })
       this.log.push({
         type: 'copyable',
-        s: `ipns://${this.ipfsWrapper.appIPNSIdentifier}` + path
+        s: `ipns://${this.ipfsWrapper.appIPNSIdentifier}/` + path
       })
       this.log.push({ type: 'msg', s: 'link for all browsers: ' })
       this.log.push({
         type: 'copyable',
-        s: `https://${this.ipfsWrapper.gatewayURL}/ipns/${this.ipfsWrapper.appIPNSIdentifier}` + path
+        s: `https://${this.ipfsWrapper.gatewayURL}/ipns/${this.ipfsWrapper.appIPNSIdentifier}/` + path
       })
     }
   }
