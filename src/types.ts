@@ -1,11 +1,12 @@
 export class Session {
   title = 'New Session'
   tracks: Track[] = []
-  previousCid: string | undefined
+  ancestor: string | undefined
 }
 
 export class LocalSession extends Session {
   dirty = false
+  ancestorsAncestor: string | undefined
 }
 
 export class PublicSession extends Session {

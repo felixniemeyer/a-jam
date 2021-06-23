@@ -1,7 +1,7 @@
 <template>
   <div class="session">
     <a ref="hiddenDownload" class="hiddenDownload"/>
-    <div class="cornerbutton back" @click="$router.go(-1)"></div>
+    <div class="cornerbutton back" @click="goHome"></div>
     <div class="title" @click="openSettings()">
       <div class="text">
         {{ session.title }}
@@ -52,26 +52,26 @@
     </div>
 
     <div class="controls">
-      <span class="shortcut-hint play">
-        (space)
+      <span class="shortcut-hint record">
+        (r)
       </span>
-      <div
-        class="play button"
-        :class="{ playing }"
-        @click="togglePlay"
-      ></div>
       <div
         class="record button"
         :class="{ recording }"
         @click="toggleRecord"
       ></div>
-      <span class="shortcut-hint record">
-        (r)
+      <div
+        class="play button"
+        :class="{ playing }"
+        @click="togglePlay"
+      ></div>
+      <span class="shortcut-hint play">
+        (space)
       </span>
       <div class="button2 download"
         @click="renderAndDownload"></div>
-      <div class="button2 mic"
-        @click="chooseMic"></div>
+      <!--div class="button2 mic"
+        @click="chooseMic"></div-->
     </div>
   </div>
 </template>
@@ -106,7 +106,8 @@ export default defineComponent({
       recordingChunks: [] as Blob[],
       mediaRecorder: undefined as MediaRecorder | undefined,
       stopTimeout: undefined as NodeJS.Timeout | undefined,
-      recording: false
+      recording: false,
+      skipRecording: false
     }
   },
   computed: {
@@ -184,8 +185,17 @@ export default defineComponent({
         this.toggleRecord()
       }
       if ($event.key === 'Escape') {
-        this.$router.go(-1)
+        if (this.recording) {
+          this.cancelRecording()
+        } else if (this.playing) {
+          this.togglePlay()
+        } else {
+          this.goHome()
+        }
       }
+    },
+    goHome () {
+      this.$router.replace({ name: 'Home' })
     },
     async ensureAcIsRunning () {
       if (this.ac.state !== 'running') {
@@ -205,6 +215,8 @@ export default defineComponent({
           )
           this.playing = true
         }
+      } else {
+        this.toggleRecord()
       }
     },
     async renderAndDownload () {
@@ -225,7 +237,7 @@ export default defineComponent({
 
       const link = this.$refs.hiddenDownload as HTMLLinkElement
       link.setAttribute('href', URL.createObjectURL(blob))
-      link.setAttribute('download', this.session.title)
+      link.setAttribute('download', this.session.title + '.wav')
       link.click()
     },
     playAllTracks () {
@@ -294,13 +306,21 @@ export default defineComponent({
         this.stopAllPlaybacks()
         this.recording = false
       } else {
-        await this.ensureAcIsRunning()
-        this.stopAllPlaybacks()
-        this.recordingChunks = []
-        this.playAllTracks()
-        this.mediaRecorder?.start() // eslint-disable-line
-        this.recording = true
-        this.session.dirty = true
+        if (!this.playing) {
+          await this.ensureAcIsRunning()
+          this.stopAllPlaybacks()
+          this.recordingChunks = []
+          this.playAllTracks()
+          this.mediaRecorder?.start() // eslint-disable-line
+          this.recording = true
+          this.session.dirty = true
+        }
+      }
+    },
+    cancelRecording () {
+      if (this.recording) {
+        this.skipRecording = true
+        this.toggleRecord()
       }
     },
     async initMediaRecorder () {
@@ -312,11 +332,15 @@ export default defineComponent({
         debug('added recording chunk')
       }
       this.mediaRecorder.onstop = async () => {
-        const audio = new Blob(this.recordingChunks, {
-          type: 'audio/ogg; codecs=opus'
-        })
-        debug('audio blob', audio)
-        this.createTrack(audio)
+        if (this.skipRecording) {
+          this.skipRecording = false
+        } else {
+          const audio = new Blob(this.recordingChunks, {
+            type: 'audio/ogg; codecs=opus'
+          })
+          debug('audio blob', audio)
+          this.createTrack(audio)
+        }
       }
     },
     async initUserMedia () {
@@ -526,25 +550,26 @@ export default defineComponent({
       background-color: #444;
       background-size: 80%;
       &.mic {
-        right: 1em;
+        left: 1em;
         background-image: url("~@/assets/icons/white/mic.svg");
       }
       &.download {
-        left: 1em;
+        right: 1em;
         background-image: url("~@/assets/icons/white/download.svg");
       }
     }
     .shortcut-hint {
       display: inline-block;
       width: 4em;
-      margin: 0.5em;
+      margin: 0.3em;
+      padding: 0;
       color: #777;
       vertical-align: middle;
       &.play {
-        text-align: right;
+        text-align: left;
       }
       &.record {
-        text-align: left;
+        text-align: right;
       }
     }
   }

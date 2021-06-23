@@ -23,7 +23,7 @@
 import Log, { LogEntry } from '@/components/Log.vue'
 import { defineComponent } from 'vue'
 
-import { PublicSession, Track } from '@/types'
+import { Track } from '@/types'
 import { SessionConfig, TrackConfig } from '@/ipfs-wrapper'
 import { RecentSessionEntry } from '@/local-storage-wrapper'
 
@@ -82,7 +82,7 @@ export default defineComponent({
     async publishSession () {
       const sc = new SessionConfig(
         this.session.title,
-        this.session.previousCid,
+        this.session.ancestor,
         Date.now(),
         []
       )
@@ -98,7 +98,8 @@ export default defineComponent({
         }
       })
       const cid = await this.ipfsWrapper.saveSessionConfig(sc)
-      this.session.previousCid = cid
+      this.session.ancestorsAncestor = this.session.ancestor
+      this.session.ancestor = cid
       this.session.dirty = false
       this.logLinks(cid)
       this.done = true
@@ -110,25 +111,23 @@ export default defineComponent({
       this.state.sessions.recent = this.storageWrapper.addRecentSession(rse, this.state.sessions.recent)
     },
     logLinks (cid: string) {
-      const params = [
-        `loadSession=${cid}`
-      ]
-      const paramString = params.join('&')
       this.log.push({ type: 'msg', s: 'jam session is now public on ipfs at:' })
       this.log.push({ type: 'copyable', s: cid })
+
       this.log.push({ type: 'headline', s: 'share' })
       this.log.push({ type: 'msg', s: '(click any link to copy)' })
+
+      const path = `/#/loadSession/${cid}`
       this.log.push({ type: 'msg', s: 'link for browsers that support ipfs: ' })
-      this.log.push({ type: 'copyable', s: `ipns://${this.ipfsWrapper.appIPNSIdentifier}/?${paramString}` })
+      this.log.push({
+        type: 'copyable',
+        s: `ipns://${this.ipfsWrapper.appIPNSIdentifier}` + path
+      })
       this.log.push({ type: 'msg', s: 'link for all browsers: ' })
-      this.log.push({ type: 'copyable', s: `https://${this.ipfsWrapper.gatewayURL}/ipns/${this.ipfsWrapper.appIPNSIdentifier}/?${paramString}` })
-    },
-    copyToPublicSession (cid: string, date: number): PublicSession {
-      const publication = new PublicSession(cid, date)
-      publication.title = this.session.title
-      publication.tracks = this.session.tracks.map(track => track.clone())
-      publication.previousCid = this.session.previousCid
-      return publication
+      this.log.push({
+        type: 'copyable',
+        s: `https://${this.ipfsWrapper.gatewayURL}/ipns/${this.ipfsWrapper.appIPNSIdentifier}` + path
+      })
     }
   }
 })

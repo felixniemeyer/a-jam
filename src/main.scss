@@ -1,19 +1,22 @@
 $danger: rgb(204, 61, 17);
 $selected:rgb(132, 205, 223);
 
-$standard-box-shadow: 0 0 1em #0004;
+
+@mixin clickable-box-shadow {
+  box-shadow: 0 0 1em #0004;
+  &:hover {
+    box-shadow: 0 0 0.4em #0004;
+  }
+}
+
 
 @mixin clickable-surface {
+  @include clickable-box-shadow();
   cursor: pointer;
   user-select: none;
-  box-shadow: $standard-box-shadow;
   border-radius: 0.3em;
   padding: 1em;
   margin: 1em;
-  &:hover {
-    box-shadow: 0 0 0.4em #0004;
-    background-color: #0000000a;
-  }
 }
 
 @mixin centered-background-image {

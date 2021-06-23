@@ -18,7 +18,7 @@ export class TrackConfig {
 export class SessionConfig {
   constructor (
     public title: string,
-    public origin: string | undefined, // cid of the session this one builds upon
+    public ancestor: string | undefined, // cid of the session this one builds upon
     public localTime: number,
     public tracks: TrackConfig[]
   ) {}
@@ -97,6 +97,7 @@ export class IPFSWrapper {
   }
 
   saveSessionConfig (sc: SessionConfig) {
+    debug('publishing session config', sc)
     return new Promise<string>((resolve, reject) => {
       if (this.node !== undefined) {
         this.node.add(JSON.stringify(sc)).then(

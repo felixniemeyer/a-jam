@@ -1,6 +1,7 @@
 <template>
   <div class="copyable">
     <textarea class="text" :value="text" readonly @click="copyCid"></textarea>
+    <div v-if="action !== undefined" class="action" @click="$emit('click')"> {{action}} </div>
     <div class="copy-hint" :class="{visible}">copied to clipboard!</div>
   </div>
 </template>
@@ -10,8 +11,10 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   props: {
-    text: String
+    text: String,
+    action: String
   },
+  emits: ['click'],
   data () {
     return {
       visible: false
@@ -47,14 +50,16 @@ export default defineComponent({
     height: 2em;
     width: 100%;
   }
-  .copy-hint{
+  .copy-hint, .action{
     position: absolute;
-    right: 1em;
+    right: 0em;
     bottom: 0.5em;
     padding: 0.6em 0.8em;
     border-radius: 1em;
-    background-color: #1e5daf;
     color: #fff;
+  }
+  .copy-hint {
+    background-color: #1e5daf;
     transition: opacity ease-in-out 4s;
     pointer-events: none;
     opacity: 0;
@@ -62,6 +67,11 @@ export default defineComponent({
       opacity: 1;
     transition: opacity ease-in-out 0.1s;
     }
+  }
+  .action {
+    @include clickable-box-shadow();
+    cursor: pointer;
+    background-color: rgb(161, 101, 66);
   }
 }
 </style>

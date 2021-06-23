@@ -1,10 +1,23 @@
 <template>
   <div class="track-settings">
-    <div v-if="base !== undefined">
-      <p> this jam is based on: </p>
-      <Copyable :text="base"/>
-      <p class="small"> <i> {{ Date(baseDate).toLocaleString() }}</i></p>
-    </div>
+    <Section title="info" :initiallyClosed="true">
+      <div v-if="session.ancestor !== undefined">
+        <p> this session is derived from: </p>
+        <Copyable
+          :text="session.ancestor"
+          action="derive another session"
+          @click="loadSession(session.ancestor)"/>
+      </div>
+      <div v-if="session.ancestorsAncestor !== undefined">
+        <p> it's ancestor is: </p>
+        <div class="loadable">
+          <Copyable
+            :text="session.ancestorsAncestor"
+            action="load ancestor session"
+            @click="loadSession(session.ancestorsAncestor)"/>
+        </div>
+      </div>
+    </Section>
     <h3> rename session </h3>
     <input :value="title" ref="newSessionTitle">
     <div>
@@ -19,7 +32,14 @@ import { defineComponent } from 'vue'
 import WidthFreezer from '@/mixins/WidthFreezer'
 import Keyhandler from '@/mixins/Keyhandler'
 
+import Copyable from '@/components/Copyable.vue'
+import Section from '@/components/Section.vue'
+
 export default defineComponent({
+  components: {
+    Copyable,
+    Section
+  },
   mixins: [WidthFreezer, Keyhandler],
   mounted () {
     this.$nextTick(() => {
@@ -51,6 +71,9 @@ export default defineComponent({
     },
     leave () {
       this.$router.go(-1)
+    },
+    loadSession (cid: string) {
+      this.$router.push('/loadSession/' + cid)
     }
   }
 })

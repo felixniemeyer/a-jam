@@ -18,6 +18,9 @@
       right="200%"
       :from="0.0"
       :to="2.0"
+      :factor="100"
+      :decimalPlaces="0"
+      unit="%"
       :value="track.volume"
       @update="updateVolume" />
     <Slider
@@ -29,9 +32,10 @@
       :value="track.panning"
       @update="updatePanning" />
     <Slider
-      name="offset in ms (requires re-play)"
+      name="offset"
       left="delayed"
       right="earlier"
+      unit="ms"
       :factor="1000"
       :decimalPlaces="0"
       :from="offsetOrigin-0.100"

@@ -2,7 +2,7 @@
   <div class="loading">
     <AudioContextPrompt v-if="requireInteraction" @clicked='loadSession'/>
     <div v-else>
-      <h1> loading... </h1>
+      <h1> loading session... </h1>
       <Log
         :entries="log"/>
       <p v-for="(error, i) in errors" :key="i" class="error">{{ error }}</p>
@@ -28,7 +28,7 @@ export default defineComponent({
     return {
       requireInteraction: false,
       log: [
-        { type: 'msg', s: 'retrieving session with cid:' },
+        { type: 'msg', s: 'session cid:' },
         { type: 'copyable', s: this.$route.params.cid }
       ],
       errors: []
@@ -71,7 +71,7 @@ export default defineComponent({
         this.log.push({ type: 'msg', s: 'found session in memory.' })
       }
       const localSessionId = this.state.sessions.nextLocalSessionId++
-      this.state.sessions.local[localSessionId] = this.copyToLocalSession(publicSession)
+      this.state.sessions.local[localSessionId] = this.deriveLocalSession(publicSession)
       this.$router.replace({
         name: 'SessionEditor',
         params: {
@@ -85,18 +85,19 @@ export default defineComponent({
       )
       this.state.sessions.recent = this.storageWrapper.addRecentSession(rse, this.state.sessions.recent)
     },
-    copyToLocalSession (publicSession: PublicSession): LocalSession {
+    deriveLocalSession (publicSession: PublicSession): LocalSession {
       const derivative = new LocalSession()
       derivative.title = publicSession.title
       derivative.tracks = publicSession.tracks.map(track => track.clone())
-      derivative.previousCid = publicSession.previousCid
+      derivative.ancestor = publicSession.cid
+      derivative.ancestorsAncestor = publicSession.ancestor
       return derivative
     },
     async retrieveSessionFromIPFS (cid: string) {
       const sessionConfig = await this.ipfsWrapper.loadSessionConfig(cid)
       const session = new PublicSession(cid, sessionConfig.localTime)
       session.title = sessionConfig.title
-      session.previousCid = sessionConfig.origin
+      session.ancestor = sessionConfig.ancestor
       session.tracks = await this.createTracks(sessionConfig.tracks)
       this.state.sessions.public[cid] = session
       return session

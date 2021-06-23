@@ -1,6 +1,6 @@
 <template>
   <div class="slider">
-    {{name}}: {{(value*factor).toFixed(decimalPlaces)}}
+    {{name}}: {{(value*factor).toFixed(decimalPlaces)}} {{unit}}
     <div class="bar" ref="bar">
       <div class="left">{{left}}</div>
       <div class="right">{{right}}</div>
@@ -47,6 +47,10 @@ export default defineComponent({
     factor: {
       type: Number,
       default: 1
+    },
+    unit: {
+      type: String,
+      default: ''
     }
   },
   data () {
@@ -124,9 +128,9 @@ export default defineComponent({
 $dotsize: 3em;
 
 .slider {
+  @include clickable-box-shadow();
   margin: 1em;
   border-radius: 0.2em;
-  box-shadow: $standard-box-shadow;
   padding: 0.5em 0;
   .bar{
     position: relative;
