@@ -1,1 +1,1 @@
-ipfs name publish --key=ajam /ipfs/$1
+ipfs name publish --key=a-jam /ipfs/$1
