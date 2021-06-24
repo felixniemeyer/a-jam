@@ -19,7 +19,7 @@ This web app lets you
 The web app itself is served from ipfs:
 
 - If your browser supports ipfs or if you have ipfs companion installed you can open the app with this link:  `ipns://k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf`
-- Otherwise, use a public ipfs gateway like this one: [https://gateway.ipfs.io/ipns/k5...](https://gateway.ipfs.io/ipns/k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf)
+- Otherwise, use a public ipfs gateway like this one: [https://ipfs.io/ipns/k5...](https://ipfs.io/ipns/k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf)
 
 All the data (project files and audio data) is stored on ipfs as well.
 Some data such as the project history is stored in browser's localStorage  
