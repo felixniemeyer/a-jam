@@ -3,11 +3,10 @@
 	- entries can be broken down, which is expressed by indentation
 	- prepending the following prefixes has the following meaning: 
 		- "D[(<comment>)]: " = done
-		- "R[(<comment>)]: " = removed
 		- "WIP[(<name>)]: " = work started by <name> at <date>
 */
 
-- V3 
+- V3
 	- Architectural 
 		- D(decided against): Vuex
 		- D: Vue Router (to enable browser back and forth buttons, bookmarks...)
@@ -17,7 +16,7 @@
 		- D: Export master audio
 		- Loop playback
 			- generate a new recording in every loop, choose the best loop afterwards!
-		- Merge Sessions
+		- Convenient Merge Tools
 			- on page trackinfo, click "merge session" 
 			- Show recent sessions
 			- click one => Merge
@@ -27,6 +26,9 @@
 				- shows recent session
 				- click one => shows tracks from this other session 
 				- click one => loads this track into the current session
+		- D: import audio
+			- by cid
+			- from file
 		- Mute, Solo tracks
 		- Select playback time
 			- Create start flags
@@ -36,19 +38,19 @@
 			- Reverb
 			- Delay
 			- ...
-	- Pinning Service(s) integration
-		- Configure pinning service in settings
-		- Promt for pinning service on publish
-	- IPFS
-		- try to connect to a local node before spawning a in process node https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#getting-started
-		- pin a foreign project on local ipfs node on load
-			- enable automatic in settings (default: auto) 
-			- manually in session settings
+	- Improve Loading times and availability
+		- Pinning Service(s) integration
+			- Configure pinning service in settings
+			- Promt for pinning service on publish
+		- IPFS
+			- try to connect to a local node before spawning a js-ipfs node https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-http-client#getting-started
+			- pin a foreign project on local ipfs node on load
+				- enable automatic in settings (default: auto) 
+				- manually in session settings
+		- Ask ipfs community for help with connecting to session origin
+			- Post list of connection failures
 	- Jam session config object versions and migrations
-	- Ask ipfs community for help with connecting to session origin
-		- Post list of connection failures
-	- Sharing links only one line high (it's enough), maybe make them wider? 100% - 2em? left: 1em
-	- Sharing links on project 
+	- D: Sharing links only one line high (it's enough), maybe make them wider? 100% - 2em? left: 1em
 	- Do some manual work and hardcode some offsets for different browsers
 		- chrome, chromium, brave
 		- firefox
@@ -59,18 +61,16 @@
 			- safari
 		- try to cover 90% of all used browsers
 		- this make wide adoption possible, it's a major hurdle 
-	- enhance "tracks"-layout and timebar etc. by using a wrapper div and abs posistioning
+	- D: enhance "tracks"-layout and timebar etc. by using a wrapper div and abs posistioning
 		- wrapper
 			- scrolling content
 			- abs positioned stuff
 	- Playback delay: 
 		- add the 5 ms on playback, not on the track (possible: delay and offset are both set) 
 		- => this will make sure the track offset equals the default track offset (instead now: track offset = default + 5)
-	- bugfixes: stop track on removal
-	- redraw on vue cycle (prevent lags)
-	- Choose recording device in the settings and/or on first recording: mediaDevices.enumerateDevices
+	- D: Choose recording device in the settings and/or on first recording: mediaDevices.enumerateDevices
 
-- Hotfixes 
+- D: Hotfixes 
 	- D: implement a "save-input" button, that 
 		- fixes body width on focus
 		- releases the fix on blur
@@ -78,7 +78,7 @@
 		- alternative: fix width on menu entry
 	- D: ajam => a-jam title
 
-- pre release
+- D: pre release
 	- D(removed reconstruction from end time + introduced default rec offset): Reduce latency (firefox e.g.) 
 	- D: make default recording offset configurable
 	- D: enable remove track
