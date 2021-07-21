@@ -16,7 +16,9 @@
           :key="key"
           :cid="track.recording.cid"
           :name="track.name"
+          :muted="track.muted"
           :relativeDuration="track.effectiveDuration / maxTrackDuration"
+          @toggleMute="toggleTrackMute(track)"
           @editTrack="$router.push(`/session/${this.localId}/track/${key}`)"
           />
         <div v-if="session.tracks.length === 0 && !recording" class="placeholder">
@@ -139,6 +141,16 @@ export default defineComponent({
     }
   },
   methods: {
+    toggleTrackMute (track: Track) {
+      track.muted = !track.muted
+      if (track.playback !== undefined) {
+        if (track.muted) {
+          track.playback.gain.gain.value = 0
+        } else {
+          track.playback.gain.gain.value = track.volume
+        }
+      }
+    },
     publish () {
       debug(this.$route.path)
       this.$router.push({
@@ -266,7 +278,7 @@ export default defineComponent({
       const panner = ac.createStereoPanner()
       panner.pan.value = track.panning
       const gain = ac.createGain()
-      gain.gain.value = track.volume
+      gain.gain.value = track.muted ? 0 : track.volume
       source
         .connect(gain)
         .connect(panner)
@@ -420,6 +432,7 @@ export default defineComponent({
       height: 2em;
       opacity: 0.33;
       background-image: url("~@/assets/icons/edit.svg");
+      cursor: pointer;
     }
   }
   .cornerbutton.publish {

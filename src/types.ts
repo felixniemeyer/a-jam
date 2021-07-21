@@ -29,6 +29,7 @@ export class Track {
   panning = 0 // -1 left, 1 right
   effectiveDuration: number
   playback: undefined | Playback
+  muted = false
 
   constructor (
     public offset: number,

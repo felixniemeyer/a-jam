@@ -132,7 +132,7 @@ $dotsize: 3em;
   margin: 1em;
   border-radius: 0.2em;
   padding: 0.5em 0;
-  .bar{
+  .bar {
     position: relative;
     width: calc(100% - #{$dotsize});
     height: 0.4em;
