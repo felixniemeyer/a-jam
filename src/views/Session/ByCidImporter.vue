@@ -55,7 +55,8 @@ export default defineComponent({
         let audioBuffer: AudioBuffer
         try {
           console.log('right before loading:')
-          audioBuffer = await this.ipfsWrapper.loadRecording(cid)
+          const arrayBuffer = await this.ipfsWrapper.loadRecording(cid)
+          audioBuffer = await this.ac.decodeAudioData(arrayBuffer)
           console.log('why uncaught')
         } catch (e) {
           this.error = `Could not get recording from ipfs. ${e}`

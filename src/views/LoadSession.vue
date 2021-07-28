@@ -123,7 +123,8 @@ export default defineComponent({
     async retrieveRecordingFromIPFS (cid: string) {
       this.log.push({ type: 'msg', s: 'retrieving recording with cid:' })
       this.log.push({ type: 'copyable', s: cid })
-      const audioBuffer = await this.ipfsWrapper.loadRecording(cid)
+      const arrayBuffer = await this.ipfsWrapper.loadRecording(cid)
+      const audioBuffer = await this.ac.decodeAudioData(arrayBuffer)
       const recording = this.state.recordings[cid] = {
         cid,
         audioBuffer,
