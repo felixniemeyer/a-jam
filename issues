@@ -6,6 +6,9 @@
 		- "WIP[(<name>)]: " = work started by <name> at <date>
 */
 
+- V4 
+	- Use ipfs-http-client to connect to a go-ipfs node 
+
 - V3
 	- Architectural 
 		- D(decided against): Vuex
