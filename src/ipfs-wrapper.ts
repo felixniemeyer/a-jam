@@ -141,14 +141,12 @@ export class IPFSWrapper {
         chunks.push(chunk)
       }
       const audio = new Blob(chunks, { type: 'audio/ogg; codecs=opus' })
-      return await new Promise<AudioBuffer>((resolve, reject) => {
+      return await new Promise<ArrayBuffer>((resolve, reject) => {
         const fileReader = new FileReader()
         fileReader.onloadend = () => {
           const arrayBuffer = fileReader.result
           if (arrayBuffer instanceof ArrayBuffer) {
-            this.ac.decodeAudioData(arrayBuffer).then(
-              audioBuffer => { resolve(audioBuffer) }
-            )
+            resolve(arrayBuffer)
           } else {
             reject(Error('track audio data from ipfs could not be read into an ArrayBuffer'))
           }
