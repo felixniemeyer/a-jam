@@ -1,7 +1,9 @@
 import { Ref, ref } from 'vue'
 import ipfs from 'ipfs'
+import ipfsClient from 'ipfs-http-client'
 import { BaseName } from 'multibase'
 import { debug } from './tools'
+import { IpfsSettings, NodeApiEndpoint } from './local-storage-wrapper'
 
 const NO_CONNECTION_ERROR = Error('ipfs not connected')
 
@@ -34,27 +36,49 @@ export class IPFSWrapper {
   baseName: BaseName = 'base32'
   gatewayURL = 'ipfs.io'
   appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
+  settings: IpfsSettings | undefined = undefined
 
-  constructor (public ac: AudioContext) {}
+  constructor () {}
 
-  initialize () {
-    return new Promise((resolve, reject) => {
-      if (this.node === undefined && this.state.value !== 'initializing') {
-        this.state.value = 'initializing'
-        ipfs.create().then(
-          node => {
-            debug(node)
-            this.node = node
-            this.state.value = 'initialized'
-            resolve(node)
-          },
-          err => {
-            this.state.value = 'failed'
-            reject(Error('could not initialize ipfs connection: ' + err))
-          }
-        )
+  async initialize (ipfsSettings: IpfsSettings) {
+    this.settings = ipfsSettings
+    debug("reached this")
+    if (this.node !== undefined && this.node.stop !== undefined) {
+      debug('stopping previous node')
+      await this.node.stop()
+    }
+    this.state.value = 'uninitialized'
+    if (ipfsSettings.nodeApiEndpoint === undefined) {
+      this.spinUpBrowserNode()
+    } else {
+      this.connectToIpfsNode(ipfsSettings.nodeApiEndpoint)
+      debug("connecting")
+    }
+    debug("reached that")
+  }
+
+  spinUpBrowserNode () {
+    this.state.value = 'initializing'
+    ipfs.create().then(
+      node => {
+        debug(node)
+        this.node = node
+        this.state.value = 'initialized'
+      },
+      err => {
+        this.state.value = 'failed'
+        throw Error('could not spin up browser ipfs node: ' + err)
       }
-    })
+    )
+  }
+
+  connectToIpfsNode (nodeApiEndpoint: NodeApiEndpoint) {
+    this.node = ipfsClient({
+      host: nodeApiEndpoint.host,
+      port: nodeApiEndpoint.port,
+      protocol: nodeApiEndpoint.protocol
+    }) as unknown as ipfs.IPFS
+    this.state.value = 'initialized'
   }
 
   logPeers () {

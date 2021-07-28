@@ -18,8 +18,9 @@ const state = reactive({
   settings: storageWrapper.getSettings()
 } as State)
 const ac = new AudioContext()
-const ipfsWrapper = new IPFSWrapper(ac)
-ipfsWrapper.initialize()
+const ipfsWrapper = new IPFSWrapper()
+
+ipfsWrapper.initialize(state.settings.ipfsSettings)
 
 createApp(App)
   .use(({ config }) => {

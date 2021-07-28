@@ -6,6 +6,18 @@ export interface Settings {
   defaultRecordingOffset: number;
   playbackDelay: number;
   micDeviceId: string | undefined;
+  ipfsSettings: IpfsSettings;
+}
+
+export interface IpfsSettings {
+  nodeApiEndpoint: undefined | NodeApiEndpoint;
+  pinOnLoad: boolean;
+}
+
+export interface NodeApiEndpoint {
+  host: string;
+  port: number;
+  protocol: 'http';
 }
 
 export class RecentSessionEntry {
@@ -14,7 +26,6 @@ export class RecentSessionEntry {
     public title: string,
     public timestamp = Date.now()
   ) {
-
   }
 
   static fromString (jsonString: string) {
@@ -119,7 +130,16 @@ export class LocalStorageWrapper implements StorageWrapper {
     const settings = {
       defaultRecordingOffset: 0.065,
       playbackDelay: 0.010,
-      micDeviceId: undefined
+      micDeviceId: undefined,
+      ipfsSettings: {
+        nodeApiEndpoint: undefined,
+        // {
+        //   host: '127.0.0.1',
+        //   port: 5001,
+        //   protocol: 'http'
+        // },
+        pinOnLoad: true
+      }
     } as Settings
     if ('playbackDelay' in localStorage) {
       settings.playbackDelay = Number(localStorage.getItem('playbackDelay'))

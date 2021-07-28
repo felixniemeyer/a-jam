@@ -3,7 +3,7 @@
     <div class="header" @click="toggle" :class="{closed}">
       {{ title }}
     </div>
-    <div class="content">
+    <div class="content" :class="{closed}">
       <slot v-if="!closed"></slot>
     </div>
   </div>
@@ -54,6 +54,12 @@ export default defineComponent({
     }
     &.closed::after {
       content: " ▼"
+    }
+  }
+  .content {
+    padding: 0em 0em 0.5em 0em;
+    &.closed {
+      padding: 0em;
     }
   }
 }

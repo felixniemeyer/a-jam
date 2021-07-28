@@ -1,6 +1,10 @@
 $danger: rgb(204, 61, 17);
 $selected:rgb(132, 205, 223);
 
+input {
+  padding: 1em;
+  margin: 0.5em;
+}
 
 @mixin clickable-box-shadow {
   box-shadow: 0 0 1em #0004;

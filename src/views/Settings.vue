@@ -1,17 +1,26 @@
 <template>
   <div class="settings">
     <h1>settings</h1>
-    <div>
+    <!--div>
       <div class="inline-button" @click="exportSettings">export settings</div>
       <div class="inline-button" @click="importSettings">import settings</div>
-    </div>
+    </div-->
+    <Section title="ipfs">
+      <p>ipfs connection state: {{ipfsWrapper.state.value}}</p>
+      <div>
+        node api endpoint:
+        <input v-model="state.settings.ipfsSettings.nodeApiEndpoint.address">
+      </div>
+      <input type="checkbox" id="checkbox" v-model="state.settings.ipfsSettings.pinOnLoad" />
+      <label for="checkbox">Pin sessions when loading (to improve availability).</label>
+    </Section>
     <Section title="recording">
       <Section title="device" :initiallyClosed="false">
         <p> choose the recording device:</p>
         <div class="micgroup" v-for="group, gKey in mics" :key="gKey">
           <p> {{ gKey }}</p>
           <div v-for="micLabel, micId in group" :key="micId" class="button" :class="{selected: micId === state.settings.micDeviceId}" @click="setMic(micId)">
-            {{ micId }}: <br/> {{ micLabel }}
+            {{ micLabel || micId }}
           </div>
         </div>
       </Section>

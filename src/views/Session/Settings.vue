@@ -87,9 +87,6 @@ export default defineComponent({
   left: 50%;
   width: calc(100% - 1em);
   transform: translate(-50%, -50%);
-  input {
-    padding: 1em;
-  }
   .small {
     font-size: 0.7em;
   }
