@@ -1,10 +1,17 @@
 <template>
   <div class="publishing">
-    <h1> publishing session... </h1>
-    <Log
-      :entries="log"/>
-    <p v-for="(error, i) in errors" :key="i" class="error">{{ error }}</p>
-    <div v-if="done">
+    <h1> {{ resultCid !== undefined ? "session published!" : "publishing session..." }} </h1>
+    <Section title="log" :initiallyClosed="true">
+      <Log
+        :entries="log"/>
+      <p v-for="(error, i) in errors" :key="i" class="error">{{ error }}</p>
+    </Section>
+    <div v-if="resultCid !== undefined">
+      <h4> share </h4>
+      <p> link for browsers that support ipns: </p>
+      <Copyable :text="ipnsLink"/>
+      <p> link for all browsers (public ipfs gateway): </p>
+      <Copyable :text="gatewayLink"/>
       <div class="button" @click="this.$router.go(-1)">
         return to session
       </div>
@@ -20,8 +27,11 @@
 </template>
 
 <script lang="ts">
-import Log, { LogEntry } from '@/components/Log.vue'
 import { defineComponent } from 'vue'
+
+import Log, { LogEntry } from '@/components/Log.vue'
+import Section from '@/components/Section.vue'
+import Copyable from '@/components/Copyable.vue'
 
 import { Track } from '@/types'
 import { SessionConfig, TrackConfig } from '@/ipfs-wrapper'
@@ -33,16 +43,29 @@ export default defineComponent({
     return {
       log: [] as LogEntry[],
       errors: [] as string[],
-      done: false,
+      resultCid: undefined as string | undefined,
       localId,
       session: this.state.sessions.local[localId]
     }
   },
   components: {
-    Log
+    Copyable,
+    Log,
+    Section
   },
   mounted () {
     this.publish()
+  },
+  computed: {
+    loadSessionPath (): string {
+      return `#/loadSession/${this.resultCid}`
+    },
+    ipnsLink (): string {
+      return `ipns://${this.ipfsWrapper.appIPNSIdentifier}/${this.loadSessionPath}`
+    },
+    gatewayLink (): string {
+      return `https://${this.ipfsWrapper.gatewayHost}/ipns/${this.ipfsWrapper.appIPNSIdentifier}/${this.loadSessionPath}`
+    }
   },
   methods: {
     async publish () {
@@ -57,8 +80,11 @@ export default defineComponent({
       const promises: Promise<void>[] = []
       this.session.tracks.forEach(track => {
         if (track.recording.cid === undefined) {
-          this.log.push({ type: 'msg', s: `publishing track ${track.name}...` })
+          this.log.push({ type: 'msg', s: `publishing recording ${track.name}...` })
           promises.push(this.publishRecording(track))
+        } else {
+          this.log.push({ type: 'msg', s: `recording ${track.name} already public by:` })
+          this.log.push({ type: 'copyable', s: track.recording.cid })
         }
       })
       if (promises.length === 0) {
@@ -69,8 +95,8 @@ export default defineComponent({
     async publishRecording (track: Track) {
       const recording = track.recording
       if (recording.audioBlob !== undefined) {
-        const cid = await this.ipfsWrapper.saveTrackAudio(recording.audioBlob)
-        this.log.push({ type: 'msg', s: `track ${track.name} is now public on ipfs at:` })
+        const cid = await this.ipfsWrapper.ipfsAdd(recording.audioBlob)
+        this.log.push({ type: 'msg', s: `track ${track.name} is now public on ipfs by:` })
         this.log.push({ type: 'copyable', s: cid })
         recording.cid = cid
         this.state.recordings[cid] = track.recording
@@ -101,33 +127,15 @@ export default defineComponent({
       this.session.ancestorsAncestor = this.session.ancestor
       this.session.ancestor = cid
       this.session.dirty = false
-      this.logLinks(cid)
-      this.done = true
+      this.resultCid = cid
+      this.log.push({ type: 'msg', s: 'jam session is now public on ipfs at:' })
+      this.log.push({ type: 'copyable', s: cid })
       const rse = new RecentSessionEntry(
         cid,
         this.session.title,
         sc.localTime
       )
       this.state.sessions.recent = this.storageWrapper.addRecentSession(rse, this.state.sessions.recent)
-    },
-    logLinks (cid: string) {
-      this.log.push({ type: 'msg', s: 'jam session is now public on ipfs at:' })
-      this.log.push({ type: 'copyable', s: cid })
-
-      this.log.push({ type: 'headline', s: 'share' })
-      this.log.push({ type: 'msg', s: '(click any link to copy)' })
-
-      const path = `#/loadSession/${cid}`
-      this.log.push({ type: 'msg', s: 'link for browsers that support ipfs: ' })
-      this.log.push({
-        type: 'copyable',
-        s: `ipns://${this.ipfsWrapper.appIPNSIdentifier}/` + path
-      })
-      this.log.push({ type: 'msg', s: 'link for all browsers: ' })
-      this.log.push({
-        type: 'copyable',
-        s: `https://${this.ipfsWrapper.gatewayURL}/ipns/${this.ipfsWrapper.appIPNSIdentifier}/` + path
-      })
     }
   }
 })

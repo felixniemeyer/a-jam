@@ -3,7 +3,6 @@ import ipfs from 'ipfs'
 import ipfsClient from 'ipfs-http-client'
 import { BaseName } from 'multibase'
 import { debug } from './tools'
-import { IpfsSettings, NodeApiEndpoint } from './local-storage-wrapper'
 
 const NO_CONNECTION_ERROR = Error('ipfs not connected')
 
@@ -29,137 +28,231 @@ export class SessionConfig {
     this.tracks.push(tc)
   }
 }
+export class IpfsSettings {
+  browserNode: {
+    usage: IpfsInterfaceUsage;
+  }
+
+  publicNode: {
+    usage: IpfsInterfaceUsage;
+  }
+
+  configuredNode: {
+    usage: IpfsInterfaceUsage;
+    endpoint: IpfsNodeApiEndpoint;
+  }
+
+  constructor () {
+    this.browserNode = {
+      usage: {
+        enabled: false,
+        useForPinning: true,
+        useForRetrievalPriority: 0, // interface with highest number gets chosen
+        pinForeignSessions: true
+      }
+    }
+    this.publicNode = {
+      usage: {
+        enabled: true,
+        useForPinning: true,
+        useForRetrievalPriority: 1, // interface with highest number gets chosen
+        pinForeignSessions: false
+      }
+    }
+    this.configuredNode = {
+      usage: {
+        enabled: false,
+        useForPinning: true,
+        useForRetrievalPriority: 2, // interface with highest number gets chosen
+        pinForeignSessions: true
+      },
+      endpoint: {
+        host: '127.0.0.1',
+        port: 5001,
+        protocol: 'http'
+      }
+    }
+  }
+}
+
+export interface IpfsInterfaceUsage {
+  enabled: boolean;
+  useForPinning: boolean;
+  useForRetrievalPriority: number; // interface with highest number gets chosen
+  pinForeignSessions: boolean;
+}
+
+export interface IpfsNodeApiEndpoint {
+  host: string;
+  port: number;
+  protocol: 'http';
+}
 
 export class IPFSWrapper {
-  state: Ref<string> = ref('uninitialized')
-  node: ipfs.IPFS | undefined = undefined
+  errorLog: Ref<string[]> = ref([])
+
+  // various ways to the ipfs network
+  nodes: {
+    browserNode: ipfs.IPFS | undefined;
+    publicNode: ipfs.IPFS;
+    configuredNode: ipfs.IPFS | undefined;
+  }
+
+  // pinataPinningService: k ==> use axios - if configured
+
   baseName: BaseName = 'base32'
-  gatewayURL = 'ipfs.io'
+  gatewayHost = 'ipfs.io'
   appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
-  settings: IpfsSettings | undefined = undefined
+  settings: IpfsSettings
 
-  constructor () {}
+  constructor () {
+    this.nodes = {
+      publicNode: this.setHttpClient({
+        host: 'nathanael.in',
+        port: 5001,
+        protocol: 'http'
+      }) as ipfs.IPFS,
+      configuredNode: undefined,
+      browserNode: undefined
+    }
+    this.settings = new IpfsSettings()
+  }
 
-  async initialize (ipfsSettings: IpfsSettings) {
+  async updateSettings (ipfsSettings: IpfsSettings) {
+    await this.closeBrowserNode()
+
     this.settings = ipfsSettings
-    debug("reached this")
-    if (this.node !== undefined && this.node.stop !== undefined) {
-      debug('stopping previous node')
-      await this.node.stop()
-    }
-    this.state.value = 'uninitialized'
-    if (ipfsSettings.nodeApiEndpoint === undefined) {
+
+    if (ipfsSettings.browserNode.usage.enabled === true) {
       this.spinUpBrowserNode()
-    } else {
-      this.connectToIpfsNode(ipfsSettings.nodeApiEndpoint)
-      debug("connecting")
     }
-    debug("reached that")
+
+    if (ipfsSettings.configuredNode.usage.enabled === true) {
+      this.nodes.configuredNode = this.setHttpClient(ipfsSettings.configuredNode.endpoint)
+    }
+  }
+
+  async closeBrowserNode () {
+    if (this.nodes.browserNode !== undefined) {
+      debug('stopping previous node')
+      await this.nodes.browserNode.stop()
+    }
   }
 
   spinUpBrowserNode () {
-    this.state.value = 'initializing'
     ipfs.create().then(
       node => {
         debug(node)
-        this.node = node
-        this.state.value = 'initialized'
+        this.nodes.browserNode = node
       },
       err => {
-        this.state.value = 'failed'
-        throw Error('could not spin up browser ipfs node: ' + err)
+        this.errorLog.value.push('could not spin up browser ipfs node: ' + err)
       }
     )
   }
 
-  connectToIpfsNode (nodeApiEndpoint: NodeApiEndpoint) {
-    this.node = ipfsClient({
+  setHttpClient (nodeApiEndpoint: IpfsNodeApiEndpoint): ipfs.IPFS {
+    return ipfsClient({
       host: nodeApiEndpoint.host,
       port: nodeApiEndpoint.port,
       protocol: nodeApiEndpoint.protocol
     }) as unknown as ipfs.IPFS
-    this.state.value = 'initialized'
   }
 
-  logPeers () {
+  monitorPeers (node: ipfs.IPFS) {
     setInterval(() => {
       console.log('peers:')
-      if (this.node !== undefined) {
-        this.node.swarm.peers({}).then(peers => {
-          console.log(peers)
-        })
-      }
+      node.swarm.peers({}).then(peers => {
+        console.log(peers)
+      })
     }, 10000)
   }
 
-  getIpfsNodeId () {
-    return new Promise<string>((resolve, reject) => {
-      if (this.node === undefined) {
-        reject(NO_CONNECTION_ERROR)
-      } else {
-        return this.node.id().then(identity => {
-          console.log(identity)
-          resolve(identity.id)
-        })
-      }
-    })
+  forEachNode (f: ((node: ipfs.IPFS, settings: IpfsInterfaceUsage) => void)) {
+    if (this.nodes.browserNode !== undefined) {
+      f(this.nodes.browserNode,
+        this.settings.browserNode.usage)
+    }
+    if (this.nodes.configuredNode !== undefined) {
+      f(this.nodes.configuredNode,
+        this.settings.configuredNode.usage)
+    }
+    f(this.nodes.publicNode,
+      this.settings.publicNode.usage)
   }
 
-  saveTrackAudio (blob: Blob) {
+  ipfsAdd (blob: Blob | string) {
     return new Promise<string>((resolve, reject) => {
-      if (this.node !== undefined) {
-        this.node.add(blob).then(
-          results => {
-            resolve(results.cid.toV1().toString(this.baseName))
-          },
-          reject
-        )
-      } else {
-        reject(NO_CONNECTION_ERROR)
+      let count = 0
+      let successes = 0
+      let errors = 0
+      this.forEachNode((node, usage) => {
+        console.log("here, im in it. usage:", usage)
+        if (usage.enabled && usage.useForPinning) {
+          count += 1
+          node.add(blob).then(
+            results => {
+              if (successes === 0) {
+                resolve(results.cid.toV1().toString(this.baseName))
+              }
+              successes += 1
+            },
+            err => {
+              errors += 1
+              this.errorLog.value.push(`Failed to ipfs add blob track: ${err}`)
+              if (errors === count) {
+                reject(new Error('All ipfs interfaces failed to do ipfs add for this file. See details at the ipfsWrapper error log.'))
+              }
+            }
+          )
+        }
+      })
+      if (count === 0) {
+        reject(new Error('No ipfs interface is configured for pinning'))
       }
     })
   }
 
   saveSessionConfig (sc: SessionConfig) {
-    debug('publishing session config', sc)
-    return new Promise<string>((resolve, reject) => {
-      if (this.node !== undefined) {
-        this.node.add(JSON.stringify(sc)).then(
-          results => {
-            resolve(results.cid.toV1().toString(this.baseName))
-          },
-          reject
-        )
-      } else {
-        reject(NO_CONNECTION_ERROR)
-      }
-    })
+    return this.ipfsAdd(JSON.stringify(sc))
   }
 
-  loadSessionConfig (cid: string) {
-    return new Promise<SessionConfig>((resolve, reject) => {
-      if (this.node !== undefined) {
-        (async node => {
-          const data = node.cat(cid)
-          const decoder = new TextDecoder()
-          const messageParts = []
-          for await (const chunk of data) {
-            messageParts.push(decoder.decode(chunk, { stream: true }))
-          }
-          const sc = JSON.parse(messageParts.join())
-          resolve(sc as SessionConfig)
-        })(this.node)
-      } else {
-        reject(NO_CONNECTION_ERROR)
+  getNodeForRetrieval (): ipfs.IPFS | undefined {
+    let winner: ipfs.IPFS | undefined
+    let prio = -1
+    this.forEachNode((node, settings) => {
+      if (settings.enabled) {
+        if (settings.useForRetrievalPriority > prio) {
+          winner = node
+          prio = settings.useForRetrievalPriority
+        }
       }
     })
+    return winner
+  }
+
+  async loadSessionConfig (cid: string) {
+    const node = this.getNodeForRetrieval()
+    if (node !== undefined) {
+      const data = node.cat(cid)
+      const decoder = new TextDecoder()
+      const messageParts = []
+      for await (const chunk of data) {
+        messageParts.push(decoder.decode(chunk, { stream: true }))
+      }
+      const sc = JSON.parse(messageParts.join())
+      return sc as SessionConfig
+    } else {
+      throw NO_CONNECTION_ERROR
+    }
   }
 
   async loadRecording (cid: string) {
-    if (this.node === undefined) {
+    const node = this.getNodeForRetrieval()
+    if (node === undefined) {
       throw (NO_CONNECTION_ERROR)
     } else {
-      const data = this.node.cat(cid)
+      const data = node.cat(cid)
       const chunks = []
       for await (const chunk of data) {
         chunks.push(chunk)

@@ -1,4 +1,5 @@
 import { debug } from './tools'
+import { IpfsSettings } from './ipfs-wrapper'
 
 const HIST_LENGTH = 100
 
@@ -7,17 +8,6 @@ export interface Settings {
   playbackDelay: number;
   micDeviceId: string | undefined;
   ipfsSettings: IpfsSettings;
-}
-
-export interface IpfsSettings {
-  nodeApiEndpoint: undefined | NodeApiEndpoint;
-  pinOnLoad: boolean;
-}
-
-export interface NodeApiEndpoint {
-  host: string;
-  port: number;
-  protocol: 'http';
 }
 
 export class RecentSessionEntry {
@@ -131,15 +121,7 @@ export class LocalStorageWrapper implements StorageWrapper {
       defaultRecordingOffset: 0.065,
       playbackDelay: 0.010,
       micDeviceId: undefined,
-      ipfsSettings: {
-        nodeApiEndpoint: undefined,
-        // {
-        //   host: '127.0.0.1',
-        //   port: 5001,
-        //   protocol: 'http'
-        // },
-        pinOnLoad: true
-      }
+      ipfsSettings: new IpfsSettings()
     } as Settings
     if ('playbackDelay' in localStorage) {
       settings.playbackDelay = Number(localStorage.getItem('playbackDelay'))

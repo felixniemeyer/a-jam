@@ -109,7 +109,7 @@ export default defineComponent({
         box-shadow: 0 0 0.2em #0005;
       }
       &.muted {
-        background-color: #e72;
+        background-color: #e52;
         box-shadow: 0 0 0.5em #e727;
       }
     }

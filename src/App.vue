@@ -1,17 +1,8 @@
 <template>
-  <!--div id="nav">
-    <router-link to="/">Home</router-link> |
-  </div-->
-  <router-view v-if="ipfsWrapper.state.value === 'initialized'"></router-view>
-  <p v-if="ipfsWrapper.state === 'failed'" class='error'>
-    failed to connect to ipfs
+  <p class="error" v-for="(errorMsg, key) in ipfsWrapper.errorLog.value" :key="key">
+    {{ errorMsg }}
   </p>
-  <p v-else-if="ipfsWrapper.state === 'initializing'">
-    connecting to ipfs: {{ ipfsWrapper.state }}
-  </p>
-  <div v-if="showIpfsInfo" class="ipfs-info" @click="checkIpfsId">
-    ipfs id: {{ipfsId}}
-  </div>
+  <router-view></router-view>
 </template>
 
 <script lang="ts">
@@ -22,22 +13,6 @@ export default defineComponent({
     return {
       showIpfsInfo: false,
       ipfsId: ''
-    }
-  },
-  mounted () {
-    this.checkIpfsId()
-  },
-  methods: {
-    checkIpfsId () {
-      this.ipfsWrapper.getIpfsNodeId().then(
-        id => {
-          if (this.ipfsId !== id) {
-            this.ipfsId = id
-          }
-        }
-      ).catch(() => {
-        this.ipfsId = 'none (ipfs not connected. click to refresh)'
-      })
     }
   }
 })

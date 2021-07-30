@@ -20,7 +20,7 @@ const state = reactive({
 const ac = new AudioContext()
 const ipfsWrapper = new IPFSWrapper()
 
-ipfsWrapper.initialize(state.settings.ipfsSettings)
+ipfsWrapper.updateSettings(state.settings.ipfsSettings)
 
 createApp(App)
   .use(({ config }) => {

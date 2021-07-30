@@ -7,13 +7,23 @@
 */
 
 - V4 
-	- Use ipfs-http-client to connect to a go-ipfs node 
+	- Three possible ipfs nodes
+		- public node (via ipfs-http-client)
+		- configurable node (via ipfs-http-client) 
+			- hint to configure cors headers 
+				- should allow <a-jam-ipns>.*
+		- browser node
+	- Use all 3 options if configured for pinning
+	- Use for requesting: configurable node > public node > browser node
+		- Allow switch for browser node > public node
+
 		- create ipfs-http-client
 		- store setting in local storage
 	- Set up a free ipfs node that a-jam connects to
 		- once a-jam get's bigger, prevent abuse 
 			- use nginx in front of ipfs & authenticate requests
 		- have a job, that notes down all pins and removes all pins that are older than y
+	- Dark mode (or simply dark style over all - no choice) 
 
 - V3
 	- Architectural 
