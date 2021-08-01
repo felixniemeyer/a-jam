@@ -1,7 +1,9 @@
 <template>
-  <p class="error" v-for="(errorMsg, key) in ipfsWrapper.errorLog.value" :key="key">
-    {{ errorMsg }}
-  </p>
+  <div class="ipfs-errors">
+    <p class="error" v-for="(errorMsg, key) in ipfsWrapper.errorLog.value" :key="key">
+      {{ errorMsg }}
+    </p>
+  </div>
   <router-view></router-view>
 </template>
 
@@ -46,6 +48,7 @@ body {
   transform: translate(-50%, 0);
   overflow-x: hidden;
 }
+
 #app {
   font-family: sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -55,7 +58,15 @@ body {
 }
 
 .error {
-  color: rgb(128 + 64, 9, 9);
+  color: #fff ;
+}
+
+.ipfs-errors {
+  background-color: rgb(128 + 64, 9, 9);
+  position: fixed;
+  top: 2em;
+  left: 50%;
+  transform: translate(-50%, 0);
 }
 
 </style>

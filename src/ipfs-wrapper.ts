@@ -109,7 +109,7 @@ export class IPFSWrapper {
     this.nodes = {
       publicNode: this.setHttpClient({
         host: 'nathanael.in',
-        port: 5001,
+        port: 15151,
         protocol: 'http'
       }) as ipfs.IPFS,
       configuredNode: undefined,

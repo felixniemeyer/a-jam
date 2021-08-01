@@ -4,8 +4,8 @@
     <Section title="log" :initiallyClosed="true">
       <Log
         :entries="log"/>
-      <p v-for="(error, i) in errors" :key="i" class="error">{{ error }}</p>
     </Section>
+    <p v-for="(error, i) in errors" :key="i" class="error">{{ error }}</p>
     <div v-if="resultCid !== undefined">
       <h4> share </h4>
       <p> link for browsers that support ipns: </p>
@@ -164,6 +164,10 @@ export default defineComponent({
   .spacer {
     width: 1em;
     height: 5em;
+  }
+  p {
+    margin-right: 1em;
+    margin-left: 1em;
   }
 }
 
