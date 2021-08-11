@@ -116,21 +116,27 @@ export class IPFSWrapper {
       browserNode: undefined
     }
     this.settings = new IpfsSettings()
-    watch(ipfsSettings, this.updateSettings)
+    watch(ipfsSettings, this.updateSettings, {
+    })
     this.setup()
   }
 
   updateSettings (settings: IpfsSettings, prevSettings: IpfsSettings) {
+    debug('ipfs settings changes:')
+    debug('before', JSON.stringify(prevSettings))
+    debug('after', JSON.stringify(settings))
     if (settings.browserNode.usage.enabled !== prevSettings.browserNode.usage.enabled) {
-      debug("browserNode.usage.enabled changed")
+      debug('browserNode.usage.enabled changed')
       this.nodes.configuredNode = this.setHttpClient(settings.configuredNode.endpoint)
     }
   }
 
   updateBrowserNode () {
+
   }
 
   updateConfiguredNode () {
+
   }
 
   async setup () {
@@ -150,7 +156,7 @@ export class IPFSWrapper {
   }
 
   spinUpBrowserNode () {
-    debug("spinning up browser node")
+    debug('spinning up browser node')
     ipfs.create().then(
       node => {
         debug(node)

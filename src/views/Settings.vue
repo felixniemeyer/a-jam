@@ -6,41 +6,22 @@
       <div class="inline-button" @click="importSettings">import settings</div>
     </div-->
     <Section title="ipfs">
-      <Ipfsv-for="(ipfsIf, iName) of this.state.settings.ipfs" :key="iName" :title="iName" class="tll">
-        <IpfsInterfaceUsage :interfaceUsage="this.state.settings.ipfs.browserNode.enabled"/>
-        <IpfsInterfaceUsage :interfaceUsage="this.state.settings.ipfs.configuredNode.enabled"/>
-        <IpfsInterfaceUsage :interfaceUsage="this.state.settings.ipfs.browserNode.enabled"/>
-        <div>
-        <input type="checkbox" :id="`enable${iName}`" v-model="ipfsIf.usage.enabled" @change="persistIpfsSettings"/>
-        <label :for="`enable${iName}`">Enable this ipfs interface.</label>
-        </div>
-        <div>
-        <input type="number" :id="`retrievalPrio${iName}`" v-model="ipfsIf.usage.useForRetrievalPriority" @change="persistIpfsSettings"/>
-        <label :for="`retrievalPrio${iName}`">Set this interface's priority for content retrieval from ipfs. The interface with the highest priority will be used for content retrieval.</label>
-        </div>
-        <div>
-        <input type="checkbox" :id="`pinning${iName}`" v-model="ipfsIf.usage.useForPinning" @change="notifyIpfsSettingsChange"/>
-        <label :for="`pinning${iName}`">Use this ipfs interface for pinning.</label>
-        </div>
-        <div>
-        <input type="checkbox" :id="`pinForeign${iName}`" v-model="ipfsIf.usage.pinForeignSessions" @change="persistIpfsSettings"/>
-        <label :for="`pinForeign${iName}`">Pin sessions when loading jam sessions in order to improve availability.</label>
-        </div>
-        <div v-if="ipfsIf == state.settings.ipfs.configuredNode">
-          <div>
-            node api host:
-            <input v-model="ipfsIf.endpoint.host" @change="persistIpfsSettings">
-          </div>
-          <div>
-            node api port:
-            <input type="number" v-model="ipfsIf.endpoint.port" @change="persistIpfsSettings">
-          </div>
-          <div>
-            node api protocol: {{ ipfsIf.endpoint.protocol }}
-          </div>
-          <p>The target ipfs node needs to be configured to allow CORS. Set HTTPHeaders like for example API.HTTPHeaders.Access-Control-Allow-Origin: ["k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf.ipns.localhost"].
-        </p>
-        </div>
+      <Section title="browser node">
+        <IpfsInterfaceUsageConfig
+          :usage="this.state.settings.ipfs.browserNode.usage"
+          id="iiusage0"/>
+      </Section>
+      <Section title="public node">
+        <IpfsInterfaceUsageConfig
+          :usage="this.state.settings.ipfs.publicNode.usage"
+          id="iiusage1"/>
+      </Section>
+      <Section title="configurable node">
+        <IpfsInterfaceUsageConfig
+          :usage="this.state.settings.ipfs.configuredNode.usage"
+          id="iiusage2"/>
+        <IpfsApiEndpointConfig
+          :endpoint="this.state.settings.ipfs.configuredNode.endpoint"/>
       </Section>
     </Section>
     <Section title="recording">
@@ -76,12 +57,16 @@ import { defineComponent } from 'vue'
 
 import Slider from '@/components/Slider.vue'
 import Section from '@/components/Section.vue'
+import IpfsInterfaceUsageConfig from '@/components/IpfsInterfaceUsageConfig.vue'
+import IpfsApiEndpointConfig from '@/components/IpfsApiEndpointConfig.vue'
 import { debug } from '@/tools'
 
 export default defineComponent({
   components: {
     Slider,
-    Section
+    Section,
+    IpfsInterfaceUsageConfig,
+    IpfsApiEndpointConfig
   },
   data () {
     return {
@@ -125,7 +110,6 @@ export default defineComponent({
     },
     persistIpfsSettings () {
       this.storageWrapper.persistIpfsSettings(this.state.settings.ipfs)
-
     }
   }
 })
