@@ -15,12 +15,10 @@ const state = reactive({
     nextLocalSessionId: 0
   },
   recordings: {},
-  settings: storageWrapper.getSettings()
+  settings: storageWrapper.loadSettings()
 } as State)
 const ac = new AudioContext()
-const ipfsWrapper = new IPFSWrapper()
-
-ipfsWrapper.updateSettings(state.settings.ipfsSettings)
+const ipfsWrapper = new IPFSWrapper(state.settings.ipfs)
 
 createApp(App)
   .use(({ config }) => {

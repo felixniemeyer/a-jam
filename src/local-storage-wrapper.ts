@@ -7,7 +7,7 @@ export interface Settings {
   defaultRecordingOffset: number;
   playbackDelay: number;
   micDeviceId: string | undefined;
-  ipfsSettings: IpfsSettings;
+  ipfs: IpfsSettings;
 }
 
 export class RecentSessionEntry {
@@ -38,9 +38,12 @@ export interface StorageWrapper {
   setDefaultRecordingOffset (v: number): void;
   setPlaybackDelay (v: number): void;
   setMicDeviceId (micId: string): void;
+  persistIpfsSettings (ipfsSettings: IpfsSettings): void;
+
   getRecentSessions (): RecentSessionEntry[];
   addRecentSession (rse: RecentSessionEntry, list: RecentSessionEntry[]): RecentSessionEntry[];
-  getSettings (): Settings;
+
+  loadSettings(): Settings;
 }
 
 export class LocalStorageWrapper implements StorageWrapper {
@@ -79,7 +82,6 @@ export class LocalStorageWrapper implements StorageWrapper {
             localStorage.removeItem(key)
           } else {
             const rseString = localStorage.getItem(key)
-            debug('rse string = ' + rseString)
             if (rseString !== null) {
               const rse = RecentSessionEntry.fromString(rseString)
               if (rse.cid in cids) {
@@ -116,12 +118,17 @@ export class LocalStorageWrapper implements StorageWrapper {
     }
   }
 
-  getSettings () {
+  persistIpfsSettings (ipfsSettings: IpfsSettings) {
+    localStorage.setItem('settings.ipfs', JSON.stringify(ipfsSettings))
+    debug('persisted ipfs settings')
+  }
+
+  loadSettings () {
     const settings = {
       defaultRecordingOffset: 0.065,
       playbackDelay: 0.010,
       micDeviceId: undefined,
-      ipfsSettings: new IpfsSettings()
+      ipfs: new IpfsSettings()
     } as Settings
     if ('playbackDelay' in localStorage) {
       settings.playbackDelay = Number(localStorage.getItem('playbackDelay'))
@@ -129,10 +136,17 @@ export class LocalStorageWrapper implements StorageWrapper {
     if ('defaultRecordingOffset' in localStorage) {
       settings.defaultRecordingOffset = Number(localStorage.getItem('defaultRecordingOffset'))
     }
+    if ('settings.ipfs' in localStorage) {
+      const str = localStorage.getItem('settings.ipfs')
+      if (str !== null) {
+        settings.ipfs = JSON.parse(str)
+      }
+    }
     const micDeviceId = localStorage.getItem('micDeviceId')
     if (micDeviceId !== null) {
       settings.micDeviceId = micDeviceId
     }
+    debug('loaded settings', settings)
     return settings
   }
 }

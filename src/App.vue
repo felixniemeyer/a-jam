@@ -25,19 +25,6 @@ export default defineComponent({
   outline: 1px solid pink;
 } /**/
 
-.ipfs-info {
-  z-index: 400;
-  position: fixed;
-  bottom: 9em;
-  right: 1em;
-  background-color: #080;
-  color: #fff;
-  opacity: 0.5;
-  width: 20em;
-  text-align: right;
-  word-wrap: break-word;
-}
-
 body {
   position: absolute;
   width: 100%;

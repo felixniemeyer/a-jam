@@ -1,4 +1,4 @@
-/* How this issue tracking file works: 
+/ How this issue tracking file works: 
 	- most recent entries are added on top
 	- entries can be broken down, which is expressed by indentation
 	- prepending the following prefixes has the following meaning: 
@@ -16,7 +16,6 @@
 	- Use all 3 options if configured for pinning
 	- Use for requesting: configurable node > public node > browser node
 		- Allow switch for browser node > public node
-
 		- create ipfs-http-client
 		- store setting in local storage
 	- Set up a free ipfs node that a-jam connects to

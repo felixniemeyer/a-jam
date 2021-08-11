@@ -1,4 +1,4 @@
-import { Ref, ref } from 'vue'
+import { Ref, ref, watch } from 'vue'
 import ipfs from 'ipfs'
 import ipfsClient from 'ipfs-http-client'
 import { BaseName } from 'multibase'
@@ -105,7 +105,7 @@ export class IPFSWrapper {
   appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
   settings: IpfsSettings
 
-  constructor () {
+  constructor (ipfsSettings: IpfsSettings) {
     this.nodes = {
       publicNode: this.setHttpClient({
         host: 'nathanael.in',
@@ -116,19 +116,29 @@ export class IPFSWrapper {
       browserNode: undefined
     }
     this.settings = new IpfsSettings()
+    watch(ipfsSettings, this.updateSettings)
+    this.setup()
   }
 
-  async updateSettings (ipfsSettings: IpfsSettings) {
-    await this.closeBrowserNode()
+  updateSettings (settings: IpfsSettings, prevSettings: IpfsSettings) {
+    if (settings.browserNode.usage.enabled !== prevSettings.browserNode.usage.enabled) {
+      debug("browserNode.usage.enabled changed")
+      this.nodes.configuredNode = this.setHttpClient(settings.configuredNode.endpoint)
+    }
+  }
 
-    this.settings = ipfsSettings
+  updateBrowserNode () {
+  }
 
-    if (ipfsSettings.browserNode.usage.enabled === true) {
+  updateConfiguredNode () {
+  }
+
+  async setup () {
+    if (this.settings.browserNode.usage.enabled === true) {
       this.spinUpBrowserNode()
     }
-
-    if (ipfsSettings.configuredNode.usage.enabled === true) {
-      this.nodes.configuredNode = this.setHttpClient(ipfsSettings.configuredNode.endpoint)
+    if (this.settings.configuredNode.usage.enabled === true) {
+      this.nodes.configuredNode = this.setHttpClient(this.settings.configuredNode.endpoint)
     }
   }
 
@@ -140,6 +150,7 @@ export class IPFSWrapper {
   }
 
   spinUpBrowserNode () {
+    debug("spinning up browser node")
     ipfs.create().then(
       node => {
         debug(node)
@@ -187,7 +198,7 @@ export class IPFSWrapper {
       let successes = 0
       let errors = 0
       this.forEachNode((node, usage) => {
-        console.log("here, im in it. usage:", usage)
+        console.log('here, im in it. usage:', usage)
         if (usage.enabled && usage.useForPinning) {
           count += 1
           node.add(blob).then(
