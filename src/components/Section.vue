@@ -36,6 +36,7 @@ export default defineComponent({
 <style lang="scss">
 
 .section{
+  box-shadow: 0 0 0.5em #0002;
   margin: 0.5em 0.2em;
   overflow: hidden;
   border-radius: 1em;
@@ -57,10 +58,14 @@ export default defineComponent({
     }
   }
   .content {
-    padding: 0.5em;
+    padding: 0.3em;
     &.closed {
       padding: 0em;
     }
+    background-color: rgba(84,91,111,0.05);
+  }
+  h4{
+    margin: 0.5em;
   }
 }
 </style>

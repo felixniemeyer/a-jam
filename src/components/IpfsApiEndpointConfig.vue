@@ -1,13 +1,13 @@
 <template>
-  <h4>usage</h4>
+  <h4>endpoint</h4>
   <div class="ipfsApiEndpointConfig">
     <div>
       node api host:
-      <input v-model="endpoint.host" @change="persistIpfsSettings">
+      <input v-model="endpoint.host" @change="$emit('change')">
     </div>
     <div>
       node api port:
-      <input type="number" v-model="endpoint.port" @change="persistIpfsSettings">
+      <input type="number" v-model="endpoint.port" @change="$emit('change')">
     </div>
     <div>
       node api protocol: {{ endpoint.protocol }}
@@ -29,6 +29,7 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+  emits: ['change'],
   props: {
     endpoint: {
       type: Object,

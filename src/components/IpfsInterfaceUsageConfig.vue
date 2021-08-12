@@ -1,12 +1,12 @@
 <template>
-  <h4>api endpoint</h4>
+  <h4>usage</h4>
   <div class="ipfsInterfaceUsageConfig">
     <div>
       <input
         type="checkbox"
         :id="`enable${id}`"
         v-model="usage.enabled"
-        @change="persistIpfsSettings"/>
+        @change="toggle"/>
       <label :for="`enable${id}`">
         Enable this ipfs interface.
       </label>
@@ -15,8 +15,7 @@
       <input
         type="number"
         :id="`retrievalPrio${id}`"
-        v-model="usage.useForRetrievalPriority"
-        @change="persistIpfsSettings"/>
+        v-model="usage.useForRetrievalPriority"/>
       <label :for="`retrievalPrio${id}`">
         Set this interface's priority for content retrieval from ipfs. The interface with the highest priority will be used for content retrieval.
       </label>
@@ -25,16 +24,16 @@
       <input
         type="checkbox"
         :id="`pinning${id}`"
-        v-model="usage.useForPinning"
-        @change="notifyIpfsSettingsChange"/>
-      <label :for="`pinning${id}`">Use this ipfs interface for pinning.</label>
+        v-model="usage.useForPinning"/>
+      <label :for="`pinning${id}`">
+        Use this ipfs interface for pinning.
+      </label>
     </div>
     <div>
       <input
         type="checkbox"
         :id="`pinForeign${id}`"
-        v-model="usage.pinForeignSessions"
-        @change="persistIpfsSettings"/>
+        v-model="usage.pinForeignSessions"/>
       <label :for="`pinForeign${id}`">
         Pin sessions when loading jam sessions in order to improve availability.
       </label>
@@ -44,9 +43,9 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { IpfsInterfaceUsage } from '@/ipfs-wrapper'
 
 export default defineComponent({
+  emits: ['disable', 'enable'],
   props: {
     usage: {
       type: Object,
@@ -55,6 +54,15 @@ export default defineComponent({
     id: {
       type: String,
       required: true
+    }
+  },
+  methods: {
+    toggle () {
+      if (this.usage.enabled) {
+        this.$emit('enable')
+      } else {
+        this.$emit('disable')
+      }
     }
   }
 })

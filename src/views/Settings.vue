@@ -9,6 +9,8 @@
       <Section title="browser node">
         <IpfsInterfaceUsageConfig
           :usage="this.state.settings.ipfs.browserNode.usage"
+          @disable="disableBrowserNode"
+          @enable="enableBrowserNode"
           id="iiusage0"/>
       </Section>
       <Section title="public node">
@@ -21,14 +23,15 @@
           :usage="this.state.settings.ipfs.configuredNode.usage"
           id="iiusage2"/>
         <IpfsApiEndpointConfig
-          :endpoint="this.state.settings.ipfs.configuredNode.endpoint"/>
+          :endpoint="this.state.settings.ipfs.configuredNode.endpoint"
+          @change="changeIpfsEndpointConfig"/>
       </Section>
     </Section>
     <Section title="recording">
       <Section title="device" :initiallyClosed="false">
         <p> choose the recording device:</p>
         <div class="micgroup" v-for="group, gKey in mics" :key="gKey">
-          <p> {{ gKey }}</p>
+          <p> Microfone device group: {{ gKey }}</p>
           <div v-for="micLabel, micId in group" :key="micId" class="button" :class="{selected: micId === state.settings.micDeviceId}" @click="setMic(micId)">
             {{ micLabel || micId }}
           </div>
@@ -108,8 +111,14 @@ export default defineComponent({
       this.state.settings.micDeviceId = micId
       this.storageWrapper.setMicDeviceId(micId)
     },
-    persistIpfsSettings () {
-      this.storageWrapper.persistIpfsSettings(this.state.settings.ipfs)
+    changeIpfsEndpointConfig () {
+      this.ipfsWrapper.resetConfigurableNode()
+    },
+    disableBrowserNode () {
+      this.ipfsWrapper.shutdownBrowserNode()
+    },
+    enableBrowserNode () {
+      this.ipfsWrapper.spinUpBrowserNode()
     }
   }
 })
@@ -133,6 +142,9 @@ export default defineComponent({
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .button {
+      background-color: #fff;
     }
     .button.selected{
       background-color: $selected;

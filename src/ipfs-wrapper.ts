@@ -1,4 +1,4 @@
-import { Ref, ref, watch } from 'vue'
+import { Ref, ref } from 'vue'
 import ipfs from 'ipfs'
 import ipfsClient from 'ipfs-http-client'
 import { BaseName } from 'multibase'
@@ -103,11 +103,12 @@ export class IPFSWrapper {
   baseName: BaseName = 'base32'
   gatewayHost = 'ipfs.io'
   appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
-  settings: IpfsSettings
+  ipfsSettings: IpfsSettings
 
   constructor (ipfsSettings: IpfsSettings) {
+    this.ipfsSettings = ipfsSettings
     this.nodes = {
-      publicNode: this.setHttpClient({
+      publicNode: this.configureHttpClient({
         host: 'nathanael.in',
         port: 15151,
         protocol: 'http'
@@ -115,42 +116,23 @@ export class IPFSWrapper {
       configuredNode: undefined,
       browserNode: undefined
     }
-    this.settings = new IpfsSettings()
-    watch(ipfsSettings, this.updateSettings, {
-    })
-    this.setup()
-  }
-
-  updateSettings (settings: IpfsSettings, prevSettings: IpfsSettings) {
-    debug('ipfs settings changes:')
-    debug('before', JSON.stringify(prevSettings))
-    debug('after', JSON.stringify(settings))
-    if (settings.browserNode.usage.enabled !== prevSettings.browserNode.usage.enabled) {
-      debug('browserNode.usage.enabled changed')
-      this.nodes.configuredNode = this.setHttpClient(settings.configuredNode.endpoint)
-    }
-  }
-
-  updateBrowserNode () {
-
-  }
-
-  updateConfiguredNode () {
-
-  }
-
-  async setup () {
-    if (this.settings.browserNode.usage.enabled === true) {
+    this.resetConfigurableNode()
+    if (this.ipfsSettings.browserNode.usage.enabled === true) {
       this.spinUpBrowserNode()
     }
-    if (this.settings.configuredNode.usage.enabled === true) {
-      this.nodes.configuredNode = this.setHttpClient(this.settings.configuredNode.endpoint)
-    }
   }
 
-  async closeBrowserNode () {
+  resetConfigurableNode () {
+    debug(
+      'resetting configurable node endpoint',
+      JSON.stringify(this.ipfsSettings.configuredNode.endpoint)
+    )
+    this.nodes.configuredNode = this.configureHttpClient(this.ipfsSettings.configuredNode.endpoint)
+  }
+
+  async shutdownBrowserNode () {
+    debug('shutting down browser node')
     if (this.nodes.browserNode !== undefined) {
-      debug('stopping previous node')
       await this.nodes.browserNode.stop()
     }
   }
@@ -168,7 +150,7 @@ export class IPFSWrapper {
     )
   }
 
-  setHttpClient (nodeApiEndpoint: IpfsNodeApiEndpoint): ipfs.IPFS {
+  configureHttpClient (nodeApiEndpoint: IpfsNodeApiEndpoint): ipfs.IPFS {
     return ipfsClient({
       host: nodeApiEndpoint.host,
       port: nodeApiEndpoint.port,
@@ -185,17 +167,17 @@ export class IPFSWrapper {
     }, 10000)
   }
 
-  forEachNode (f: ((node: ipfs.IPFS, settings: IpfsInterfaceUsage) => void)) {
+  forEachNode (f: ((node: ipfs.IPFS, usage: IpfsInterfaceUsage) => void)) {
     if (this.nodes.browserNode !== undefined) {
       f(this.nodes.browserNode,
-        this.settings.browserNode.usage)
+        this.ipfsSettings.browserNode.usage)
     }
     if (this.nodes.configuredNode !== undefined) {
       f(this.nodes.configuredNode,
-        this.settings.configuredNode.usage)
+        this.ipfsSettings.configuredNode.usage)
     }
     f(this.nodes.publicNode,
-      this.settings.publicNode.usage)
+      this.ipfsSettings.publicNode.usage)
   }
 
   ipfsAdd (blob: Blob | string) {
@@ -237,11 +219,11 @@ export class IPFSWrapper {
   getNodeForRetrieval (): ipfs.IPFS | undefined {
     let winner: ipfs.IPFS | undefined
     let prio = -1
-    this.forEachNode((node, settings) => {
-      if (settings.enabled) {
-        if (settings.useForRetrievalPriority > prio) {
+    this.forEachNode((node, usage) => {
+      if (usage.enabled) {
+        if (usage.useForRetrievalPriority > prio) {
           winner = node
-          prio = settings.useForRetrievalPriority
+          prio = usage.useForRetrievalPriority
         }
       }
     })
