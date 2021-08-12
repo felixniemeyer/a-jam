@@ -119,8 +119,8 @@ export class LocalStorageWrapper implements StorageWrapper {
   }
 
   persistIpfsSettings (ipfsSettings: IpfsSettings) {
-    localStorage.setItem('settings.ipfs', JSON.stringify(ipfsSettings))
     debug('persisted ipfs settings')
+    localStorage.setItem('settings.ipfs', JSON.stringify(ipfsSettings))
   }
 
   loadSettings () {

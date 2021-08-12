@@ -11,16 +11,19 @@
           :usage="this.state.settings.ipfs.browserNode.usage"
           @disable="disableBrowserNode"
           @enable="enableBrowserNode"
+          @change="persistIpfsSettings"
           id="iiusage0"/>
       </Section>
       <Section title="public node">
         <IpfsInterfaceUsageConfig
           :usage="this.state.settings.ipfs.publicNode.usage"
+          @change="persistIpfsSettings"
           id="iiusage1"/>
       </Section>
       <Section title="configurable node">
         <IpfsInterfaceUsageConfig
           :usage="this.state.settings.ipfs.configuredNode.usage"
+          @change="persistIpfsSettings"
           id="iiusage2"/>
         <IpfsApiEndpointConfig
           :endpoint="this.state.settings.ipfs.configuredNode.endpoint"
@@ -32,7 +35,12 @@
         <p> choose the recording device:</p>
         <div class="micgroup" v-for="group, gKey in mics" :key="gKey">
           <p> Microfone device group: {{ gKey }}</p>
-          <div v-for="micLabel, micId in group" :key="micId" class="button" :class="{selected: micId === state.settings.micDeviceId}" @click="setMic(micId)">
+          <div
+            v-for="micLabel, micId in group"
+            :key="micId"
+            class="button"
+            :class="{selected: micId === state.settings.micDeviceId}"
+            @click="setMic(micId)">
             {{ micLabel || micId }}
           </div>
         </div>
@@ -111,7 +119,11 @@ export default defineComponent({
       this.state.settings.micDeviceId = micId
       this.storageWrapper.setMicDeviceId(micId)
     },
+    persistIpfsSettings () {
+      this.storageWrapper.persistIpfsSettings(this.state.settings.ipfs)
+    },
     changeIpfsEndpointConfig () {
+      this.persistIpfsSettings()
       this.ipfsWrapper.resetConfigurableNode()
     },
     disableBrowserNode () {

@@ -24,6 +24,7 @@
       <input
         type="checkbox"
         :id="`pinning${id}`"
+        @change="change"
         v-model="usage.useForPinning"/>
       <label :for="`pinning${id}`">
         Use this ipfs interface for pinning.
@@ -33,6 +34,7 @@
       <input
         type="checkbox"
         :id="`pinForeign${id}`"
+        @change="change"
         v-model="usage.pinForeignSessions"/>
       <label :for="`pinForeign${id}`">
         Pin sessions when loading jam sessions in order to improve availability.
@@ -45,7 +47,7 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  emits: ['disable', 'enable'],
+  emits: ['disable', 'enable', 'change'],
   props: {
     usage: {
       type: Object,
@@ -63,6 +65,10 @@ export default defineComponent({
       } else {
         this.$emit('disable')
       }
+      this.change()
+    },
+    change () {
+      this.$emit('change')
     }
   }
 })
