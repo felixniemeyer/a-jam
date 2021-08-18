@@ -45,10 +45,10 @@ export class IpfsSettings {
   constructor () {
     this.browserNode = {
       usage: {
-        enabled: false,
+        enabled: true,
         useForPinning: true,
         useForRetrievalPriority: 0, // interface with highest number gets chosen
-        pinForeignSessions: true
+        pinOnRetrieve: true
       }
     }
     this.publicNode = {
@@ -56,7 +56,7 @@ export class IpfsSettings {
         enabled: true,
         useForPinning: true,
         useForRetrievalPriority: 1, // interface with highest number gets chosen
-        pinForeignSessions: false
+        pinOnRetrieve: false
       }
     }
     this.configuredNode = {
@@ -64,7 +64,7 @@ export class IpfsSettings {
         enabled: false,
         useForPinning: true,
         useForRetrievalPriority: 2, // interface with highest number gets chosen
-        pinForeignSessions: true
+        pinOnRetrieve: true
       },
       endpoint: {
         host: '127.0.0.1',
@@ -79,7 +79,7 @@ export interface IpfsInterfaceUsage {
   enabled: boolean;
   useForPinning: boolean;
   useForRetrievalPriority: number; // interface with highest number gets chosen
-  pinForeignSessions: boolean;
+  pinOnRetrieve: boolean;
 }
 
 export interface IpfsNodeApiEndpoint {
@@ -231,6 +231,7 @@ export class IPFSWrapper {
   }
 
   async loadSessionConfig (cid: string) {
+    setTimeout(() => { this.pin_on_retrieve(cid) })
     const node = this.getNodeForRetrieval()
     if (node !== undefined) {
       const data = node.cat(cid)
@@ -247,6 +248,7 @@ export class IPFSWrapper {
   }
 
   async loadRecording (cid: string) {
+    setTimeout(() => { this.pin_on_retrieve(cid) })
     const node = this.getNodeForRetrieval()
     if (node === undefined) {
       throw (NO_CONNECTION_ERROR)
@@ -270,5 +272,14 @@ export class IPFSWrapper {
         fileReader.readAsArrayBuffer(audio)
       })
     }
+  }
+
+  pinOnRetrieve (cid: string) {
+    this.forEachNode((node, usage) => {
+      if (usage.enabled &&
+          usage.pinOnRetrieve) {
+        node.pin.add(cid)
+      }
+    })
   }
 }

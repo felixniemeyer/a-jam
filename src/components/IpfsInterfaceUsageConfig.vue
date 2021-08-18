@@ -34,10 +34,10 @@
     <div>
       <input
         type="checkbox"
-        :id="`pinForeign${id}`"
+        :id="`pinOnRetrieve${id}`"
         @change="change"
-        v-model="usage.pinForeignSessions"/>
-      <label :for="`pinForeign${id}`">
+        v-model="usage.pinOnRetrieve"/>
+      <label :for="`pinOnRetrieve${id}`">
         Pin sessions when loading jam sessions in order to improve availability.
       </label>
     </div>
