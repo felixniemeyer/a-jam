@@ -15,6 +15,7 @@
       <input
         type="number"
         :id="`retrievalPrio${id}`"
+        @change="change"
         v-model="usage.useForRetrievalPriority"/>
       <label :for="`retrievalPrio${id}`">
         Set this interface's priority for content retrieval from ipfs. The interface with the highest priority will be used for content retrieval.
