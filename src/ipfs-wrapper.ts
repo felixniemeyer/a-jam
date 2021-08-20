@@ -231,7 +231,7 @@ export class IPFSWrapper {
   }
 
   async loadSessionConfig (cid: string) {
-    setTimeout(() => { this.pin_on_retrieve(cid) })
+    setTimeout(() => { this.pinOnRetrieve(cid) })
     const node = this.getNodeForRetrieval()
     if (node !== undefined) {
       const data = node.cat(cid)
@@ -248,7 +248,7 @@ export class IPFSWrapper {
   }
 
   async loadRecording (cid: string) {
-    setTimeout(() => { this.pin_on_retrieve(cid) })
+    setTimeout(() => { this.pinOnRetrieve(cid) })
     const node = this.getNodeForRetrieval()
     if (node === undefined) {
       throw (NO_CONNECTION_ERROR)
