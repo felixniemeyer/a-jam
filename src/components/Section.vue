@@ -39,10 +39,10 @@ export default defineComponent({
   box-shadow: 0 0 0.5em #0002;
   margin: 0.5em 0.2em;
   overflow: hidden;
-  border-radius: 1em;
-  border: 0.2em solid #aaa;
+  border-radius: 0.5em;
+  border: 0.14em solid darken($grey, 40%);
   .header {
-    background-color: #aaa;
+    background-color: darken($grey, 20%);
     font-weight: bold;
     padding: 0.5em;
     display: block;

@@ -128,16 +128,17 @@ export default defineComponent({
 $dotsize: 3em;
 
 .slider {
-  @include clickable-box-shadow();
+  background-color: #555;
   margin: 1em;
   border-radius: 0.2em;
-  padding: 0.5em 0;
+  padding: 1em 0;
   .bar {
     position: relative;
     width: calc(100% - #{$dotsize});
     height: 0.4em;
-    background: linear-gradient(180deg, #888, #ccc 80%, #aaa);
-    margin: $dotsize * 0.5 0;
+    background: linear-gradient(180deg, darken($turquoise, 20%), #bbb);
+    margin-top: $dotsize * 0.7 ;
+    margin-bottom: $dotsize * 0.3;
     border-radius: 0.2em;
     left: $dotsize * 0.5;
     .dot {
@@ -148,14 +149,14 @@ $dotsize: 3em;
       top: 50%;
       transform: translate(-50%, -50%);
       border-radius: $dotsize * 0.5;
-      background-color: $selected;
+      background-color: darken($turquoise, 10%);
       box-sizing: border-box;
-      border: 0.4em solid rgb(9, 112, 138);
+      border: 0.4em solid darken($turquoise, 30%);
     }
     .right, .left{
       position: absolute;
       bottom: 0.7em;
-      color: #777;
+      color: #999;
     }
     .left {
       left: 0.5em;

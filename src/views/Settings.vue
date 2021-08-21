@@ -156,10 +156,10 @@ export default defineComponent({
       text-overflow: ellipsis;
     }
     .button {
-      background-color: #fff;
+      background-color: darken($turquoise, 30%);
     }
     .button.selected{
-      background-color: $selected;
+      background-color: darken($turquoise, 20%);
     }
     p{
       margin: 0em 1em;

@@ -1,12 +1,59 @@
-$danger: rgb(204, 61, 17);
+/* color definitions */
+$danger: rgb(244, 91, 77);
 $selected:rgb(132, 205, 223);
+$turquoise: #36e3cf;
+$brown: #cc6e40;
+$grey: #c1c5c9;
+$blue: #1e5daf;
+$pink: #f482ed;
+
+/* stuff */
+body {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  max-width: 60vh;
+  left: 50%;
+  transform: translate(-50%, 0);
+  overflow-x: hidden;
+  background-color: #333;
+  color: #e9e9e9;
+
+  font-family: sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #e2e5eb;
+}
+
+a {
+  color: $pink;
+  &:visited {
+    color: desaturate($pink, 80%);
+  }
+}
+
+.ipfs-errors {
+  background-color: rgb(128 + 64, 9, 9);
+  position: fixed;
+  top: 2em;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
 
 input {
   padding: 1em;
   margin: 0.5em;
+  background-color: darken($turquoise, 30%);
+  border: 0.1em solid #222;
+  border-radius: 0.5em;
+  color: #ddd;
+  font-weight: bold;
 }
 
 @mixin clickable-box-shadow {
+  background-color: #555;
   box-shadow: 0 0 1em #0004;
   &:hover {
     box-shadow: 0 0 0.4em #0004;
@@ -33,19 +80,21 @@ input {
   @include centered-background-image;
   position:fixed;
   z-index: 10;
-  background-color: #fff;
+  background-color: darken($turquoise, 20%);
   height: 3em;
   width: 3em;
   background-size: 50%;
   cursor: pointer;
   border-radius: 0.5em;
-  box-shadow: 0 0 0.5em #0008;
+  &:hover {
+    background-color: darken($turquoise, 5%);
+  }
 }
 
 .cornerbutton.back {
   left: 1em;
   top: 1em;
-  background-image: url('~@/assets/icons/back.svg');
+  background-image: url('~@/assets/icons/white/back.svg');
 }
 
 .code {

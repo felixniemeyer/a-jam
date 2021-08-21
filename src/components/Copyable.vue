@@ -41,16 +41,17 @@ export default defineComponent({
   margin: 0.33em auto;
   width: 80%;
   .text{
-    color: #333;
+    color: $pink;
     border: none;
-    background-color: #ddd;
-    padding: 0.5em;
+    background-color: #555;
+    padding: 0.9em;
     border-radius: 0.3em;
     box-sizing: border-box;
-    height: 2em;
+    height: 3em;
     width: 100%;
   }
   .copy-hint, .action{
+    font-family: default;
     position: absolute;
     right: 0em;
     bottom: 0.5em;
@@ -59,7 +60,7 @@ export default defineComponent({
     color: #fff;
   }
   .copy-hint {
-    background-color: #1e5daf;
+    background-color: $blue;
     transition: opacity ease-in-out 4s;
     pointer-events: none;
     opacity: 0;
@@ -71,7 +72,7 @@ export default defineComponent({
   .action {
     @include clickable-box-shadow();
     cursor: pointer;
-    background-color: rgb(161, 101, 66);
+    background-color: desaturate($brown, 20%);
   }
 }
 </style>

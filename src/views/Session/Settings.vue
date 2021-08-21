@@ -1,7 +1,7 @@
 <template>
   <div class="track-settings">
-    <Section title="info" :initiallyClosed="true">
-      <div v-if="session.ancestor !== undefined">
+    <Section v-if="session.ancestor !== undefined" title="info" :initiallyClosed="true">
+      <div>
         <p> this session is derived from: </p>
         <Copyable
           :text="session.ancestor"

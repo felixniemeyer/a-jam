@@ -93,12 +93,12 @@ export default defineComponent({
   .cornerbutton{
     background-size: 50%;
     &.info {
-      background-image: url("~@/assets/icons/info.svg");
+      background-image: url("~@/assets/icons/white/info.svg");
       right: 1em;
       top: 1em;
     }
     &.settings {
-      background-image: url("~@/assets/icons/settings.svg");
+      background-image: url("~@/assets/icons/white/settings.svg");
       left: 1em;
       top: 1em;
   }
