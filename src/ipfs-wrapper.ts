@@ -12,7 +12,8 @@ export class TrackConfig {
     public name: string,
     public volume: number,
     public panning: number,
-    public offset: number
+    public offset: number,
+    public muted: boolean
   ) {}
 }
 

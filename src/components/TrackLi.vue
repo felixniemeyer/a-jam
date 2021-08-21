@@ -4,7 +4,7 @@
       <div class="name">
         <span class="edit"></span>
         <div class="text" :style="{ backgroundColor: color + '88'}">
-          {{ name }}<span v-if="this.cid == undefined" class="small"> (unpublished)</span>
+          {{ name }}<span v-if="cid == undefined" class="small"> (unpublished)</span>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import makeRouter from './router'
 import { State } from '@/state'
 import { IPFSWrapper } from '@/ipfs-wrapper'
 import { LocalStorageWrapper, StorageWrapper } from '@/local-storage-wrapper'
+import { debug } from '@/tools'
 
 const storageWrapper = new LocalStorageWrapper()
 const state = reactive({
@@ -19,6 +20,8 @@ const state = reactive({
 } as State)
 const ac = new AudioContext()
 const ipfsWrapper = new IPFSWrapper(state.settings.ipfs)
+
+debug('here is the state', state)
 
 createApp(App)
   .use(({ config }) => {

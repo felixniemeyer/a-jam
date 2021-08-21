@@ -46,6 +46,7 @@ export class Track {
     clone.name = this.name
     clone.volume = this.volume
     clone.panning = this.panning
+    clone.muted = this.muted
     return clone
   }
 

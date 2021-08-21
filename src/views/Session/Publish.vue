@@ -119,7 +119,8 @@ export default defineComponent({
             track.name,
             track.volume,
             track.panning,
-            track.offset
+            track.offset,
+            track.muted
           ))
         }
       })

@@ -116,6 +116,7 @@ export default defineComponent({
           track.name = trackConfig.name
           track.volume = trackConfig.volume
           track.panning = trackConfig.panning
+          track.muted = trackConfig.muted
           return track
         })
       )
