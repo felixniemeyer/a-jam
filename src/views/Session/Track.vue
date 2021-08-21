@@ -4,11 +4,6 @@
       <p> recording cid: </p>
       <Copyable :text="track.recording.cid"/>
     </div>
-    <div>
-      <div class="danger inline-button" tabindex="0" @click="remove" @blur="confirmRemove = false">
-        {{confirmRemove ? "confirm remove track" : "remove track"}}
-      </div>
-    </div>
     <p>track name:
       <input :value="track.name" ref="name">
     </p>
@@ -45,6 +40,11 @@
       @update="updateOffset" />
     <div>
       <div class="inline-button" @click="renameAndLeave">back to session</div>
+    </div>
+    <div>
+      <div :class="{danger: confirmRemove}" class="inline-button" tabindex="0" @click="remove" @blur="confirmRemove = false">
+        {{confirmRemove ? "confirm remove track" : "remove track"}}
+      </div>
     </div>
   </div>
 </template>

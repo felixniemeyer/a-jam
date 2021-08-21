@@ -81,7 +81,7 @@ export default defineComponent({
         width: 2em;
         height: 2em;
         margin: 0.5em;
-        opacity: 0.5;
+        opacity: 0.9;
         background-image: url("~@/assets/icons/white/edit.svg");
       }
     }
@@ -109,7 +109,7 @@ export default defineComponent({
         box-shadow: 0 0 0.2em #0005;
       }
       &.muted {
-        background-color: #e52;
+        background-color: $danger;
         box-shadow: 0 0 0.5em #e727;
       }
     }

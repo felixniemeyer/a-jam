@@ -42,7 +42,6 @@ export default defineComponent({
 
 <style lang="scss">
 .log {
-  font-family: monospace;
   .msg {
     margin: 1em 1em 0 1em;
   }

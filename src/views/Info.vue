@@ -1,5 +1,4 @@
-<template>
-  <div class='cornerbutton back' @click="$router.go(-1)">
+<template> <div class='cornerbutton back' @click="$router.go(-1)">
   </div>
   <div class='container'>
     <h1>a-jam</h1>
@@ -35,7 +34,7 @@ export default defineComponent({
     margin: 1em 2em;
   }
   .ipfs-info{
-    color: rgb(18, 92, 134)
+    color: lighten($blue, 30%);
   }
   .local-storage{
     color: $danger;

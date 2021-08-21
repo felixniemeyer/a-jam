@@ -154,9 +154,8 @@ export default defineComponent({
     display: block;
     text-decoration: none;
     @include clickable-surface;
-    color: #4c46f7;
-    border: 0.1em solid #4c46f7;
-    box-shadow: 0 0 0.5em #4c46f799;
+    color: #2fe9ff;
+    border: 0.1em solid darken(#2fe9ff,20%);
   }
   .nowrap {
     white-space: nowrap;

@@ -21,7 +21,7 @@
           @toggleMute="toggleTrackMute(track)"
           @editTrack="$router.push(`/session/${this.localId}/track/${key}`)"
           />
-        <div v-if="session.tracks.length === 0 && !recording" class="placeholder">
+        <div v-if="session.tracks.length === 0 && !recording && recordingProcessed" class="hint">
           <p>
           There are no tracks yet.
           </p>
@@ -33,11 +33,12 @@
           </div>
         </div>
         <div
-          v-if="recording"
-          class="recording-placeholder"
+          v-if="recording || !recordingProcessed"
+          class="recordBar"
           :style="{width: `calc(3em + ${playProgress} * (100% - 3.4em)`}">
         </div>
         <div
+          :class="{hidden: recording}"
           class="importers">
           import recording...
           <div class="button" @click="importRecordingByCid">by cid</div>
@@ -109,7 +110,8 @@ export default defineComponent({
       mediaRecorder: undefined as MediaRecorder | undefined,
       stopTimeout: undefined as NodeJS.Timeout | undefined,
       recording: false,
-      skipRecording: false
+      skipRecording: false,
+      recordingProcessed: true
     }
   },
   computed: {
@@ -325,6 +327,7 @@ export default defineComponent({
           this.playAllTracks()
           this.mediaRecorder?.start() // eslint-disable-line
           this.recording = true
+          this.recordingProcessed = false
           this.session.dirty = true
         }
       }
@@ -353,6 +356,7 @@ export default defineComponent({
           debug('audio blob', audio)
           this.createTrack(audio)
         }
+        this.recordingProcessed = true
       }
     },
     async initUserMedia () {
@@ -430,20 +434,23 @@ export default defineComponent({
       display: inline-block;
       width: 2em;
       height: 2em;
-      opacity: 0.33;
-      background-image: url("~@/assets/icons/edit.svg");
+      opacity: 0.9;
+      background-image: url("~@/assets/icons/white/edit.svg");
       cursor: pointer;
     }
   }
   .cornerbutton.publish {
-    background-image: url("~@/assets/icons/publish.svg");
+    background-image: url("~@/assets/icons/white/publish.svg");
     right: 1em;
     top: 1em;
   }
 
   .trackArea {
     position: absolute;
-    background: linear-gradient(178deg, #ddd, #fff, #eee);
+    background-color: #444;
+    background-image: url('~@/assets/logo-watermark-small.png');
+    background-position: center;
+    background-repeat: repeat;
     text-align: left;
     left: 0;
     top: 5em;
@@ -453,15 +460,15 @@ export default defineComponent({
       height: 100%;
       overflow-y: auto;
       overflow-x: hidden;
-      .recording-placeholder {
+      .recordBar {
         height: 1em;
         margin: 1em 0.2em;
         background-color: #c00;
         border-radius: 0.5em;
       }
-      .placeholder {
+      .hint {
         text-align: center;
-        color: #888;
+        color: #999;
         margin: 1em 1em 0.5em 1em;
         div {
           display: inline-block;
@@ -478,12 +485,17 @@ export default defineComponent({
           padding: 0.5em;
           margin: 0.5em;
           display: inline-block;
-          background-color: #fff8;
-          border: 0.1em solid #444;
+          background-color: darken($brown, 15%);
           border-radius: 0.5em;
           &:hover {
-            background-color: #fff;
+            background-color: darken($brown, 0%);
           }
+        }
+        transition: opacity ease-in-out 0.2s;
+        opacity: 1;
+        &.hidden {
+          opacity: 0;
+          transition: opacity ease-in-out 0s;
         }
       }
     }
@@ -500,16 +512,16 @@ export default defineComponent({
     .from-time, .to-time {
       position: absolute;
       z-index: 51;
-      bottom: 0.2em;
-      background-color: #fffb;
-      color: #777;
+      bottom: 0.5em;
+      background-color: #333;
+      color: #999;
       padding: 0.2em;
     }
     .from-time {
-      left: 0.2em;
+      left: 0.5em;
     }
     .to-time {
-      right: 0.2em;
+      right: 0.5em;
     }
   }
 
@@ -525,31 +537,33 @@ export default defineComponent({
       display: inline-block;
       background-repeat: no-repeat;
       background-position: center;
-      box-shadow: 0 0 0.5em #0008;
-      &:hover {
-        box-shadow: 0 0 0.2em #0008;
-      }
     }
     .button {
+      background-color: #555;
+      box-sizing: border-box;
       height: 4em;
       width: 4em;
       margin: 0.5em;
       background-size: 100%;
       border-radius: 2em;
       &.record {
+        border: 0.2em solid #c00;
         background-image: url("~@/assets/icons/record.svg");
         cursor: pointer;
         &.recording {
-          background-image: url("~@/assets/icons/stop-record.svg");
+          background-image: url("~@/assets/icons/white/stop-record.svg");
           background-color: #c00;
+          border:none;
         }
       }
       &.play {
-        background-image: url("~@/assets/icons/play.svg");
+        background-image: url("~@/assets/icons/white/play.svg");
         background-size: 80%;
+      border: 0.2em solid #999;
         cursor: pointer;
         &.playing {
-          background-image: url("~@/assets/icons/stop-play.svg");
+          background-image: url("~@/assets/icons/white/stop-play.svg");
+          background-color: #999;
         }
       }
       vertical-align: middle;
@@ -560,7 +574,10 @@ export default defineComponent({
       border-radius: 0.5em;
       width: 3em;
       height: 3em;
-      background-color: #444;
+      background-color: darken($brown, 15%);
+      &:hover {
+        background-color: darken($brown, 0%);
+      }
       background-size: 80%;
       &.mic {
         left: 1em;
@@ -576,7 +593,7 @@ export default defineComponent({
       width: 4em;
       margin: 0.3em;
       padding: 0;
-      color: #777;
+      color: #999;
       vertical-align: middle;
       &.play {
         text-align: left;
