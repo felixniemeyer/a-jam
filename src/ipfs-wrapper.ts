@@ -199,7 +199,7 @@ export class IPFSWrapper {
             },
             err => {
               errors += 1
-              this.errorLog.value.push(`Failed to add blob track: ${err}`)
+              this.errorLog.value.push(`Failed to ipfs add: ${err}`)
               if (errors === count) {
                 reject(new Error('All ipfs interfaces failed to add this file. See details at the ipfsWrapper error log.'))
               }
