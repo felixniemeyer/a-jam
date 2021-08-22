@@ -329,23 +329,23 @@ export default defineComponent({
           this.recording = true
           this.recordingProcessed = false
           this.session.dirty = true
-          if(this.recloop) {
+          if (this.recloop) {
             this.quitRecloop = false
             setTimeout(this.stopRecording.bind(this), this.recloopDuration * 1000)
           }
         }
       }
     },
-    stopRecording() {
+    stopRecording () {
       if (this.mediaRecorder !== undefined && this.mediaRecorder.state === 'recording') {
         this.mediaRecorder.stop()
       }
       this.stopAllPlaybacks()
       this.recording = false
     },
-    toggleRecloop() {
+    toggleRecloop () {
       this.recloop = !this.recloop
-      if(this.recloop) {
+      if (this.recloop) {
         this.recloopDuration = this.maxTrackDuration
       }
     },
@@ -373,12 +373,12 @@ export default defineComponent({
             type: 'audio/ogg; codecs=opus'
           })
           debug('audio blob', audio)
-          let track = await this.createTrack(audio)
+          const track = await this.createTrack(audio)
           this.recordingProcessed = true
-          const trackListDiv = this.$refs.trackList as HTMLDivElement;
-          trackListDiv.scrollTop = trackListDiv.scrollHeight;
-          if(this.recloop && !this.quitRecloop) {
-            track.muted = true;
+          const trackListDiv = this.$refs.trackList as HTMLDivElement
+          trackListDiv.scrollTop = trackListDiv.scrollHeight
+          if (this.recloop && !this.quitRecloop) {
+            track.muted = true
             this.toggleRecord()
           }
         }
