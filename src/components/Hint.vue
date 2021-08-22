@@ -1,5 +1,5 @@
 <template>
-  <div class="section">
+  <div class="hint">
     <div class="header" @click="toggle" :class="{closed}">
       {{ title }}
     </div>
@@ -16,7 +16,7 @@ export default defineComponent({
   props: {
     title: String,
     initiallyClosed: {
-      default: false,
+      default: true,
       type: Boolean
     }
   },
@@ -35,34 +35,29 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 
-.section{
-  box-shadow: 0 0 0.5em #0002;
+.hint{
   margin: 0.5em 0.2em;
+  border-radius: 1em;
   overflow: hidden;
-  border-radius: 0.5em;
-  border: 0.14em solid darken($grey, 40%);
-  .header {
-    background-color: darken($grey, 20%);
-    font-weight: bold;
+  .header{
+    background-color: #555;
     padding: 0.5em;
     display: block;
-    width: 100%;
-    color: #fff;
     cursor: pointer;
     user-select: none;
-    &::after{
-      content: " ▲"
+    &::before{
+      content: "▲ "
     }
-    &.closed::after {
-      content: " ▼"
+    &.closed::before{
+      content: "▼ "
     }
   }
   .content {
-    padding: 0.3em;
+    background-color: #222;
+    padding: 0.5em;
     &.closed {
       padding: 0em;
     }
-    background-color: rgba(84,91,111,0.05);
   }
   h4{
     margin: 0.5em;

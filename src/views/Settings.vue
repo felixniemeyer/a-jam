@@ -1,10 +1,6 @@
 <template>
   <div class="settings">
     <h1>settings</h1>
-    <!--div>
-      <div class="inline-button" @click="exportSettings">export settings</div>
-      <div class="inline-button" @click="importSettings">import settings</div>
-    </div-->
     <Section title="ipfs">
       <Section title="browser node">
         <IpfsInterfaceUsageConfig
@@ -32,17 +28,14 @@
     </Section>
     <Section title="recording">
       <Section title="device" :initiallyClosed="false">
-        <p> choose the recording device:</p>
-        <div class="micgroup" v-for="group, gKey in mics" :key="gKey">
-          <p> Microfone device group: {{ gKey }}</p>
-          <div
-            v-for="micLabel, micId in group"
-            :key="micId"
-            class="button"
-            :class="{selected: micId === state.settings.micDeviceId}"
-            @click="setMic(micId)">
-            {{ micLabel || micId }}
-          </div>
+        <p>choose the recording device:</p>
+        <div
+          v-for="micLabel, micId in mics"
+          :key="micId"
+          class="button"
+          :class="{selected: micId === state.settings.micDeviceId}"
+          @click="setMic(micId)">
+          {{ micLabel || micId }}
         </div>
       </Section>
       <Slider
@@ -81,11 +74,7 @@ export default defineComponent({
   },
   data () {
     return {
-      mics: {} as {
-        [groupId: string]: {
-          [deviceId: string]: string;
-        };
-      },
+      mics: {} as {[deviceId: string]: string},
       sliderOrigin: {
         defaultRecordingOffset: this.state.settings.defaultRecordingOffset
       }
@@ -106,10 +95,8 @@ export default defineComponent({
       navigator.mediaDevices.enumerateDevices().then(devices => {
         const audioInputs = devices.filter(device => device.kind === 'audioinput')
         audioInputs.forEach(mic => {
-          if (!(mic.groupId in this.mics)) {
-            this.mics[mic.groupId] = {}
-          }
-          this.mics[mic.groupId][mic.deviceId] = mic.label
+          debug('found mic')
+          this.mics[mic.deviceId] = mic.label
         })
         debug(this.mics)
       })
@@ -141,32 +128,17 @@ export default defineComponent({
 
 .settings{
   word-wrap: break-word;
+  .button {
+    @include clickable-surface;
+    text-align: left;
+    background-color: darken($turquoise, 30%);
+    &.selected {
+      background-color: darken($turquoise, 20%);
+    }
+  }
   .inline-button{
     @include clickable-surface;
     display: inline-block;
-  }
-  .button {
-    @include clickable-surface;
-  }
-  .micgroup {
-    p, .button {
-      text-align: left;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .button {
-      background-color: darken($turquoise, 30%);
-    }
-    .button.selected{
-      background-color: darken($turquoise, 20%);
-    }
-    p{
-      margin: 0em 1em;
-    }
-  }
-  .tll {
-    text-align: left;
   }
 }
 

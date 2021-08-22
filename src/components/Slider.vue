@@ -1,6 +1,6 @@
 <template>
   <div class="slider">
-    {{name}}: {{(value*factor).toFixed(decimalPlaces)}} {{unit}}
+    {{name}}: {{(value*factor).toFixed(decimalPlaces)}}{{unit}}
     <div class="bar" ref="bar">
       <div class="left">{{left}}</div>
       <div class="right">{{right}}</div>
@@ -128,15 +128,16 @@ export default defineComponent({
 $dotsize: 3em;
 
 .slider {
-  background-color: #555;
+  background-color: #282828;
+  border: 0.1em solid #444;
   margin: 1em;
   border-radius: 0.2em;
-  padding: 1em 0;
+  padding: 0.9em 0;
   .bar {
     position: relative;
     width: calc(100% - #{$dotsize});
-    height: 0.4em;
-    background: linear-gradient(180deg, darken($turquoise, 20%), #bbb);
+    height: 0.35em;
+    background: linear-gradient(180deg, darken($turquoise, 30%), #bbb);
     margin-top: $dotsize * 0.7 ;
     margin-bottom: $dotsize * 0.3;
     border-radius: 0.2em;

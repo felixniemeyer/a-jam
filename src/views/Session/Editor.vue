@@ -141,8 +141,8 @@ export default defineComponent({
   },
   beforeUnmount () {
     this.stopAllPlaybacks()
-    if (this.mediaRecorder !== undefined && this.mediaRecorder?.state !== 'inactive') {
-      this.mediaRecorder!.stop() // eslint-disable-line
+    if (this.mediaRecorder !== undefined) {
+      this.mediaRecorder.stop()
     }
   },
   methods: {
@@ -387,9 +387,13 @@ export default defineComponent({
     async initUserMedia () {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         debug('micDeviceId', this.state.settings.micDeviceId)
+        let deviceId
+        if (this.state.settings.micDeviceId) {
+          deviceId = { exact: this.state.settings.micDeviceId }
+        }
         const constraints: MediaStreamConstraints = {
           audio: {
-            deviceId: this.state.settings.micDeviceId,
+            deviceId: deviceId,
             echoCancellation: false,
             noiseSuppression: false,
             autoGainControl: false
