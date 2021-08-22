@@ -2,10 +2,10 @@
   <div class="track-li">
     <div class="track-bar" :style="{ width: `calc(3em + ${relativeDuration} * (100% - 3.4em)`, backgroundColor: color}" @click="$emit('editTrack')">
       <div class="name">
-        <span class="edit"></span>
         <div class="text" :style="{ backgroundColor: color + '88'}">
           {{ name }}<span v-if="cid == undefined" class="small"> (unpublished)</span>
         </div>
+        <span class="edit"></span>
       </div>
     </div>
     <div class="track-controls">
@@ -65,8 +65,8 @@ export default defineComponent({
         position: absolute;
         white-space: nowrap;
         top: 50%;
-        left: 3em;
-        padding: 0.25em 0.45em 0.25em 0;
+        left: 0em;
+        padding: 0.25em 0.45em 0.25em 3em;
         border-radius: 0 0.5em 0.5em 0 ;
         transform: translate(0, -50%);
         .small{
