@@ -65,7 +65,10 @@ import IpfsInterfaceUsageConfig from '@/components/IpfsInterfaceUsageConfig.vue'
 import IpfsApiEndpointConfig from '@/components/IpfsApiEndpointConfig.vue'
 import { debug } from '@/tools'
 
+import WidthFreezer from '@/mixins/WidthFreezer'
+
 export default defineComponent({
+  mixins: [WidthFreezer],
   components: {
     Slider,
     Section,
