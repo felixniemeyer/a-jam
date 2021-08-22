@@ -10,7 +10,7 @@
     </div>
     <div class="cornerbutton publish" @click="publish"></div>
     <div class="trackArea">
-      <div class="trackList">
+      <div ref="trackList" class="trackList">
         <TrackLi
           v-for="(track, key) in session.tracks"
           :key="key"
@@ -56,6 +56,7 @@
 
     <div class="controls">
       <span class="shortcut-hint record">
+        <div class="recloop" :class="{on: recloop}" @click="toggleRecloop"></div>
         (r)
       </span>
       <div
@@ -71,10 +72,9 @@
       <span class="shortcut-hint play">
         (space)
       </span>
-      <div class="button2 download"
-        @click="renderAndDownload"></div>
-      <!--div class="button2 mic"
-        @click="chooseMic"></div-->
+      <div class="export"
+        @click="renderAndDownload">
+      </div>
     </div>
   </div>
 </template>
@@ -111,7 +111,10 @@ export default defineComponent({
       stopTimeout: undefined as NodeJS.Timeout | undefined,
       recording: false,
       skipRecording: false,
-      recordingProcessed: true
+      recordingProcessed: true,
+      recloop: false,
+      recloopDuration: 0,
+      quitRecloop: true
     }
   },
   computed: {
@@ -314,11 +317,8 @@ export default defineComponent({
         await this.initMediaRecorder()
       }
       if (this.recording) {
-        if (this.mediaRecorder !== undefined && this.mediaRecorder.state === 'recording') {
-          this.mediaRecorder.stop()
-        }
-        this.stopAllPlaybacks()
-        this.recording = false
+        this.quitRecloop = true
+        this.stopRecording()
       } else {
         if (!this.playing) {
           await this.ensureAcIsRunning()
@@ -329,13 +329,31 @@ export default defineComponent({
           this.recording = true
           this.recordingProcessed = false
           this.session.dirty = true
+          if(this.recloop) {
+            this.quitRecloop = false
+            setTimeout(this.stopRecording.bind(this), this.recloopDuration * 1000)
+          }
         }
+      }
+    },
+    stopRecording() {
+      if (this.mediaRecorder !== undefined && this.mediaRecorder.state === 'recording') {
+        this.mediaRecorder.stop()
+      }
+      this.stopAllPlaybacks()
+      this.recording = false
+    },
+    toggleRecloop() {
+      this.recloop = !this.recloop
+      if(this.recloop) {
+        this.recloopDuration = this.maxTrackDuration
       }
     },
     cancelRecording () {
       if (this.recording) {
         this.skipRecording = true
-        this.toggleRecord()
+        this.quitRecloop = true
+        this.stopRecording()
       }
     },
     async initMediaRecorder () {
@@ -349,14 +367,21 @@ export default defineComponent({
       this.mediaRecorder.onstop = async () => {
         if (this.skipRecording) {
           this.skipRecording = false
+          this.recordingProcessed = true
         } else {
           const audio = new Blob(this.recordingChunks, {
             type: 'audio/ogg; codecs=opus'
           })
           debug('audio blob', audio)
-          this.createTrack(audio)
+          let track = await this.createTrack(audio)
+          this.recordingProcessed = true
+          const trackListDiv = this.$refs.trackList as HTMLDivElement;
+          trackListDiv.scrollTop = trackListDiv.scrollHeight;
+          if(this.recloop && !this.quitRecloop) {
+            track.muted = true;
+            this.toggleRecord()
+          }
         }
-        this.recordingProcessed = true
       }
     },
     async initUserMedia () {
@@ -371,34 +396,38 @@ export default defineComponent({
           },
           video: false // wäre eigentlich geil, das auch zu ermöglichen => V4 ;)
         }
-        return await navigator.mediaDevices.getUserMedia(constraints) // todo mediaDevices.enumerateDevices and let user choose his preferred mic (super for mobile devices)
+        return await navigator.mediaDevices.getUserMedia(constraints)
       } else {
         throw Error('getUserMedia not supported on your browser!')
       }
     },
     createTrack (audioBlob: Blob) {
-      const fileReader = new FileReader()
-      fileReader.onloadend = () => {
-        const arrayBuffer = fileReader.result
-        if (arrayBuffer instanceof ArrayBuffer) {
-          this.ac.decodeAudioData(arrayBuffer).then(
-            (audioBuffer) => {
-              debug(audioBuffer)
-              this.session.tracks.push(new Track(this.state.settings.defaultRecordingOffset, {
-                cid: undefined,
-                audioBlob,
-                audioBuffer
-              }))
-            },
-            (err) => {
-              console.error('failed to decode audio data:', err)
-            }
-          )
-        } else {
-          console.error('arrayBuffer is not an ArrayBuffer')
+      return new Promise<Track>((resolve, reject) => {
+        const fileReader = new FileReader()
+        fileReader.onloadend = () => {
+          const arrayBuffer = fileReader.result
+          if (arrayBuffer instanceof ArrayBuffer) {
+            this.ac.decodeAudioData(arrayBuffer).then(
+              (audioBuffer) => {
+                debug(audioBuffer)
+                const track = new Track(this.state.settings.defaultRecordingOffset, {
+                  cid: undefined,
+                  audioBlob,
+                  audioBuffer
+                })
+                this.session.tracks.push(track)
+                resolve(track)
+              },
+              (err) => {
+                reject(new Error(`failed to decode audio data: ${err}`))
+              }
+            )
+          } else {
+            reject(new Error('arrayBuffer is not an ArrayBuffer'))
+          }
         }
-      }
-      fileReader.readAsArrayBuffer(audioBlob)
+        fileReader.readAsArrayBuffer(audioBlob)
+      })
     }
   }
 })
@@ -532,34 +561,75 @@ export default defineComponent({
     overflow-y: hidden;
     width: 100%;
     margin:0;
-    .button, .button2 {
+
+    $buttonBgc: #555;
+    $recBgc: #c00;
+
+    .button, .export, .recloop{
       cursor: pointer;
-      display: inline-block;
       background-repeat: no-repeat;
       background-position: center;
-    }
-    .button {
-      background-color: #555;
+      user-select: none;
       box-sizing: border-box;
+    }
+
+    .recloop, .export {
+      position: absolute;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.5rem;
+    }
+    .recloop {
+      left: -1em;
+      top: 50%;
+      transform: translate(0, -50%);
+      border: 0.2em solid $recBgc;
+      background-color: $buttonBgc;
+      background-size: 80%;
+      background-image: url("~@/assets/icons/white/recloop.svg");
+      &:hover {
+        background-color: lighten($buttonBgc, 20%);
+      }
+      &.on {
+        background-color: $recBgc;
+      }
+    }
+    .export {
+      right: 1em;
+      top: 1rem;
+      background-color: darken($brown, 15%);
+      background-size: 80%;
+      background-image: url("~@/assets/icons/white/download.svg");
+      &:hover {
+        background-color: darken($brown, 0%);
+      }
+    }
+
+    .button {
+      display: inline-block;
+      background-color: $buttonBgc;
+      &:hover {
+        background-color: lighten($buttonBgc, 20%);
+      }
       height: 4em;
       width: 4em;
       margin: 0.5em;
       background-size: 100%;
       border-radius: 2em;
       &.record {
-        border: 0.2em solid #c00;
+        border: 0.2em solid $recBgc;
         background-image: url("~@/assets/icons/record.svg");
         cursor: pointer;
         &.recording {
           background-image: url("~@/assets/icons/white/stop-record.svg");
-          background-color: #c00;
+          background-color: $recBgc;
           border:none;
         }
       }
       &.play {
         background-image: url("~@/assets/icons/white/play.svg");
         background-size: 80%;
-      border: 0.2em solid #999;
+        border: 0.2em solid #999;
         cursor: pointer;
         &.playing {
           background-image: url("~@/assets/icons/white/stop-play.svg");
@@ -568,27 +638,8 @@ export default defineComponent({
       }
       vertical-align: middle;
     }
-    .button2 {
-      position: absolute;
-      top: 1em;
-      border-radius: 0.5em;
-      width: 3em;
-      height: 3em;
-      background-color: darken($brown, 15%);
-      &:hover {
-        background-color: darken($brown, 0%);
-      }
-      background-size: 80%;
-      &.mic {
-        left: 1em;
-        background-image: url("~@/assets/icons/white/mic.svg");
-      }
-      &.download {
-        right: 1em;
-        background-image: url("~@/assets/icons/white/download.svg");
-      }
-    }
     .shortcut-hint {
+      position: relative;
       display: inline-block;
       width: 4em;
       margin: 0.3em;

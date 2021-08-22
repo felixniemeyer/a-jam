@@ -36,19 +36,22 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+
+$texareaBgc: #282828;
 .copyable{
   position: relative;
   margin: 0.33em auto;
   width: 80%;
   .text{
     color: $pink;
-    border: none;
-    background-color: #555;
-    padding: 0.9em;
+    background-color: $texareaBgc;
+    border: 0.3em solid $texareaBgc;
+    padding: 0.7em;
     border-radius: 0.3em;
     box-sizing: border-box;
     height: 3em;
     width: 100%;
+    box-sizing: border-box;
   }
   .copy-hint, .action{
     font-family: default;
