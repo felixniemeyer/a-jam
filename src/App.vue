@@ -40,6 +40,7 @@ export default defineComponent({
   background-color: rgb(128 + 64, 9, 9);
   min-width: 50%;
   position: fixed;
+  z-index: 999;
   top: 2em;
   left: 50%;
   transform: translate(-50%, 0);
