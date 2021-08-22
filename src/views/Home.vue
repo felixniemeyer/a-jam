@@ -71,6 +71,7 @@ export default defineComponent({
       .small {
         font-size: 0.7em;
         margin: 0.2em;
+        word-wrap: break-word;
       }
       .close {
         position: absolute;

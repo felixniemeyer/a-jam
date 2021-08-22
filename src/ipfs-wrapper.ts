@@ -90,7 +90,7 @@ export interface IpfsNodeApiEndpoint {
 }
 
 export class IPFSWrapper {
-  errorLog: Ref<string[]> = ref([])
+  errorLog: Ref<string[]> = ref(['test1', 'test2'])
 
   // various ways to the ipfs network
   nodes: {
