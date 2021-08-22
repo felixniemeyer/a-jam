@@ -1,6 +1,6 @@
 <template>
   <div class="loading">
-    <AudioContextPrompt v-if="requireInteraction" @clicked='loadSession'/>
+    <AudioContextPrompt v-if="requireInteraction" @clicked='resumeAcAndLoad'/>
     <div v-else>
       <h1> loading session... </h1>
       <Log
@@ -45,20 +45,17 @@ export default defineComponent({
     leave () {
       this.$router.go(-1)
     },
-    checkAcAndLoad () {
+    async checkAcAndLoad () {
+      await this.ac.resume()
       if (this.ac.state === 'suspended') {
-        this.ac.resume()
-        if (this.ac.state === 'suspended') {
-          this.requireInteraction = true
-        }
-      }
-      if (!this.requireInteraction) {
-        this.requireInteraction = false
+        this.requireInteraction = true
+      } else {
         this.loadSession()
       }
     },
-    resumeAcAndLoad () {
-      this.ac.resume()
+    async resumeAcAndLoad () {
+      this.requireInteraction = false
+      await this.ac.resume()
       this.loadSession()
     },
     async loadSession () {
