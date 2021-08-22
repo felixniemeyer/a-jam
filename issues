@@ -6,6 +6,11 @@
 		- "WIP[(<name>)]: " = work started by <name> at <date>
 */
 
+- Backlog 
+	- public node: support https 
+	- pinata integration
+	- 300ms latency unter firefox. was geht schief
+
 - V4 
 	- D: Three possible ipfs nodes
 		- D: public node (via ipfs-http-client)
@@ -21,7 +26,7 @@
 		- once a-jam get's bigger, prevent abuse 
 			- use nginx in front of ipfs & authenticate requests
 		- have a job, that notes down all pins and removes all pins that are older than y
-	- Dark mode (or simply dark style over all - no choice) 
+	- D: Dark mode (or simply dark style over all - no choice) 
 
 - V3
 	- Architectural 
@@ -31,8 +36,8 @@
 		- D: use "defineComponent" instead of classes
 	- Features 
 		- D: Export master audio
-		- Loop playback
-			- generate a new recording in every loop, choose the best loop afterwards!
+		- D: Loop playback
+			- D: generate a new recording in every loop, choose the best loop afterwards!
 		- Convenient Merge Tools
 			- on page trackinfo, click "merge session" 
 			- Show recent sessions
