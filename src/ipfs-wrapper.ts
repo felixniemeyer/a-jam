@@ -90,7 +90,7 @@ export interface IpfsNodeApiEndpoint {
 }
 
 export class IPFSWrapper {
-  errorLog: Ref<string[]> = ref(['test1', 'test2'])
+  errorLog: Ref<string[]> = ref([])
 
   // various ways to the ipfs network
   nodes: {
@@ -199,9 +199,9 @@ export class IPFSWrapper {
             },
             err => {
               errors += 1
-              this.errorLog.value.push(`Failed to ipfs add blob track: ${err}`)
+              this.errorLog.value.push(`Failed to add blob track: ${err}`)
               if (errors === count) {
-                reject(new Error('All ipfs interfaces failed to do ipfs add for this file. See details at the ipfsWrapper error log.'))
+                reject(new Error('All ipfs interfaces failed to add this file. See details at the ipfsWrapper error log.'))
               }
             }
           )
