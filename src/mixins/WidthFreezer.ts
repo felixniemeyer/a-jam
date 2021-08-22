@@ -6,10 +6,9 @@ import { debug } from '@/tools'
  */
 export default defineComponent({
   beforeCreate () {
-    let width = `${document.body.clientWidth}px`
+    const width = `${document.body.clientWidth}px`
     document.body.style.setProperty('width', width)
     document.body.style.setProperty('max-width', 'none')
-    debug("fixing width to", width)
   },
   unmounted () {
     document.body.style.removeProperty('width')
