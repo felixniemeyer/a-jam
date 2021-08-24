@@ -1,0 +1,2 @@
+- only allow cat, add, pin api requests on the public node
+- support https on the public node
