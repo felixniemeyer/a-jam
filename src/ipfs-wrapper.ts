@@ -86,7 +86,7 @@ export interface IpfsInterfaceUsage {
 export interface IpfsNodeApiEndpoint {
   host: string;
   port: number;
-  protocol: 'http';
+  protocol: string;
 }
 
 export class IPFSWrapper {
@@ -108,11 +108,16 @@ export class IPFSWrapper {
 
   constructor (ipfsSettings: IpfsSettings) {
     this.ipfsSettings = ipfsSettings
+    const protocol = location.protocol.slice(0,-1);
+    let port = 15151
+    if (protocol == "https") {
+      port = 15152
+    }
     this.nodes = {
       publicNode: this.configureHttpClient({
         host: 'nathanael.in',
-        port: 15151,
-        protocol: 'http'
+        port,
+        protocol
       }) as ipfs.IPFS,
       configuredNode: undefined,
       browserNode: undefined
