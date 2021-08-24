@@ -36,9 +36,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 
 .hint{
-  margin: 0.5em 0.2em;
+  margin: 0.5em 1em;
   border-radius: 1em;
   overflow: hidden;
+  text-align: center;
   .header{
     background-color: #555;
     padding: 0.5em;

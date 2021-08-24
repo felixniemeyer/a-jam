@@ -33,6 +33,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 
 .tooltip {
+  margin: 0.3em 1em;
   cursor: pointer;
   vertical-align: top;
   display: inline-block;

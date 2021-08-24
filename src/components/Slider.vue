@@ -130,7 +130,7 @@ $dotsize: 3em;
 .slider {
   background-color: #282828;
   border: 0.1em solid #444;
-  margin: 1em;
+  margin: 0.3em 1em;
   border-radius: 0.2em;
   padding: 0.9em 0;
   .bar {

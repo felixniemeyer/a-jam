@@ -12,6 +12,7 @@ import SessionTrack from /* webpackChunkName: "sessionTrack" */ '@/views/Session
 import ByCidImporter from /* webpackChunkName: "sessionTrack" */ '@/views/Session/ByCidImporter.vue'
 import FromFileImporter from /* webpackChunkName: "sessionTrack" */ '@/views/Session/FromFileImporter.vue'
 import ErrorComponent from /* webpackChunkName: "error" */ '@/views/Error.vue'
+import OffsetCalibration from /* webpackChunkName: "error" */ '@/views/OffsetCalibration.vue'
 
 function makeRoutes (state: State): Array<RouteRecordRaw> {
   return [
@@ -32,6 +33,11 @@ function makeRoutes (state: State): Array<RouteRecordRaw> {
       path: '/settings',
       name: 'Settings',
       component: Settings
+    },
+    {
+      path: '/offsetCalibration',
+      name: 'OffsetCalibration',
+      component: OffsetCalibration
     },
     {
       path: '/loadSession/:cid',

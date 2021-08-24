@@ -32,12 +32,16 @@
         <div
           v-for="micLabel, micId in mics"
           :key="micId"
-          class="button"
+          class="recdevice"
           :class="{selected: micId === state.settings.micDeviceId}"
           @click="setMic(micId)">
           {{ micLabel || micId }}
         </div>
       </Section>
+      <h4> recording offset </h4>
+      <Hint title="The recording offset compensates recording latency">
+        When the browser starts recording sound, it will take a couple of milliseconds until the recording will actually start. There will be a small time difference, that could be heard when left ignored. Thus, every track allows for a compensation of this lag: the recording offset. Usually the lag depends on the device, operating system and the browser and will be similar each time when recording. Here you can set the default recording offset to the most accurate value. An automatic detection is also available."
+      </Hint>
       <Slider
         name="default recording offset in ms"
         left="more delayed"
@@ -49,6 +53,9 @@
         :value="state.settings.defaultRecordingOffset"
         @dragEnd="resetInitialRecordingOffset"
         @update="updateDefaultRecordingOffset"/>
+      <div class="inline-button" @click="$router.push('OffsetCalibration')">
+        automatically calibrate recording offset
+      </div>
     </Section>
     <div>
       <div class="inline-button" @click="$router.go(-1)">done</div>
@@ -61,6 +68,7 @@ import { defineComponent } from 'vue'
 
 import Slider from '@/components/Slider.vue'
 import Section from '@/components/Section.vue'
+import Hint from '@/components/Hint.vue'
 import IpfsInterfaceUsageConfig from '@/components/IpfsInterfaceUsageConfig.vue'
 import IpfsApiEndpointConfig from '@/components/IpfsApiEndpointConfig.vue'
 import { debug } from '@/tools'
@@ -72,6 +80,7 @@ export default defineComponent({
   components: {
     Slider,
     Section,
+    Hint,
     IpfsInterfaceUsageConfig,
     IpfsApiEndpointConfig
   },
@@ -131,7 +140,7 @@ export default defineComponent({
 
 .settings{
   word-wrap: break-word;
-  .button {
+  .recdevice {
     @include clickable-surface;
     text-align: left;
     background-color: darken($turquoise, 30%);
