@@ -138,6 +138,9 @@ export default defineComponent({
 
 <style lang="scss">
 
+body {
+  overflow: auto;
+}
 .settings{
   word-wrap: break-word;
   .recdevice {

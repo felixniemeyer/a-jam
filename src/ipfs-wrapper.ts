@@ -192,7 +192,6 @@ export class IPFSWrapper {
       let successes = 0
       let errors = 0
       this.forEachNode((node, usage) => {
-        console.log('here, im in it. usage:', usage)
         if (usage.enabled && usage.useForPinning) {
           count += 1
           node.add(blob).then(
