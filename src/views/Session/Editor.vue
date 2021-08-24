@@ -141,7 +141,7 @@ export default defineComponent({
   },
   beforeUnmount () {
     this.stopAllPlaybacks()
-    if (this.mediaRecorder !== undefined) {
+    if (this.mediaRecorder !== undefined && this.mediaRecorder.state !== 'inactive') {
       this.mediaRecorder.stop()
     }
   },
