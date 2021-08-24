@@ -1,31 +1,6 @@
 <template>
   <div class="settings">
     <h1>settings</h1>
-    <Section title="ipfs">
-      <Section title="browser node">
-        <IpfsInterfaceUsageConfig
-          :usage="this.state.settings.ipfs.browserNode.usage"
-          @disable="disableBrowserNode"
-          @enable="enableBrowserNode"
-          @change="persistIpfsSettings"
-          id="iiusage0"/>
-      </Section>
-      <Section title="public node">
-        <IpfsInterfaceUsageConfig
-          :usage="this.state.settings.ipfs.publicNode.usage"
-          @change="persistIpfsSettings"
-          id="iiusage1"/>
-      </Section>
-      <Section title="configurable node">
-        <IpfsInterfaceUsageConfig
-          :usage="this.state.settings.ipfs.configuredNode.usage"
-          @change="persistIpfsSettings"
-          id="iiusage2"/>
-        <IpfsApiEndpointConfig
-          :endpoint="this.state.settings.ipfs.configuredNode.endpoint"
-          @change="changeIpfsEndpointConfig"/>
-      </Section>
-    </Section>
     <Section title="recording">
       <Section title="device" :initiallyClosed="false">
         <p>choose the recording device:</p>
@@ -56,6 +31,31 @@
       <div class="inline-button" @click="$router.push('OffsetCalibration')">
         automatically calibrate recording offset
       </div>
+    </Section>
+    <Section title="ipfs" :initiallyClosed="true">
+      <Section title="browser node">
+        <IpfsInterfaceUsageConfig
+          :usage="this.state.settings.ipfs.browserNode.usage"
+          @disable="disableBrowserNode"
+          @enable="enableBrowserNode"
+          @change="persistIpfsSettings"
+          id="iiusage0"/>
+      </Section>
+      <Section title="public node">
+        <IpfsInterfaceUsageConfig
+          :usage="this.state.settings.ipfs.publicNode.usage"
+          @change="persistIpfsSettings"
+          id="iiusage1"/>
+      </Section>
+      <Section title="configurable node">
+        <IpfsInterfaceUsageConfig
+          :usage="this.state.settings.ipfs.configuredNode.usage"
+          @change="persistIpfsSettings"
+          id="iiusage2"/>
+        <IpfsApiEndpointConfig
+          :endpoint="this.state.settings.ipfs.configuredNode.endpoint"
+          @change="changeIpfsEndpointConfig"/>
+      </Section>
     </Section>
     <div>
       <div class="inline-button" @click="$router.go(-1)">done</div>
