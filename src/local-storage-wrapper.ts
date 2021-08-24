@@ -5,6 +5,7 @@ const HIST_LENGTH = 100
 
 export interface Settings {
   defaultRecordingOffset: number;
+  initialCalibration: boolean;
   playbackDelay: number;
   micDeviceId: string | undefined;
   ipfs: IpfsSettings;
@@ -36,6 +37,7 @@ export class RecentSessionEntry {
 
 export interface StorageWrapper {
   setDefaultRecordingOffset (v: number): void;
+  setInitialCalibration (v: boolean): void;
   setPlaybackDelay (v: number): void;
   setMicDeviceId (micId: string): void;
   persistIpfsSettings (ipfsSettings: IpfsSettings): void;
@@ -57,6 +59,10 @@ export class LocalStorageWrapper implements StorageWrapper {
 
   setDefaultRecordingOffset (v: number) {
     localStorage.setItem('defaultRecordingOffset', v.toString())
+  }
+
+  setInitialCalibration (v: boolean) {
+    localStorage.setItem('initialCalibration', v.toString())
   }
 
   getRecentSessions (): RecentSessionEntry[] {
@@ -126,6 +132,7 @@ export class LocalStorageWrapper implements StorageWrapper {
   loadSettings () {
     const settings = {
       defaultRecordingOffset: 0.065,
+      initialCalibration: false,
       playbackDelay: 0.010,
       micDeviceId: undefined,
       ipfs: new IpfsSettings()
@@ -135,6 +142,9 @@ export class LocalStorageWrapper implements StorageWrapper {
     }
     if ('defaultRecordingOffset' in localStorage) {
       settings.defaultRecordingOffset = Number(localStorage.getItem('defaultRecordingOffset'))
+    }
+    if ('initialCalibration' in localStorage) {
+      settings.initialCalibration = Boolean(localStorage.getItem('initialCalibration'))
     }
     if ('settings.ipfs' in localStorage) {
       const str = localStorage.getItem('settings.ipfs')

@@ -108,9 +108,9 @@ export class IPFSWrapper {
 
   constructor (ipfsSettings: IpfsSettings) {
     this.ipfsSettings = ipfsSettings
-    const protocol = location.protocol.slice(0,-1);
+    const protocol = location.protocol.slice(0, -1)
     let port = 15151
-    if (protocol == "https") {
+    if (protocol === 'https') {
       port = 15152
     }
     this.nodes = {

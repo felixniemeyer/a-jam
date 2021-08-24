@@ -10,7 +10,7 @@
       node api port
     </div>
     <div>
-      <input disabled="true" :value="endpoint.protocol">
+      <input v-model="endpoint.protocol" @change="$emit('change')">
       node api protocol
     </div>
     <Hint title="Configure ipfs node for CORS">

@@ -1,12 +1,20 @@
 <template>
   <div class="offsetCalibration">
     <h1>{{ calibrating ? "Calibrating..." : "Recording offset calibration" }}</h1>
-    <div v-if="!calibrating" class="button" @click="startCalibration">calibrate</div>
-    <div class="result" v-for="(result, key) in results" :key="key">
-      <p> Frequency: {{ result.freq }} </p>
-      <p> Offset: {{ Math.floor(1000 * result.delta) }} </p>
+    <div v-if="cancel || !calibrating" class="button" @click="startCalibration">
+      {{ done || cancel ? "re-calibrate" : "calibrate" }}
     </div>
-    <div v-if="done">
+    <div v-else class="button" @click="cancel=true">cancel</div>
+    <div v-if="results.length > 0" class="results">
+      <div class="result" v-for="(result, key) in results" :key="key">
+        <p> Frequency: {{ result.freq }} </p>
+        <p> Offset: {{ Math.floor(1000 * result.delta) }} </p>
+      </div>
+      <div v-if="cancel" class="result cancel">
+        cancelled
+      </div>
+    </div>
+    <div v-if="done" class="donearea">
       <div v-if="success">
         Calibration done.<br/>
         The average over non-outlying measurements is {{Math.floor(1000 * recommendation)}}ms.<br/>
@@ -17,8 +25,7 @@
         Try again in a more silent environment.
       </div>
     </div>
-    <div v-if="done && !success" class="button" @click="startCalibration">try again</div>
-    <div v-if="!calibrating" class="button" @click="leave">leave</div>
+    <div v-if="!calibrating || cancel" class="button" @click="leave">leave</div>
   </div>
 </template>
 
@@ -39,7 +46,8 @@ export default defineComponent({
       done: false,
       success: false,
       recommendation: 0,
-      calibrating: false
+      calibrating: false,
+      cancel: false
     }
   },
   props: {
@@ -58,6 +66,7 @@ export default defineComponent({
     },
     startCalibration () {
       this.done = false
+      this.cancel = false
       this.calibrating = true
       this.success = false
       this.results = []
@@ -83,6 +92,10 @@ export default defineComponent({
         this.recommendation = inliersSum / inliersCount
         this.state.settings.defaultRecordingOffset = this.recommendation
         this.storageWrapper.setDefaultRecordingOffset(this.recommendation)
+        if (this.state.settings.initialCalibration === false) {
+          this.storageWrapper.setInitialCalibration(true)
+          this.state.settings.initialCalibration = true
+        }
         this.success = true
       }
       this.done = true
@@ -144,6 +157,11 @@ export default defineComponent({
         delay = Math.max(start, (delay + (delay - start))) / 2 + 0.1
 
         this.results.push({ freq, delta })
+
+        if (this.cancel) {
+          this.calibrating = false
+          return
+        }
       }
       this.summarize()
     },
@@ -232,12 +250,16 @@ export default defineComponent({
 <style lang="scss">
 .offsetCalibration{
   .result {
-    margin: 1em;
+    margin: 0.3em;
+    display: inline-block;
     background-color: darken($brown, 20%);
     border-radius: 0.3em;
     padding: 0.3em;
     p {
       margin: 0.3em;
+    }
+    &.cancel {
+      background-color: darken($danger, 20%);
     }
   }
   .button {

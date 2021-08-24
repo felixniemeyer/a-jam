@@ -76,6 +76,30 @@
         @click="renderAndDownload">
       </div>
     </div>
+
+    <div v-if="resolveCalibrationPrompt !== undefined" class="calibrationPromt">
+      <h4>calibration</h4>
+      <div>
+      Great, you are about to record your second track on this device. <br/>
+      In order for the two tracks to be synchronized well, you should first calibrate the recording offset.<br/>
+      </div>
+      <div>
+      Find a quiet environment and start the automatic calibration.
+      It only takes a couple of bleeps and seconds ~(o_o)~
+      </div>
+      <div class="button" @click="goCalibrate">
+        go calibrating
+      </div>
+      <div class="button" @click="dismissCalibrationPrompt">
+        dismiss
+      </div>
+      <div class="button" @click="skipCalibrationPrompt">
+        remind me later
+      </div>
+      <div>
+        You can always find the automatic calibration in the app settings.
+      </div>
+    </div>
   </div>
 </template>
 
@@ -114,7 +138,8 @@ export default defineComponent({
       recordingProcessed: true,
       recloop: false,
       recloopDuration: 0,
-      quitRecloop: true
+      quitRecloop: true,
+      resolveCalibrationPrompt: undefined as undefined | ((value: unknown) => void)
     }
   },
   computed: {
@@ -320,6 +345,11 @@ export default defineComponent({
         this.quitRecloop = true
         this.stopRecording()
       } else {
+        if (this.state.settings.initialCalibration === false && this.session.tracks.length > 0) {
+          if (await this.promptForCalibration() === 0) {
+            return
+          }
+        }
         if (!this.playing) {
           await this.ensureAcIsRunning()
           this.stopAllPlaybacks()
@@ -432,6 +462,29 @@ export default defineComponent({
         }
         fileReader.readAsArrayBuffer(audioBlob)
       })
+    },
+    promptForCalibration () {
+      return new Promise((resolve, reject) => {
+        this.resolveCalibrationPrompt = resolve
+        setTimeout(reject, 20000)
+      })
+    },
+    goCalibrate () {
+      this.$router.push('/offsetCalibration')
+      if (this.resolveCalibrationPrompt !== undefined) {
+        this.resolveCalibrationPrompt(0)
+      }
+    },
+    dismissCalibrationPrompt () {
+      this.storageWrapper.setInitialCalibration(true)
+      this.state.settings.initialCalibration = true
+      this.skipCalibrationPrompt()
+    },
+    skipCalibrationPrompt () {
+      if (this.resolveCalibrationPrompt !== undefined) {
+        this.resolveCalibrationPrompt(1)
+        this.resolveCalibrationPrompt = undefined
+      }
     }
   }
 })
@@ -656,6 +709,25 @@ export default defineComponent({
       &.record {
         text-align: right;
       }
+    }
+  }
+  .calibrationPromt {
+    position:fixed;
+    max-height: 100%;
+    div {
+      margin: 0.5rem 0.3rem;
+    }
+    top: 50%;
+    transform: translate(0, -50%);
+    background-color: $brown;
+    box-shadow: 0 0 5rem #000;
+    z-index: 99;
+    margin: 0rem 2em;
+    border-radius: 1em;
+    .button {
+      @include clickable-surface;
+      margin: 0.3rem;
+      display: inline-block;
     }
   }
 }
