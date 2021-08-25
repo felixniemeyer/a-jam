@@ -17,5 +17,6 @@ module.exports = {
         args[0].title = 'a-jam'
         return args
       })
-  }
+  },
+  lintOnSave: false
 }
