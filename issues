@@ -7,11 +7,11 @@
 */
 
 - Backlog 
-	- public node: support https 
 	- pinata integration
-	- 300ms latency unter firefox. was geht schief
+	- copy to global on publish cid available
 
 - V4 
+	- D: public node: support https 
 	- D: Three possible ipfs nodes
 		- D: public node (via ipfs-http-client)
 		- D: configurable node (via ipfs-http-client) 
