@@ -1,7 +1,6 @@
 import { Ref, ref } from 'vue'
 import ipfs from 'ipfs'
-import ipfsClient from 'ipfs-http-client'
-import { BaseName } from 'multibase'
+import IpfsHttpClient from 'ipfs-http-client'
 import { debug } from './tools'
 
 const NO_CONNECTION_ERROR = Error('ipfs not connected')
@@ -101,7 +100,6 @@ export class IPFSWrapper {
 
   // pinataPinningService: k ==> use axios - if configured
 
-  baseName: BaseName = 'base32'
   gatewayHost = 'ipfs.io'
   appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
   ipfsSettings: IpfsSettings
@@ -157,7 +155,7 @@ export class IPFSWrapper {
   }
 
   configureHttpClient (nodeApiEndpoint: IpfsNodeApiEndpoint): ipfs.IPFS {
-    return ipfsClient({
+    return IpfsHttpClient.create({
       host: nodeApiEndpoint.host,
       port: nodeApiEndpoint.port,
       protocol: nodeApiEndpoint.protocol
@@ -197,7 +195,7 @@ export class IPFSWrapper {
           node.add(blob).then(
             results => {
               if (successes === 0) {
-                resolve(results.cid.toV1().toString(this.baseName))
+                resolve(results.cid.toV1().toString())
               }
               successes += 1
             },

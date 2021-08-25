@@ -132,7 +132,7 @@ export default defineComponent({
       // recording
       recordingChunks: [] as Blob[],
       mediaRecorder: undefined as MediaRecorder | undefined,
-      stopTimeout: undefined as NodeJS.Timeout | undefined,
+      stopTimeout: undefined as number | undefined,
       recording: false,
       skipRecording: false,
       recordingProcessed: true,
@@ -251,7 +251,7 @@ export default defineComponent({
         } else {
           await this.ensureAcIsRunning()
           this.playAllTracks()
-          this.stopTimeout = setTimeout(
+          this.stopTimeout = window.setTimeout(
             this.stopAllPlaybacks.bind(this),
             this.maxTrackDuration * 1000 + this.state.settings.playbackDelay
           )
@@ -361,7 +361,7 @@ export default defineComponent({
           this.session.dirty = true
           if (this.recloop) {
             this.quitRecloop = false
-            setTimeout(this.stopRecording.bind(this), this.recloopDuration * 1000)
+            window.setTimeout(this.stopRecording.bind(this), this.recloopDuration * 1000)
           }
         }
       }
@@ -466,7 +466,7 @@ export default defineComponent({
     promptForCalibration () {
       return new Promise((resolve, reject) => {
         this.resolveCalibrationPrompt = resolve
-        setTimeout(reject, 20000)
+        window.setTimeout(reject, 20000)
       })
     },
     goCalibrate () {
