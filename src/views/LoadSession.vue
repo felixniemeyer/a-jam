@@ -43,7 +43,7 @@ export default defineComponent({
   },
   methods: {
     leave () {
-      this.$router.go(-1)
+      this.$router.replace('/')
     },
     async checkAcAndLoad () {
       await this.ac.resume()

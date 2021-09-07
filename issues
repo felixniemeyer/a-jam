@@ -7,8 +7,11 @@
 */
 
 - Backlog 
-	- pinata integration
-	- copy to global on publish cid available
+	- Bugfix: 
+	- ipfs interface interface
+		- pinata integration
+		- D: await browser node (especially for "load session" - causes error there) 
+	- copy local session to global session on publish cid available
 
 - V4 
 	- D: public node: support https 
@@ -25,7 +28,7 @@
 	- D: Set up a free ipfs node that a-jam connects to
 		- once a-jam get's bigger, prevent abuse 
 			- use nginx in front of ipfs & authenticate requests
-		- have a job, that notes down all pins and removes all pins that are older than y
+		- D: have a job, that notes down all pins and removes all pins that are older than y
 	- D: Dark mode (or simply dark style over all - no choice) 
 
 - V3
