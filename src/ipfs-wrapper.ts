@@ -2,6 +2,7 @@ import { Ref, ref } from 'vue'
 import ipfs from 'ipfs'
 import IpfsHttpClient from 'ipfs-http-client'
 import { debug } from './tools'
+import { PinataApiIpfsInterface, PinataApiSettings } from './pinata-ipfs-interface'
 
 const NO_CONNECTION_ERROR = Error('ipfs not connected')
 
@@ -162,7 +163,8 @@ export class IpfsSettings {
   }
 
   pinata: {
-    usage: IpfsInterfaceUsage
+    usage: IpfsInterfaceUsage,
+    apiSettings: PinataApiSettings
   }
 
   constructor () {
@@ -201,6 +203,11 @@ export class IpfsSettings {
         useForPinning: true,
         useForRetrievalPriority: 1,
         pinOnRetrieve: true
+      },
+      apiSettings: {
+        apiKey: "",
+        secret: "",
+        gatewayUrl: "https://gateway.pinata.cloud"
       }
     }
   }
@@ -230,6 +237,8 @@ export class IPFSWrapper {
 
   browserNode: BrowserIpfsNodeInterface | undefined;
 
+  pinataInterface: PinataApiIpfsInterface | undefined;
+
   // pinataPinningService: k ==> use axios - if configured
   gatewayHost = 'ipfs.io'
   appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
@@ -251,8 +260,11 @@ export class IPFSWrapper {
       configuredNode: undefined,
     }
     this.resetConfigurableNode()
-    if (this.ipfsSettings.browserNode.usage.enabled === true) {
+    if (this.ipfsSettings.browserNode.usage.enabled) {
       this.spinUpBrowserNode()
+    }
+    if (this.ipfsSettings.pinata.usage.enabled) {
+
     }
   }
 
