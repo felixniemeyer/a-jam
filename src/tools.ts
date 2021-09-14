@@ -6,8 +6,8 @@ export function debug (...args: any[]) { // eslint-disable-line
   }
 }
 
-export async function sleep (s: number) {
-  return new Promise((resolve, reject) => { // eslint-disable-line
+export async function sleep (s: number) : Promise<void> {
+  return new Promise((resolve) => { // eslint-disable-line
     setTimeout(resolve, s)
   })
 }

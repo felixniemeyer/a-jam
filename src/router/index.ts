@@ -1,5 +1,5 @@
 import { State } from '@/state'
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHashHistory, Router, RouteRecordRaw } from 'vue-router'
 import Home from '../views/Home.vue'
 import Info from /* webpackChunkName: "about" */ '../views/Info.vue'
 import Settings from /* webpackChunkName: "settings" */ '@/views/Settings.vue'
@@ -117,7 +117,7 @@ function makeRoutes (state: State): Array<RouteRecordRaw> {
   ]
 }
 
-export default function makeRouter (state: State) {
+export default function makeRouter (state: State) : Router {
   return createRouter({
     history: createWebHashHistory(),
     routes: makeRoutes(state)

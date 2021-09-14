@@ -20,7 +20,7 @@
       </a>
     </div>
     <div v-else class="button" @click="this.$router.go(-1)">
-      abort
+      {{ errors.length > 0 ? "return" : "abort" }}
     </div>
     <div class="spacer"></div>
   </div>

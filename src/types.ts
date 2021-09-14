@@ -50,7 +50,7 @@ export class Track {
     return clone
   }
 
-  static fromRecording (rec: Recording, name: string) {
+  static fromRecording (rec: Recording, name: string) : Track {
     const track = new Track(
       0,
       rec

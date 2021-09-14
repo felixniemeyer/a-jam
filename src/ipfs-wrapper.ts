@@ -25,7 +25,7 @@ export class SessionConfig {
     public tracks: TrackConfig[]
   ) {}
 
-  addTrack (tc: TrackConfig) {
+  addTrack (tc: TrackConfig) : void {
     this.tracks.push(tc)
   }
 }
@@ -38,7 +38,7 @@ export interface IpfsInterface {
 }
 
 class IpfsApiInterface {
-  constructor(private ipfs: ipfs.IPFS) {};
+  constructor(private ipfs: ipfs.IPFS) {}
   pin(cid: string) {
     return this.ipfs.pin.add(cid)
   }
@@ -207,7 +207,8 @@ export class IpfsSettings {
       apiSettings: {
         apiKey: "",
         secret: "",
-        gatewayUrl: "https://gateway.pinata.cloud"
+        gatewayUrl: "https://gateway.pinata.cloud",
+        apiBaseUrl: "https://api.pinata.cloud"
       }
     }
   }
@@ -264,16 +265,31 @@ export class IPFSWrapper {
       this.spinUpBrowserNode()
     }
     if (this.ipfsSettings.pinata.usage.enabled) {
-
+      this.pinataInterface = new PinataApiIpfsInterface(
+        ipfsSettings.pinata.apiSettings
+      )
     }
   }
 
-  resetConfigurableNode () {
+  resetConfigurableNode () : void {
     debug(
       'resetting configurable node endpoint',
       JSON.stringify(this.ipfsSettings.configuredNode.endpoint)
     )
     this.nodes.configuredNode = this.configureHttpClient(this.ipfsSettings.configuredNode.endpoint)
+  }
+
+  refreshPinata () : void {
+    debug(
+      'resetting pinata ipfs interface'
+    )
+    if (this.ipfsSettings.pinata.usage.enabled) {
+      this.pinataInterface = new PinataApiIpfsInterface(
+        this.ipfsSettings.pinata.apiSettings
+      )
+    } else {
+      delete this.pinataInterface;
+    }
   }
 
   configureHttpClient (nodeApiEndpoint: IpfsNodeApiEndpoint): ipfs.IPFS {
@@ -284,16 +300,7 @@ export class IPFSWrapper {
     }) as unknown as ipfs.IPFS
   }
 
-  monitorPeers (node: ipfs.IPFS) {
-    setInterval(() => {
-      console.log('peers:')
-      node.swarm.peers({}).then(peers => {
-        console.log(peers)
-      })
-    }, 10000)
-  }
-
-  forEachNode (f: ((node: IpfsInterface, usage: IpfsInterfaceUsage) => void)) {
+  forEachNode (f: ((node: IpfsInterface, usage: IpfsInterfaceUsage) => void)) : void {
     if (this.browserNode !== undefined) {
       f(this.browserNode as IpfsInterface,
         this.ipfsSettings.browserNode.usage)
@@ -302,11 +309,12 @@ export class IPFSWrapper {
       f(new IpfsApiInterface(this.nodes.configuredNode),
         this.ipfsSettings.configuredNode.usage)
     }
+    f(this.pinataInterface as IpfsInterface, this.ipfsSettings.pinata.usage)
     f(new IpfsApiInterface(this.nodes.publicNode),
       this.ipfsSettings.publicNode.usage)
   }
 
-  ipfsAdd (blob: Blob | string) {
+  ipfsAdd (blob: Blob | string) : Promise<string> {
     return new Promise<string>((resolve, reject) => {
       let count = 0
       let successes = 0
@@ -337,7 +345,7 @@ export class IPFSWrapper {
     })
   }
 
-  saveSessionConfig (sc: SessionConfig) {
+  saveSessionConfig (sc: SessionConfig) : Promise<string> {
     return this.ipfsAdd(JSON.stringify(sc))
   }
 
@@ -375,7 +383,7 @@ export class IPFSWrapper {
     }
   }
 
-  pinOnRetrieve (cid: string) {
+  pinOnRetrieve (cid: string) : void {
     this.forEachNode((node, usage) => {
       if (usage.enabled &&
           usage.pinOnRetrieve) {
@@ -384,13 +392,13 @@ export class IPFSWrapper {
     })
   }
 
-  shutdownBrowserNode() {
+  shutdownBrowserNode() : void {
     if ( this.browserNode !== undefined) {
       this.browserNode.shutdown()
     }
   }
 
-  spinUpBrowserNode() {
+  spinUpBrowserNode() : void {
     this.shutdownBrowserNode()
     this.browserNode = new BrowserIpfsNodeInterface(err => {
       this.errorLog.value.push('could not spin up browser ipfs node: ' + err)

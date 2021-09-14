@@ -56,6 +56,16 @@
           :endpoint="this.state.settings.ipfs.configuredNode.endpoint"
           @change="changeIpfsEndpointConfig"/>
       </Section>
+      <Section title="pinata">
+        <IpfsInterfaceUsageConfig
+          :usage="this.state.settings.ipfs.pinata.usage"
+          @change="persistIpfsSettings"
+          @enable="enablePinata"
+          id="iiusage2"/>
+        <PinataApiConfig
+          :settings="this.state.settings.ipfs.pinata.apiSettings"
+          @change="updatePinataSettings"/>
+      </Section>
     </Section>
     <div>
       <div class="inline-button" @click="$router.go(-1)">done</div>
@@ -71,6 +81,7 @@ import Section from '@/components/Section.vue'
 import Hint from '@/components/Hint.vue'
 import IpfsInterfaceUsageConfig from '@/components/IpfsInterfaceUsageConfig.vue'
 import IpfsApiEndpointConfig from '@/components/IpfsApiEndpointConfig.vue'
+import PinataApiConfig from '@/components/PinataApiConfig.vue'
 import { debug } from '@/tools'
 
 import WidthFreezer from '@/mixins/WidthFreezer'
@@ -82,7 +93,8 @@ export default defineComponent({
     Section,
     Hint,
     IpfsInterfaceUsageConfig,
-    IpfsApiEndpointConfig
+    IpfsApiEndpointConfig,
+    PinataApiConfig
   },
   data () {
     return {
@@ -130,6 +142,13 @@ export default defineComponent({
     },
     enableBrowserNode () {
       this.ipfsWrapper.spinUpBrowserNode()
+    },
+    enablePinata () {
+      this.ipfsWrapper.refreshPinata()
+    },
+    updatePinataSettings () {
+      this.persistIpfsSettings()
+      this.ipfsWrapper.refreshPinata()
     }
   }
 })

@@ -19,14 +19,14 @@ export class RecentSessionEntry {
   ) {
   }
 
-  static fromString (jsonString: string) {
+  static fromString (jsonString: string) : RecentSessionEntry {
     const o = JSON.parse(jsonString)
     return new RecentSessionEntry(
       o.c, o.t, o.d
     )
   }
 
-  toString () {
+  toString () : string {
     return JSON.stringify({
       c: this.cid,
       t: this.title,
@@ -57,11 +57,11 @@ export class LocalStorageWrapper implements StorageWrapper {
     localStorage.setItem('micDeviceId', micId)
   }
 
-  setDefaultRecordingOffset (v: number) {
+  setDefaultRecordingOffset (v: number) : void {
     localStorage.setItem('defaultRecordingOffset', v.toString())
   }
 
-  setInitialCalibration (v: boolean) {
+  setInitialCalibration (v: boolean) : void {
     localStorage.setItem('initialCalibration', v.toString())
   }
 
@@ -107,7 +107,7 @@ export class LocalStorageWrapper implements StorageWrapper {
     return result
   }
 
-  addRecentSession (rse: RecentSessionEntry, list: RecentSessionEntry[]) {
+  addRecentSession (rse: RecentSessionEntry, list: RecentSessionEntry[]) : RecentSessionEntry[] {
     let i
     if ('next_history_id' in localStorage) {
       i = Number(localStorage.getItem('next_history_id'))
@@ -124,12 +124,12 @@ export class LocalStorageWrapper implements StorageWrapper {
     }
   }
 
-  persistIpfsSettings (ipfsSettings: IpfsSettings) {
+  persistIpfsSettings (ipfsSettings: IpfsSettings) : void {
     debug('persisted ipfs settings')
     localStorage.setItem('settings.ipfs', JSON.stringify(ipfsSettings))
   }
 
-  loadSettings () {
+  loadSettings () : Settings {
     const settings = {
       defaultRecordingOffset: 0.065,
       initialCalibration: false,

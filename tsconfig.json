@@ -15,10 +15,10 @@
       "webpack-env",
       "mocha",
       "dom-mediacapture-record",
-      "vue-property-decorator", 
+      "vue-property-decorator",
       "chai",
       "color-hash",
-      "ipfs", 
+      "ipfs",
       "audiobuffer-to-wav"
     ],
     "paths": {
