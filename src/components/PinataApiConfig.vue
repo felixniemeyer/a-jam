@@ -21,7 +21,7 @@
       <p class="code">
         You can create a pinata account with 1GB of free storage on the
         <a href="https://www.pinata.cloud/">website</a>.
-        When you have an account, create a new API key and configure the credentials in these settings here.
+        When you have an account, create a new API key and configure the credentials in these settings here. Make sure to tick pinByHash, pinFileToIPFS and pinJSONToIPFS when creating the api key.
       </p>
     </Hint>
   </div>

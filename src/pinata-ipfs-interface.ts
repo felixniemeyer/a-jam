@@ -37,6 +37,7 @@ export class PinataApiIpfsInterface implements IpfsInterface {
   }
 
   async loadSessionConfig(cid: string): Promise<SessionConfig> {
+    debug("loading session config from pinata gateway")
     const response = await axios
       .get(
         this.apiSettings.gatewayUrl + '/ipfs/' + cid,
@@ -44,10 +45,12 @@ export class PinataApiIpfsInterface implements IpfsInterface {
           responseType: "json"
         }
       )
+    debug("loaded", response)
     return response.data as SessionConfig
   }
 
   async loadRecording(cid: string): Promise<ArrayBuffer> {
+    debug("loading recording from pinata gateway")
     const response = await axios
       .get(
         this.apiSettings.gatewayUrl + '/ipfs/' + cid,
@@ -55,6 +58,7 @@ export class PinataApiIpfsInterface implements IpfsInterface {
           responseType: "arraybuffer"
         }
       )
+    debug("loaded", response)
     return response.data
   }
 
