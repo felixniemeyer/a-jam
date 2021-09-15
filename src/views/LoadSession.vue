@@ -47,7 +47,7 @@ export default defineComponent({
     },
     async checkAcAndLoad () {
       await this.ac.resume()
-      if (this.ac.state === 'suspended') {
+      if (this.ac === undefined || this.ac.state !== 'running') {
         this.requireInteraction = true
       } else {
         this.loadSession()
