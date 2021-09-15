@@ -10,11 +10,11 @@
       secret
     </div>
     <div class='field'>
-      <input v-model="settings.gatewayUrl" disabled @change="$emit('change')">
+      <input v-model="settings.gatewayUrl" @change="$emit('change')">
       gateway url
     </div>
     <div class='field'>
-      <input v-model="settings.apiBaseUrl" disabled @change="$emit('change')">
+      <input v-model="settings.apiBaseUrl" @change="$emit('change')">
       api base url
     </div>
     <Hint title="Get a pinata API key with 1GB free storage">
