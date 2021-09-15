@@ -421,7 +421,7 @@ export default defineComponent({
         if (this.state.settings.micDeviceId) {
           deviceId = { exact: this.state.settings.micDeviceId }
         }
-        const constraints: MediaStreamConstraints = {
+        const constraints = {
           audio: {
             deviceId: deviceId,
             echoCancellation: false,

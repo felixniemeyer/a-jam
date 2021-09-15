@@ -39,34 +39,35 @@ h1 {
 }
 
 input {
-  padding: 1em;
-  margin: 0.5em;
+  padding: 1rem;
+  margin: 0.5rem;
   background-color: darken($turquoise, 30%);
   &:disabled {
     background-color: desaturate(darken($turquoise, 20%), 70%);
   }
-  border: 0.1em solid #222;
-  border-radius: 0.5em;
+  border: 0.1rem solid #222;
+  border-radius: 0.5rem;
   color: #ddd;
   font-weight: bold;
 }
 
 @mixin clickable-box-shadow {
-  background-color: #555;
-  box-shadow: 0 0 1em #0004;
+  background-color: darken($grey, 50%);
+  box-shadow: 0 0 1rem #0004;
   &:hover {
-    box-shadow: 0 0 0.4em #0004;
+    box-shadow: 0 0 0.4rem #0004;
   }
 }
 
 
 @mixin clickable-surface {
   @include clickable-box-shadow();
+  font-size: 1rem;
   cursor: pointer;
   user-select: none;
-  border-radius: 0.3em;
-  padding: 1em;
-  margin: 1em;
+  border-radius: 0.3rem;
+  padding: 1rem;
+  margin: 1rem;
 }
 
 @mixin centered-background-image {
@@ -80,19 +81,19 @@ input {
   position:fixed;
   z-index: 10;
   background-color: darken($turquoise, 20%);
-  height: 3em;
-  width: 3em;
+  height: 3rem;
+  width: 3rem;
   background-size: 50%;
   cursor: pointer;
-  border-radius: 0.5em;
+  border-radius: 0.5rem;
   &:hover {
     background-color: darken($turquoise, 5%);
   }
 }
 
 .cornerbutton.back {
-  left: 1em;
-  top: 1em;
+  left: 1rem;
+  top: 1rem;
   background-image: url('~@/assets/icons/white/back.svg');
 }
 

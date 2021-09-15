@@ -1,6 +1,7 @@
 <template>
-  <div class="track-settings">
-    <Section v-if="session.ancestor !== undefined" title="info" :initiallyClosed="true">
+  <div class="session-settings">
+    <h2> session settings </h2>
+    <Section v-if="session.ancestor !== undefined" title="session ipfs info" :initiallyClosed="true">
       <div>
         <p> this session is derived from: </p>
         <Copyable
@@ -81,12 +82,7 @@ export default defineComponent({
 
 <style lang="scss">
 
-.track-settings{
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: calc(100% - 1em);
-  transform: translate(-50%, -50%);
+.session-settings{
   .small {
     font-size: 0.7em;
   }

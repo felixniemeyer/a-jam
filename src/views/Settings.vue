@@ -1,8 +1,9 @@
 <template>
   <div class="settings">
     <h1>settings</h1>
+    <div class="inline-button" @click="$router.go(-1)">go back</div>
     <Section title="recording">
-      <Section title="device" :initiallyClosed="false">
+      <Section title="device">
         <p>choose the recording device:</p>
         <div
           v-for="micLabel, micId in mics"
@@ -13,26 +14,27 @@
           {{ micLabel || micId }}
         </div>
       </Section>
-      <h4> recording offset </h4>
-      <Hint title="The recording offset compensates recording latency">
-        When the browser starts recording sound, it will take a couple of milliseconds until the recording will actually start. There will be a small time difference, that could be heard when left ignored. Thus, every track allows for a compensation of this lag: the recording offset. Usually the lag depends on the device, operating system and the browser and will be similar each time when recording. Here you can set the default recording offset to the most accurate value. An automatic detection is also available."
-      </Hint>
-      <Slider
-        name="default recording offset in ms"
-        left="more delayed"
-        right="earlier"
-        :factor="1000"
-        :decimalPlaces="0"
-        :from="sliderOrigin.defaultRecordingOffset - 0.100"
-        :to="sliderOrigin.defaultRecordingOffset + 0.100"
-        :value="state.settings.defaultRecordingOffset"
-        @dragEnd="resetInitialRecordingOffset"
-        @update="updateDefaultRecordingOffset"/>
-      <div class="inline-button" @click="$router.push('OffsetCalibration')">
-        automatically calibrate recording offset
-      </div>
+      <Section title="recording offset">
+        <Hint title="The recording offset compensates recording latency">
+          Explanation: when the browser starts recording sound, it will take a couple of milliseconds until the recording will actually start. There will be a small time difference between playback and recording, that could be heard when left ignored. Thus, every track allows for a compensation of this lag: the recording offset. Usually the lag depends on the device, operating system and the browser and will be similar each time when recording. Here you can set the default recording offset to the most accurate value. An automatic detection is also available."
+        </Hint>
+        <Slider
+          name="default recording offset in ms"
+          left="more delayed"
+          right="earlier"
+          :factor="1000"
+          :decimalPlaces="0"
+          :from="sliderOrigin.defaultRecordingOffset - 0.100"
+          :to="sliderOrigin.defaultRecordingOffset + 0.100"
+          :value="state.settings.defaultRecordingOffset"
+          @dragEnd="resetInitialRecordingOffset"
+          @update="updateDefaultRecordingOffset"/>
+        <div class="inline-button" @click="$router.push('OffsetCalibration')">
+          automatically calibrate recording offset
+        </div>
+      </Section>
     </Section>
-    <Section title="ipfs" :initiallyClosed="true">
+    <Section title="ipfs">
       <Section title="browser node">
         <IpfsInterfaceUsageConfig
           :usage="this.state.settings.ipfs.browserNode.usage"
@@ -68,7 +70,13 @@
       </Section>
     </Section>
     <div>
-      <div class="inline-button" @click="$router.go(-1)">done</div>
+      <div class="inline-button" @click="$router.go(-1)">go back</div>
+    </div>
+    <p>
+      By clicking the following button, you can reset all settings and clear the recent session list. The app will reload and you will lose all non-published projects.
+    </p>
+    <div :class="{danger: confirmClear}" class="inline-button" tabindex="0" @click="clearStorage" @blur="confirmClear = false">
+      {{confirmClear ? "confirm clear storage" : "clear local storage"}}
     </div>
   </div>
 </template>
@@ -101,7 +109,8 @@ export default defineComponent({
       mics: {} as {[deviceId: string]: string},
       sliderOrigin: {
         defaultRecordingOffset: this.state.settings.defaultRecordingOffset
-      }
+      },
+      confirmClear: false
     }
   },
   mounted () {
@@ -149,6 +158,14 @@ export default defineComponent({
     updatePinataSettings () {
       this.persistIpfsSettings()
       this.ipfsWrapper.refreshPinata()
+    },
+    clearStorage() {
+      if(this.confirmClear) {
+        localStorage.clear()
+        location.reload()
+      } else {
+        this.confirmClear = true
+      }
     }
   }
 })
@@ -173,6 +190,10 @@ body {
   .inline-button{
     @include clickable-surface;
     display: inline-block;
+    &.danger {
+      background-color: $danger;
+      color: #fff
+    }
   }
 }
 

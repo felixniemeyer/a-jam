@@ -62,11 +62,11 @@ export class PinataApiIpfsInterface implements IpfsInterface {
     return response.data
   }
 
-  async add(content: Blob | string) {
+  async add(content: Blob | string) : Promise<string> {
     if(content instanceof Blob) {
       return this.addBlob(content as Blob)
     } else if (typeof(content) == 'string') {
-      return this.addJsObject(JSON.parse(content as string))
+      return this.addJSON(content as string)
     } else {
       throw Error("content type not supported for adding to pinata")
     }
@@ -74,14 +74,14 @@ export class PinataApiIpfsInterface implements IpfsInterface {
 
   async addBlob(content: Blob): Promise<string> {
     const url = `${this.apiSettings.apiBaseUrl}/pinning/pinFileToIPFS`;
-    let data = new FormData()
+    const data = new FormData()
     data.append('file', content)
 
     data.append('pinataOptions', JSON.stringify({
       cidVersion: 1
     }))
 
-    let response = await axios.post(url, data, {
+    const response = await axios.post(url, data, {
       headers: {
         'Content-Type': `multipart/form-data`,
         pinata_api_key: this.apiSettings.apiKey,
@@ -92,7 +92,8 @@ export class PinataApiIpfsInterface implements IpfsInterface {
     return response.data.IpfsHash
   }
 
-  async addJsObject(content: Object): Promise<string> {
+  async addJSON(content: string): Promise<string> {
+    const obj = JSON.parse(content as string)
     const url = `${this.apiSettings.apiBaseUrl}/pinning/pinJSONToIPFS`;
 
     const body = ({
@@ -102,10 +103,10 @@ export class PinataApiIpfsInterface implements IpfsInterface {
       pinataMetadata: {
         name: "a-jam session config"
       },
-      pinataContent: content
+      pinataContent: obj
     })
 
-    let response = await axios.post(url, body, {
+    const response = await axios.post(url, body, {
       headers: {
         pinata_api_key: this.apiSettings.apiKey,
         pinata_secret_api_key: this.apiSettings.secret

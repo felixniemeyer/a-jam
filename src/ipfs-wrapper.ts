@@ -170,9 +170,9 @@ export class IpfsSettings {
   constructor () {
     this.browserNode = {
       usage: {
-        enabled: true,
+        enabled: false,
         useForPinning: true,
-        useForRetrievalPriority: 0, // interface with highest number gets chosen
+        useForRetrievalPriority: 0,
         pinOnRetrieve: true
       }
     }
@@ -180,7 +180,7 @@ export class IpfsSettings {
       usage: {
         enabled: true,
         useForPinning: true,
-        useForRetrievalPriority: 1, // interface with highest number gets chosen
+        useForRetrievalPriority: 1,
         pinOnRetrieve: false
       }
     }
@@ -188,7 +188,7 @@ export class IpfsSettings {
       usage: {
         enabled: false,
         useForPinning: true,
-        useForRetrievalPriority: 2, // interface with highest number gets chosen
+        useForRetrievalPriority: 2,
         pinOnRetrieve: true
       },
       endpoint: {

@@ -36,12 +36,12 @@ export default defineComponent({
 <style lang="scss" scoped>
 
 .hint{
-  margin: 0.5em 1em;
+  margin: 1em;
   border-radius: 1em;
   overflow: hidden;
   text-align: center;
   .header{
-    background-color: #555;
+    background-color: desaturate(darken($brown, 20%), 40%);
     padding: 0.5em;
     display: block;
     cursor: pointer;

@@ -16,7 +16,7 @@ export default defineComponent({
   props: {
     title: String,
     initiallyClosed: {
-      default: false,
+      default: true,
       type: Boolean
     }
   },
@@ -37,12 +37,12 @@ export default defineComponent({
 
 .section{
   box-shadow: 0 0 0.5em #0002;
-  margin: 0.5em 0.2em;
+  margin: 0.5em 0.5em;
   overflow: hidden;
   border-radius: 0.5em;
   border: 0.14em solid darken($grey, 40%);
   .header {
-    background-color: darken($grey, 20%);
+    background-color: darken($grey, 40%);
     font-weight: bold;
     padding: 0.5em;
     display: block;
@@ -58,10 +58,7 @@ export default defineComponent({
     }
   }
   .content {
-    padding: 0.3em;
-    &.closed {
-      padding: 0em;
-    }
+    padding: 0em;
     background-color: rgba(84,91,111,0.05);
   }
   h4{
