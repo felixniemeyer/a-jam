@@ -254,7 +254,7 @@ export class IPFSWrapper {
     }
     this.nodes = {
       publicNode: this.configureHttpClient({
-        host: 'nathanael.in',
+        host: 'mprnc.dynv6.net',
         port,
         protocol
       }) as ipfs.IPFS,
