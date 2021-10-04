@@ -46,7 +46,6 @@ export default defineComponent({
       this.$router.replace('/')
     },
     async checkAcAndLoad () {
-      await this.ac.resume()
       if (this.ac === undefined || this.ac.state !== 'running') {
         this.requireInteraction = true
       } else {
