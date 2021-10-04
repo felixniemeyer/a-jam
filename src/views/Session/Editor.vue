@@ -80,8 +80,8 @@
     <div v-if="resolveCalibrationPrompt !== undefined" class="calibrationPromt">
       <h4>calibration</h4>
       <div>
-      Great, you are about to record your second track on this device. <br/>
-      In order for the two tracks to be synchronized well, you should first calibrate the recording offset.<br/>
+      Great, you are about to record while playing back for the first time on this device. <br/>
+      In order for the recording to well in sync, you should first calibrate the recording offset.<br/>
       </div>
       <div>
       Find a quiet environment and start the automatic calibration.

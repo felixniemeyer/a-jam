@@ -6,7 +6,7 @@
     </div>
     <div v-else class="button" @click="cancel=true">cancel</div>
     <div v-if="results.length > 0" class="results">
-      <div class="result" v-for="(result, key) in results" :key="key">
+      <div class="result" :class="{ignored: result.ignored}" v-for="(result, key) in results" :key="key">
         <p> Frequency: {{ result.freq }} </p>
         <p> Offset: {{ Math.floor(1000 * result.delta) }} </p>
       </div>
@@ -22,7 +22,8 @@
       </div>
       <div v-else>
         Calibration failed.
-        Try again in a more silent environment.
+        Make sure the device can "hear" it's own output. Try lowering or raising the output volume.
+        You may need to find a more silent environment.
       </div>
     </div>
     <div v-if="!calibrating || cancel" class="button" @click="leave">leave</div>
@@ -36,6 +37,7 @@ import { defineComponent } from 'vue'
 interface Result {
   freq: number;
   delta: number;
+  ignored: boolean;
 }
 
 export default defineComponent({
@@ -85,6 +87,8 @@ export default defineComponent({
         if (result.delta > startAvg - 0.1 && result.delta < startAvg + 0.1) {
           inliersSum += result.delta
           inliersCount += 1
+        } else {
+          result.ignored = true
         }
       }
 
@@ -156,7 +160,7 @@ export default defineComponent({
         const delta = result.index / 1000 - delay
         delay = Math.max(start, (delay + (delay - start))) / 2 + 0.1
 
-        this.results.push({ freq, delta })
+        this.results.push({ freq, delta, ignored: i == 0 })
 
         if (this.cancel) {
           this.calibrating = false
@@ -260,6 +264,9 @@ export default defineComponent({
     }
     &.cancel {
       background-color: darken($danger, 20%);
+    }
+    &.ignored {
+      background-color: darken($grey, 20%);
     }
   }
   .button {
