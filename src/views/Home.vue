@@ -13,8 +13,7 @@
       <h4 v-if="state.sessions.recent.length > 0">recent sessions</h4>
       <div class="sessionButton" v-for="rse in state.sessions.recent" :key="rse.cid" @click="loadSession(rse.cid)">
         {{ rse.title }} <br />
-        <span class='small'>{{ rse.cid }}</span> <br/>
-        <i class='small'>Published: {{ (new Date(rse.timestamp)).toLocaleString() }}</i>
+        <i>Published: {{ (new Date(rse.timestamp)).toLocaleString() }}</i>
       </div>
       <div class='spacer'/>
     </div>
@@ -67,11 +66,6 @@ export default defineComponent({
       &.new{
         padding: 1.5em 1em;
         margin-bottom: 2.5em;
-      }
-      .small {
-        font-size: 0.7em;
-        margin: 0.2em;
-        word-wrap: break-word;
       }
       .close {
         position: absolute;

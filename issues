@@ -7,13 +7,15 @@
 */
 
 - Backlog 
-	- Bugfix: 
-	- ipfs interface interface
-		- pinata integration
-		- D: await browser node (especially for "load session" - causes error there) 
 	- copy local session to global session on publish cid available
 
+- V5
+	- D: remove cid from recent session buttons, make date larger
+
 - V4 
+	- D: ipfs interface interface
+		- D: pinata integration
+		- D: await browser node (especially for "load session" - causes error there) 
 	- D: public node: support https 
 	- D: Three possible ipfs nodes
 		- D: public node (via ipfs-http-client)
