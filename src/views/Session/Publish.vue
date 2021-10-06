@@ -15,9 +15,6 @@
       <div class="button" @click="this.$router.go(-1)">
         return to session
       </div>
-      <a href="https://unstoppabledomains.com/r/ac3b8968ad7245e" target="_blank" class="ud-affiliate">
-        Want a blockchain domain so that users can easily find your music on the decentralized web? <b class="nowrap">Click here.</b>
-      </a>
     </div>
     <div v-else class="button" @click="this.$router.go(-1)">
       {{ errors.length > 0 ? "return" : "abort" }}
