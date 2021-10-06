@@ -10,8 +10,8 @@
       <h4> share </h4>
       <p> link for browsers that support ipns: </p>
       <Copyable :text="ipnsLink"/>
-      <p> link for all browsers (public ipfs gateway): </p>
-      <Copyable :text="gatewayLink"/>
+      <p> link for all browsers (take this if in doubt): </p>
+      <Copyable :text="serverLink"/>
       <div class="button" @click="this.$router.go(-1)">
         return to session
       </div>
@@ -63,8 +63,8 @@ export default defineComponent({
     ipnsLink (): string {
       return `ipns://${this.ipfsWrapper.appIPNSIdentifier}/${this.loadSessionPath}`
     },
-    gatewayLink (): string {
-      return `https://${this.ipfsWrapper.gatewayHost}/ipns/${this.ipfsWrapper.appIPNSIdentifier}/${this.loadSessionPath}`
+    serverLink (): string {
+      return `https://a-jam.dynv6.net/${this.loadSessionPath}`
     }
   },
   methods: {

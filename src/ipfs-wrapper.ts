@@ -240,8 +240,6 @@ export class IPFSWrapper {
 
   pinataInterface: PinataApiIpfsInterface | undefined;
 
-  // pinataPinningService: k ==> use axios - if configured
-  gatewayHost = 'ipfs.io'
   appIPNSIdentifier = 'k51qzi5uqu5dgggo67rgyka2qo75vrsylw2idc3j6f570kthbikc8yuzyavflf'
   ipfsSettings: IpfsSettings
 
