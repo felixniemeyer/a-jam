@@ -251,9 +251,13 @@ export default defineComponent({
         } else {
           await this.ensureAcIsRunning()
           this.playAllTracks()
+          if (this.stopTimeout !== undefined) {
+            clearTimeout(this.stopTimeout)
+            this.stopTimeout = undefined
+          }
           this.stopTimeout = window.setTimeout(
             this.stopAllPlaybacks.bind(this),
-            this.maxTrackDuration * 1000 + this.state.settings.playbackDelay
+            (this.maxTrackDuration + this.state.settings.playbackDelay) * 1000
           )
           this.playing = true
         }
