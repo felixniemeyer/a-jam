@@ -8,8 +8,9 @@
 
 - Backlog 
 	- copy local session to global session on publish cid available
-	- fix bug, that sometimes recording/playback stop unexpectedly (something with escape? some playback stop timeout lingering around?) 
+	- fix bug, that sometimes recording/playback stop unexpectedly (escape during loop record) 
 	- hide keyboard shortcuts on mobile
+	- create blob when importing from file => so that publishing is possible
 
 - V5
 	- D: remove cid from recent session buttons, make date larger
