@@ -55,7 +55,7 @@ export default defineComponent({
             })
             this.goBack()
           },
-          _ => {
+          () => {
             this.error += "Make sure the selected file is an audio file. Browsers have limited support for codecs. You may want to recode it to some other format."
           }
         )
