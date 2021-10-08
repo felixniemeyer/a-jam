@@ -138,6 +138,7 @@ export default defineComponent({
       recordingProcessed: true,
       recloop: false,
       recloopDuration: 0,
+      recloopTimeout: undefined as number | undefined,
       quitRecloop: true,
       resolveCalibrationPrompt: undefined as undefined | ((value: unknown) => void)
     }
@@ -365,7 +366,7 @@ export default defineComponent({
           this.session.dirty = true
           if (this.recloop) {
             this.quitRecloop = false
-            window.setTimeout(this.stopRecording.bind(this), this.recloopDuration * 1000)
+            this.recloopTimeout = window.setTimeout(this.stopRecording.bind(this), this.recloopDuration * 1000)
           }
         }
       }
@@ -373,6 +374,9 @@ export default defineComponent({
     stopRecording () {
       if (this.mediaRecorder !== undefined && this.mediaRecorder.state === 'recording') {
         this.mediaRecorder.stop()
+      }
+      if(this.recloopTimeout !== undefined) {
+        clearTimeout(this.recloopTimeout)
       }
       this.stopAllPlaybacks()
       this.recording = false
