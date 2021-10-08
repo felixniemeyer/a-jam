@@ -29,7 +29,8 @@ createApp(App)
       state,
       ac,
       ipfsWrapper,
-      storageWrapper
+      storageWrapper,
+      onMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     })
   })
   .use(makeRouter(state))
@@ -41,5 +42,6 @@ declare module '@vue/runtime-core' {
     ac: AudioContext;
     ipfsWrapper: IPFSWrapper;
     storageWrapper: StorageWrapper;
+    onMobile: boolean;
   }
 }

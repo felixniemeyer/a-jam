@@ -55,7 +55,7 @@
     </div>
 
     <div class="controls">
-      <span class="shortcut-hint record">
+      <span v-if="!onMobile" class="shortcut-hint record">
         <div class="recloop" :class="{on: recloop}" @click="toggleRecloop"></div>
         (r)
       </span>
@@ -69,7 +69,7 @@
         :class="{ playing }"
         @click="togglePlay"
       ></div>
-      <span class="shortcut-hint play">
+      <span v-if="!onMobile" class="shortcut-hint play">
         (space)
       </span>
       <div class="export"
