@@ -9,7 +9,6 @@ import SessionEditor from /* webpackChunkName: "sessionEditor" */ '@/views/Sessi
 import SessionPublish from /* webpackChunkName: "sessionPublishing " */ '@/views/Session/Publish.vue'
 import SessionSettings from /* webpackChunkName: "sessionTrack" */ '@/views/Session/Settings.vue'
 import SessionTrack from /* webpackChunkName: "sessionTrack" */ '@/views/Session/Track.vue'
-import ByCidImporter from /* webpackChunkName: "sessionTrack" */ '@/views/Session/ByCidImporter.vue'
 import FromFileImporter from /* webpackChunkName: "sessionTrack" */ '@/views/Session/FromFileImporter.vue'
 import ErrorComponent from /* webpackChunkName: "error" */ '@/views/Error.vue'
 import OffsetCalibration from /* webpackChunkName: "error" */ '@/views/OffsetCalibration.vue'
@@ -68,11 +67,6 @@ function makeRoutes (state: State): Array<RouteRecordRaw> {
           path: 'track/:key',
           name: 'SessionTrack',
           component: SessionTrack
-        },
-        {
-          path: 'byCidImporter',
-          name: 'ByCidImporter',
-          component: ByCidImporter
         },
         {
           path: 'fromFileImporter',

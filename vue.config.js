@@ -17,5 +17,8 @@ module.exports = {
         return args
       })
   },
-  lintOnSave: false
+  lintOnSave: false,
+  devServer :{
+    disableHostCheck: true
+  }
 }

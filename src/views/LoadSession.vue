@@ -16,10 +16,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 
-import { TrackConfig } from '@/ipfs-wrapper'
 import { LocalSession, PublicSession, Track } from '@/types'
 
-import Log from '@/components/Log.vue'
+import { TrackConfig, loadRecording, loadSessionConfig } from '@/server-wrapper'
+
+import Log, { LogEntry } from '@/components/Log.vue'
 import AudioContextPrompt from '@/components/AudioContextPrompt.vue'
 import { RecentSessionEntry } from '@/local-storage-wrapper'
 
@@ -30,7 +31,7 @@ export default defineComponent({
       log: [
         { type: 'msg', s: 'session cid:' },
         { type: 'copyable', s: this.$route.params.cid }
-      ],
+      ] as LogEntry[],
       errors: []
     }
   },
@@ -90,7 +91,8 @@ export default defineComponent({
       return derivative
     },
     async retrieveSessionFromIPFS (cid: string) {
-      const sessionConfig = await this.ipfsWrapper.loadSessionConfig(cid)
+      const sessionConfig = await loadSessionConfig(cid)
+      console.log("loaded session config: ", sessionConfig)
       const session = new PublicSession(cid, sessionConfig.localTime)
       session.title = sessionConfig.title
       session.ancestor = sessionConfig.ancestor
@@ -120,7 +122,7 @@ export default defineComponent({
     async retrieveRecordingFromIPFS (cid: string) {
       this.log.push({ type: 'msg', s: 'retrieving recording with cid:' })
       this.log.push({ type: 'copyable', s: cid })
-      const arrayBuffer = await this.ipfsWrapper.loadRecording(cid)
+      const arrayBuffer = await loadRecording(cid)
       const audioBuffer = await this.ac.decodeAudioData(arrayBuffer)
       const recording = this.state.recordings[cid] = {
         cid,

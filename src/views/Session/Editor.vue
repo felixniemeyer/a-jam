@@ -40,9 +40,7 @@
         <div
           :class="{hidden: recording}"
           class="importers">
-          import recording...
-          <div class="button" @click="importRecordingByCid">by cid</div>
-          <div class="button" @click="importRecordingFromFile">from file</div>
+          <div class="button" @click="importRecordingFromFile">import audio from file</div>
         </div>
       </div>
       <div class="hoverstuff">
@@ -201,14 +199,6 @@ export default defineComponent({
     importRecordingFromFile () {
       this.$router.push({
         name: 'FromFileImporter',
-        params: {
-          localId: this.localId
-        }
-      })
-    },
-    importRecordingByCid () {
-      this.$router.push({
-        name: 'ByCidImporter',
         params: {
           localId: this.localId
         }

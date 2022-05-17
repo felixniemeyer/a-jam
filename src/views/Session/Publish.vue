@@ -8,18 +8,15 @@
     <p v-for="(error, i) in errors" :key="i" class="error">{{ error }}</p>
     <div v-if="resultCid !== undefined">
       <h4> share </h4>
-      <p> link for browsers that support ipns: </p>
-      <Copyable :text="ipnsLink"/>
-      <p> link for all browsers (public ipfs gateway): </p>
-      <Copyable :text="gatewayLink"/>
-      <div class="button" @click="this.$router.go(-1)">
+      <p> share this linkt with your friends: </p>
+      <Copyable :text="sharingLink"/>
+      <p> (click to copy) </p>
+      <div class="button" @click="$router.go(-1)">
         return to session
       </div>
-      <a href="https://unstoppabledomains.com/r/ac3b8968ad7245e" target="_blank" class="ud-affiliate">
-        Want a blockchain domain so that users can easily find your music on the decentralized web? <b class="nowrap">Click here.</b>
-      </a>
+
     </div>
-    <div v-else class="button" @click="this.$router.go(-1)">
+    <div v-else class="button" @click="$router.go(-1)">
       {{ errors.length > 0 ? "return" : "abort" }}
     </div>
     <div class="spacer"></div>
@@ -33,9 +30,11 @@ import Log, { LogEntry } from '@/components/Log.vue'
 import Section from '@/components/Section.vue'
 import Copyable from '@/components/Copyable.vue'
 
+import { postSessionConfig, postRecording, SessionConfig, TrackConfig } from '@/server-wrapper'
+
 import { Track } from '@/types'
-import { SessionConfig, TrackConfig } from '@/ipfs-wrapper'
 import { RecentSessionEntry } from '@/local-storage-wrapper'
+
 
 export default defineComponent({
   data () {
@@ -60,11 +59,11 @@ export default defineComponent({
     loadSessionPath (): string {
       return `#/loadSession/${this.resultCid}`
     },
-    ipnsLink (): string {
-      return `ipns://${this.ipfsWrapper.appIPNSIdentifier}/${this.loadSessionPath}`
-    },
-    gatewayLink (): string {
-      return `https://${this.ipfsWrapper.gatewayHost}/ipns/${this.ipfsWrapper.appIPNSIdentifier}/${this.loadSessionPath}`
+    sharingLink(): string {
+      let url = window.location.protocol
+      url += "//" + window.location.host + '/'
+      url += this.loadSessionPath
+      return url
     }
   },
   methods: {
@@ -95,7 +94,7 @@ export default defineComponent({
     async publishRecording (track: Track) {
       const recording = track.recording
       if (recording.audioBlob !== undefined) {
-        const cid = await this.ipfsWrapper.ipfsAdd(recording.audioBlob)
+        const cid = await postRecording(recording.audioBlob)
         this.log.push({ type: 'msg', s: `track ${track.name} is now public on ipfs by:` })
         this.log.push({ type: 'copyable', s: cid })
         recording.cid = cid
@@ -124,7 +123,7 @@ export default defineComponent({
           ))
         }
       })
-      const cid = await this.ipfsWrapper.saveSessionConfig(sc)
+      const cid = await postSessionConfig(sc)
       this.session.ancestorsAncestor = this.session.ancestor
       this.session.ancestor = cid
       this.session.dirty = false
