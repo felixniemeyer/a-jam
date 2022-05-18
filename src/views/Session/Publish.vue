@@ -68,12 +68,12 @@ export default defineComponent({
   },
   methods: {
     async publish () {
-      try {
+      // try {
         await this.publishRecordings()
         await this.publishSession()
-      } catch (e) {
-        this.errors.push(e)
-      }
+      //} catch (e: any) {
+      //  this.errors.push()
+      //}
     },
     async publishRecordings () {
       const promises: Promise<void>[] = []

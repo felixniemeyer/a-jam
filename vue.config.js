@@ -4,7 +4,7 @@ module.exports = {
   css: {
     loaderOptions: {
       sass: {
-        prependData: '@import "@/global.scss";\n'
+        additionalData: '@import "@/global.scss";\n'
       }
     }
   },
@@ -16,7 +16,7 @@ module.exports = {
       })
   },
   lintOnSave: false,
-  devServer :{
-    disableHostCheck: true
-  }
+  // devServer :{
+  //   allowedHosts: []
+  // }
 }
