@@ -95,7 +95,7 @@ export default defineComponent({
       const recording = track.recording
       if (recording.audioBlob !== undefined) {
         const cid = await postRecording(recording.audioBlob)
-        this.log.push({ type: 'msg', s: `track ${track.name} is now public on ipfs by:` })
+        this.log.push({ type: 'msg', s: `track ${track.name} is uploaded` })
         this.log.push({ type: 'copyable', s: cid })
         recording.cid = cid
         this.state.recordings[cid] = track.recording
@@ -128,7 +128,7 @@ export default defineComponent({
       this.session.ancestor = cid
       this.session.dirty = false
       this.resultCid = cid
-      this.log.push({ type: 'msg', s: 'jam session is now public on ipfs at:' })
+      this.log.push({ type: 'msg', s: 'jam session is uploaded' })
       this.log.push({ type: 'copyable', s: cid })
       const rse = new RecentSessionEntry(
         cid,

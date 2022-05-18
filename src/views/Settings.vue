@@ -24,8 +24,8 @@
           right="earlier"
           :factor="1000"
           :decimalPlaces="0"
-          :from="sliderOrigin.defaultRecordingOffset - 0.100"
-          :to="sliderOrigin.defaultRecordingOffset + 0.100"
+          :from="sliderOrigin.defaultRecordingOffset - 0.050"
+          :to="sliderOrigin.defaultRecordingOffset + 0.050"
           :value="state.settings.defaultRecordingOffset"
           @dragEnd="resetInitialRecordingOffset"
           @update="updateDefaultRecordingOffset"/>
@@ -34,49 +34,19 @@
         </div>
       </Section>
     </Section>
-    <Section title="ipfs">
-      <Section title="browser node">
-        <IpfsInterfaceUsageConfig
-          :usage="this.state.settings.ipfs.browserNode.usage"
-          @disable="disableBrowserNode"
-          @enable="enableBrowserNode"
-          @change="persistIpfsSettings"
-          id="iiusage0"/>
-      </Section>
-      <Section title="public node">
-        <IpfsInterfaceUsageConfig
-          :usage="this.state.settings.ipfs.publicNode.usage"
-          @change="persistIpfsSettings"
-          id="iiusage1"/>
-      </Section>
-      <Section title="configurable node">
-        <IpfsInterfaceUsageConfig
-          :usage="this.state.settings.ipfs.configuredNode.usage"
-          @change="persistIpfsSettings"
-          id="iiusage2"/>
-        <IpfsApiEndpointConfig
-          :endpoint="this.state.settings.ipfs.configuredNode.endpoint"
-          @change="changeIpfsEndpointConfig"/>
-      </Section>
-      <Section title="pinata">
-        <IpfsInterfaceUsageConfig
-          :usage="this.state.settings.ipfs.pinata.usage"
-          @change="persistIpfsSettings"
-          @enable="enablePinata"
-          id="iiusage2"/>
-        <PinataApiConfig
-          :settings="this.state.settings.ipfs.pinata.apiSettings"
-          @change="updatePinataSettings"/>
-      </Section>
-    </Section>
     <div>
       <div class="inline-button" @click="$router.go(-1)">go back</div>
     </div>
-    <p>
-      By clicking the following button, you can reset all settings and clear the recent session list. The app will reload and you will lose all non-published projects.
-    </p>
-    <div :class="{danger: confirmClear}" class="inline-button" tabindex="0" @click="clearStorage" @blur="confirmClear = false">
-      {{confirmClear ? "confirm clear storage" : "clear local storage"}}
+    <Section title="local data">
+      <p>
+        By clicking the following button, you can reset all settings and clear the recent session list. The app will reload and you will lose all non-published projects.
+      </p>
+      <div :class="{danger: confirmClear}" class="inline-button" tabindex="0" @click="clearStorage" @blur="confirmClear = false">
+        {{confirmClear ? "confirm clear storage" : "clear local storage"}}
+      </div>
+    </Section>
+    <div>
+      <div class="inline-button last-item" @click="$router.go(-1)">go back</div>
     </div>
   </div>
 </template>
@@ -87,9 +57,6 @@ import { defineComponent } from 'vue'
 import Slider from '@/components/Slider.vue'
 import Section from '@/components/Section.vue'
 import Hint from '@/components/Hint.vue'
-import IpfsInterfaceUsageConfig from '@/components/IpfsInterfaceUsageConfig.vue'
-import IpfsApiEndpointConfig from '@/components/IpfsApiEndpointConfig.vue'
-import PinataApiConfig from '@/components/PinataApiConfig.vue'
 import { debug } from '@/tools'
 
 import WidthFreezer from '@/mixins/WidthFreezer'
@@ -100,9 +67,6 @@ export default defineComponent({
     Slider,
     Section,
     Hint,
-    IpfsInterfaceUsageConfig,
-    IpfsApiEndpointConfig,
-    PinataApiConfig
   },
   data () {
     return {
@@ -139,26 +103,6 @@ export default defineComponent({
       this.state.settings.micDeviceId = micId
       this.storageWrapper.setMicDeviceId(micId)
     },
-    persistIpfsSettings () {
-      this.storageWrapper.persistIpfsSettings(this.state.settings.ipfs)
-    },
-    changeIpfsEndpointConfig () {
-      this.persistIpfsSettings()
-      this.ipfsWrapper.resetConfigurableNode()
-    },
-    disableBrowserNode () {
-      this.ipfsWrapper.shutdownBrowserNode()
-    },
-    enableBrowserNode () {
-      this.ipfsWrapper.spinUpBrowserNode()
-    },
-    enablePinata () {
-      this.ipfsWrapper.refreshPinata()
-    },
-    updatePinataSettings () {
-      this.persistIpfsSettings()
-      this.ipfsWrapper.refreshPinata()
-    },
     clearStorage() {
       if(this.confirmClear) {
         localStorage.clear()
@@ -194,6 +138,9 @@ body {
       background-color: $danger;
       color: #fff
     }
+  }
+  .last-item {
+    margin-bottom: 5rem;
   }
 }
 

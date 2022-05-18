@@ -1,9 +1,9 @@
 <template>
   <div class="session-settings">
     <h2> session settings </h2>
-    <Section v-if="session.ancestor !== undefined" title="session ipfs info" :initiallyClosed="true">
+    <Section v-if="session.ancestor !== undefined" title="session info" :initiallyClosed="true">
       <div>
-        <p> this session is derived from: </p>
+        <p> this session ancestor is: </p>
         <Copyable
           :text="session.ancestor"
           action="derive another session"

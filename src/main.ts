@@ -3,7 +3,6 @@ import App from './App.vue'
 import makeRouter from './router'
 
 import { State } from '@/state'
-import { IPFSWrapper } from '@/ipfs-wrapper'
 import { LocalStorageWrapper, StorageWrapper } from '@/local-storage-wrapper'
 import { debug } from '@/tools'
 
@@ -19,7 +18,6 @@ const state = reactive({
   settings: storageWrapper.loadSettings()
 } as State)
 const ac = new AudioContext()
-const ipfsWrapper = new IPFSWrapper(state.settings.ipfs)
 
 debug('here is the state', state)
 
@@ -28,7 +26,6 @@ createApp(App)
     Object.assign(config.globalProperties, {
       state,
       ac,
-      ipfsWrapper,
       storageWrapper
     })
   })
@@ -39,7 +36,6 @@ declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     state: State;
     ac: AudioContext;
-    ipfsWrapper: IPFSWrapper;
     storageWrapper: StorageWrapper;
   }
 }

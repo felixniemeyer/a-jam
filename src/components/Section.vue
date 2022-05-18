@@ -16,7 +16,7 @@ export default defineComponent({
   props: {
     title: String,
     initiallyClosed: {
-      default: true,
+      default: false,
       type: Boolean
     }
   },
@@ -45,6 +45,7 @@ export default defineComponent({
     background-color: darken($grey, 40%);
     font-weight: bold;
     padding: 0.5em;
+    margin:0;
     display: block;
     width: 100%;
     color: #fff;

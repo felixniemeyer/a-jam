@@ -1,5 +1,4 @@
 import { debug } from './tools'
-import { IpfsSettings } from './ipfs-wrapper'
 
 const HIST_LENGTH = 100
 
@@ -8,7 +7,6 @@ export interface Settings {
   initialCalibration: boolean;
   playbackDelay: number;
   micDeviceId: string | undefined;
-  ipfs: IpfsSettings;
 }
 
 export class RecentSessionEntry {
@@ -40,7 +38,6 @@ export interface StorageWrapper {
   setInitialCalibration (v: boolean): void;
   setPlaybackDelay (v: number): void;
   setMicDeviceId (micId: string): void;
-  persistIpfsSettings (ipfsSettings: IpfsSettings): void;
 
   getRecentSessions (): RecentSessionEntry[];
   addRecentSession (rse: RecentSessionEntry, list: RecentSessionEntry[]): RecentSessionEntry[];
@@ -124,10 +121,6 @@ export class LocalStorageWrapper implements StorageWrapper {
     }
   }
 
-  persistIpfsSettings (ipfsSettings: IpfsSettings) : void {
-    debug('persisted ipfs settings')
-    localStorage.setItem('settings.ipfs', JSON.stringify(ipfsSettings))
-  }
 
   loadSettings () : Settings {
     const settings = {
@@ -135,7 +128,6 @@ export class LocalStorageWrapper implements StorageWrapper {
       initialCalibration: false,
       playbackDelay: 0.010,
       micDeviceId: undefined,
-      ipfs: new IpfsSettings()
     } as Settings
     if ('playbackDelay' in localStorage) {
       settings.playbackDelay = Number(localStorage.getItem('playbackDelay'))
@@ -145,12 +137,6 @@ export class LocalStorageWrapper implements StorageWrapper {
     }
     if ('initialCalibration' in localStorage) {
       settings.initialCalibration = Boolean(localStorage.getItem('initialCalibration'))
-    }
-    if ('settings.ipfs' in localStorage) {
-      const str = localStorage.getItem('settings.ipfs')
-      if (str !== null) {
-        settings.ipfs = JSON.parse(str)
-      }
     }
     const micDeviceId = localStorage.getItem('micDeviceId')
     if (micDeviceId !== null) {

@@ -62,8 +62,8 @@ export default defineComponent({
       const cid = this.$route.params.cid as string
       let publicSession = this.state.sessions.public[cid]
       if (publicSession === undefined) {
-        this.log.push({ type: 'msg', s: 'loading from ipfs.' })
-        publicSession = await this.retrieveSessionFromIPFS(cid)
+        this.log.push({ type: 'msg', s: 'loading from server.' })
+        publicSession = await this.loadSessionFromServer(cid)
       } else {
         this.log.push({ type: 'msg', s: 'found session in memory.' })
       }
@@ -90,7 +90,7 @@ export default defineComponent({
       derivative.ancestorsAncestor = publicSession.ancestor
       return derivative
     },
-    async retrieveSessionFromIPFS (cid: string) {
+    async loadSessionFromServer(cid: string) {
       const sessionConfig = await loadSessionConfig(cid)
       console.log("loaded session config: ", sessionConfig)
       const session = new PublicSession(cid, sessionConfig.localTime)
