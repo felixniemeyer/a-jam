@@ -41,7 +41,7 @@ export default defineComponent({
   overflow: hidden;
   text-align: center;
   .header{
-    background-color: desaturate(darken($brown, 20%), 40%);
+    background-color: lighten($blue, 5%);
     padding: 0.5em;
     display: block;
     cursor: pointer;

@@ -43,15 +43,19 @@ $texareaBgc: #282828;
   margin: 0.33em auto;
   width: 80%;
   .text{
+    overflow: hidden;
     color: $pink;
     background-color: $texareaBgc;
     border: 0.3em solid $texareaBgc;
-    padding: 0.7em;
-    border-radius: 0.3em;
+    padding: 0.5em;
+    border-radius: 0.9em;
     box-sizing: border-box;
     height: 3em;
     width: 100%;
     box-sizing: border-box;
+    &:focus {
+      outline: none;
+    }
   }
   .copy-hint, .action{
     font-family: default;

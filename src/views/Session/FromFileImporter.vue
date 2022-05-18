@@ -68,7 +68,6 @@ export default defineComponent({
       }
     },
     async importRecording (file: File) {
-      console.log('importing file', file)
       const arrayBuffer = await file.arrayBuffer()
       const audioContext = new AudioContext()
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)

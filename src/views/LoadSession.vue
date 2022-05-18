@@ -92,7 +92,6 @@ export default defineComponent({
     },
     async loadSessionFromServer(cid: string) {
       const sessionConfig = await loadSessionConfig(cid)
-      console.log("loaded session config: ", sessionConfig)
       const session = new PublicSession(cid, sessionConfig.localTime)
       session.title = sessionConfig.title
       session.ancestor = sessionConfig.ancestor
