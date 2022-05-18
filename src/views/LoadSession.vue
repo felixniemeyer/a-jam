@@ -29,8 +29,8 @@ export default defineComponent({
     return {
       requireInteraction: false,
       log: [
-        { type: 'msg', s: 'session cid:' },
-        { type: 'copyable', s: this.$route.params.cid }
+        { type: 'msg', s: 'session hash:' },
+        { type: 'copyable', s: this.$route.params.hash }
       ] as LogEntry[],
       errors: []
     }
@@ -59,11 +59,11 @@ export default defineComponent({
       this.loadSession()
     },
     async loadSession () {
-      const cid = this.$route.params.cid as string
-      let publicSession = this.state.sessions.public[cid]
+      const hash = this.$route.params.hash as string
+      let publicSession = this.state.sessions.public[hash]
       if (publicSession === undefined) {
         this.log.push({ type: 'msg', s: 'loading from server.' })
-        publicSession = await this.loadSessionFromServer(cid)
+        publicSession = await this.loadSessionFromServer(hash)
       } else {
         this.log.push({ type: 'msg', s: 'found session in memory.' })
       }
@@ -76,7 +76,7 @@ export default defineComponent({
         }
       })
       const rse = new RecentSessionEntry(
-        publicSession.cid,
+        publicSession.hash,
         publicSession.title,
         publicSession.date
       )
@@ -86,25 +86,25 @@ export default defineComponent({
       const derivative = new LocalSession()
       derivative.title = publicSession.title
       derivative.tracks = publicSession.tracks.map(track => track.clone())
-      derivative.ancestor = publicSession.cid
+      derivative.ancestor = publicSession.hash
       derivative.ancestorsAncestor = publicSession.ancestor
       return derivative
     },
-    async loadSessionFromServer(cid: string) {
-      const sessionConfig = await loadSessionConfig(cid)
-      const session = new PublicSession(cid, sessionConfig.localTime)
+    async loadSessionFromServer(hash: string) {
+      const sessionConfig = await loadSessionConfig(hash)
+      const session = new PublicSession(hash, sessionConfig.localTime)
       session.title = sessionConfig.title
       session.ancestor = sessionConfig.ancestor
       session.tracks = await this.createTracks(sessionConfig.tracks)
-      this.state.sessions.public[cid] = session
+      this.state.sessions.public[hash] = session
       return session
     },
     async createTracks (trackConfigs: TrackConfig[]) {
       return Promise.all<Track>(
         trackConfigs.map(async trackConfig => {
-          let recording = this.state.recordings[trackConfig.cid]
+          let recording = this.state.recordings[trackConfig.hash]
           if (recording === undefined) {
-            recording = await this.retrieveRecordingFromIPFS(trackConfig.cid)
+            recording = await this.retrieveRecordingFromIPFS(trackConfig.hash)
           }
           const track = new Track(
             trackConfig.offset,
@@ -118,13 +118,13 @@ export default defineComponent({
         })
       )
     },
-    async retrieveRecordingFromIPFS (cid: string) {
-      this.log.push({ type: 'msg', s: 'retrieving recording with cid:' })
-      this.log.push({ type: 'copyable', s: cid })
-      const arrayBuffer = await loadRecording(cid)
+    async retrieveRecordingFromIPFS (hash: string) {
+      this.log.push({ type: 'msg', s: 'retrieving recording with hash:' })
+      this.log.push({ type: 'copyable', s: hash })
+      const arrayBuffer = await loadRecording(hash)
       const audioBuffer = await this.ac.decodeAudioData(arrayBuffer)
-      const recording = this.state.recordings[cid] = {
-        cid,
+      const recording = this.state.recordings[hash] = {
+        hash,
         audioBuffer,
         audioBlob: undefined
       }

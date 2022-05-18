@@ -14,14 +14,14 @@
         <TrackLi
           v-for="(track, key) in session.tracks"
           :key="key"
-          :cid="track.recording.cid"
+          :hash="track.recording.hash"
           :name="track.name"
           :muted="track.muted"
           :relativeDuration="track.effectiveDuration / maxTrackDuration"
           @toggleMute="toggleTrackMute(track)"
           @editTrack="$router.push(`/session/${this.localId}/track/${key}`)"
           />
-        <div v-if="session.tracks.length === 0 && !recording && recordingProcessed" class="hint">
+        <div v-if="session.tracks.length === 0 && !recording" class="hint">
           <p>
           There are no tracks yet.
           </p>
@@ -29,11 +29,11 @@
           <div>
             - recording a track, <br/>
             - uploading a local file or <br/>
-            - importing one by cid.
+            - importing one by hash.
           </div>
         </div>
         <div
-          v-if="recording || !recordingProcessed"
+          v-if="recording"
           class="recordBar"
           :style="{width: `calc(3em + ${playProgress} * (100% - 3.4em)`}">
         </div>
@@ -123,20 +123,30 @@ export default defineComponent({
     return {
       localId,
       session,
-      // playback
+
+      recloop: false, // this reflects the ui button state
+
+      /* states
+        recording
+          - with loop
+          - without loop
+        playing
+        nothing */
       playing: false,
+      recording: false,
+      loopRecording: false,
+
+      // playback
       playtime: 0,
       playbackStartTime: 0,
+
       // recording
       recordingChunks: [] as Blob[],
       mediaRecorder: undefined as MediaRecorder | undefined,
       stopTimeout: undefined as number | undefined,
-      recording: false,
-      skipRecording: false,
-      recordingProcessed: true,
-      recloop: false,
-      recloopDuration: 0,
-      quitRecloop: true,
+      recordingLoopDuration: 0,
+      cancelRecording: false,
+
       resolveCalibrationPrompt: undefined as undefined | ((value: unknown) => void)
     }
   },
@@ -218,11 +228,10 @@ export default defineComponent({
       }
       if ($event.key === 'Escape') {
         if (this.recording) {
-          this.cancelRecording()
+          this.cancelRecording = true
+          this.stopRecording()
         } else if (this.playing) {
-          this.togglePlay()
-        } else {
-          this.goHome()
+          this.stopPlaying()
         }
       }
     },
@@ -234,43 +243,38 @@ export default defineComponent({
         return this.ac.resume()
       }
     },
-    async togglePlay () {
-      if (!this.recording) {
-        if (this.playing) {
-          this.stopAllPlaybacks()
-        } else {
-          await this.ensureAcIsRunning()
-          this.playAllTracks()
-          this.stopTimeout = window.setTimeout(
-            this.stopAllPlaybacks.bind(this),
-            this.maxTrackDuration * 1000 + this.state.settings.playbackDelay
-          )
-          this.playing = true
-        }
-      } else {
-        this.toggleRecord()
+    /* overview over the play and record state machine
+
+    play() and stopPlaying()
+    record() and stopRecording()
+
+    record will start one or x recordingLoops using:
+    recordLoop() and stopRecordLoop() */
+
+    async stopPlaying() {
+      if (this.playing) {
+        this.stopAllPlaybacks()
       }
     },
-    async renderAndDownload () {
-      const renderStartTime = 0.5
-      const oac = new OfflineAudioContext(2, (this.maxTrackDuration + renderStartTime) * 44100, 44100)
-      this.session.tracks.forEach(track => {
-        const playback = this.createPlayback(track, oac)
-        if (track.offset > 0) {
-          playback.source.start(renderStartTime, track.offset)
-        } else {
-          playback.source.start(renderStartTime - track.offset)
+    async play() {
+      await this.ensureAcIsRunning()
+      this.playAllTracks()
+      this.stopTimeout = window.setTimeout(
+        this.stopAllPlaybacks.bind(this),
+        this.maxTrackDuration * 1000 + this.state.settings.playbackDelay
+      )
+      this.playing = true
+    },
+    async togglePlay () {
+      if (!this.recording && !this.playing) {
+        this.play()
+      } else {
+        if(this.recording) {
+          this.stopRecording()
+        } else if(this.playing) {
+          this.stopPlaying()
         }
-        debug('started playback for offline ac')
-      })
-      const renderedBuffer = await oac.startRendering()
-      const wav = toWav(renderedBuffer)
-      const blob = new Blob([wav], { type: 'audio/wav' })
-
-      const link = this.$refs.hiddenDownload as HTMLLinkElement
-      link.setAttribute('href', URL.createObjectURL(blob))
-      link.setAttribute('download', this.session.title + '.wav')
-      link.click()
+      }
     },
     playAllTracks () {
       this.stopAllPlaybacks()
@@ -310,7 +314,7 @@ export default defineComponent({
       }
     },
     updatePlaytime () {
-      if (this.playing) {
+      if (this.playing || this.recording) {
         this.playtime = this.ac.currentTime - this.playbackStartTime
         requestAnimationFrame(this.updatePlaytime.bind(this))
       }
@@ -328,53 +332,81 @@ export default defineComponent({
       this.playtime = 0
     },
     async toggleRecord () {
+      if(!this.playing && !this.recording) {
+        this.record()
+      } else if (this.recording) {
+        this.stopRecording()
+      }
+    },
+    async record() {
       if (this.mediaRecorder === undefined) {
         await this.initMediaRecorder()
       }
-      if (this.recording) {
-        this.quitRecloop = true
-        this.stopRecording()
-      } else {
-        if (this.state.settings.initialCalibration === false && this.session.tracks.length > 0) {
-          if (await this.promptForCalibration() === 0) {
-            return
-          }
+      if (this.state.settings.initialCalibration === false && this.session.tracks.length > 0) {
+        if (await this.promptForCalibration() === 0) {
+          return
         }
-        if (!this.playing) {
-          await this.ensureAcIsRunning()
-          this.stopAllPlaybacks()
-          this.recordingChunks = []
-          this.playAllTracks()
-          this.mediaRecorder?.start() // eslint-disable-line
-          this.recording = true
-          this.recordingProcessed = false
-          this.session.dirty = true
-          if (this.recloop) {
-            this.quitRecloop = false
-            window.setTimeout(this.stopRecording.bind(this), this.recloopDuration * 1000)
+      }
+      this.recordingLoopDuration = this.maxTrackDuration
+      this.loopRecording = this.recloop
+      this.session.dirty = true
+      this.recording = true
+      this.recordLoop()
+    },
+    async recordLoop() {
+      this.recordingChunks = []
+      await this.play()
+      this.mediaRecorder?.start() // eslint-disable-line
+      this.loopRecording = this.recloop
+      if (this.loopRecording) {
+        window.setTimeout(async () => {
+          if(this.recording) {
+            await this.stopRecordLoop()
+            this.recordLoop()
           }
-        }
+        }, this.recordingLoopDuration * 1000 + this.state.settings.playbackDelay + 100)
       }
     },
-    stopRecording () {
-      if (this.mediaRecorder !== undefined && this.mediaRecorder.state === 'recording') {
-        this.mediaRecorder.stop()
-      }
-      this.stopAllPlaybacks()
+    async stopRecordLoop() : Promise<void> {
+      return new Promise((resolve, reject) => {
+        if(this.mediaRecorder instanceof MediaRecorder) {
+          if (this.playing) {
+            this.stopPlaying()
+          }
+          if (this.mediaRecorder.state === 'recording') {
+            this.mediaRecorder.onstop = async () => {
+              if (this.cancelRecording) {
+                this.cancelRecording = false
+                resolve()
+              } else {
+                const audio = new Blob(this.recordingChunks, {
+                  type: 'audio/ogg; codecs=opus'
+                })
+                debug('audio blob', audio)
+                const track = await this.createTrack(audio)
+                const trackListDiv = this.$refs.trackList as HTMLDivElement
+                trackListDiv.scrollTop = trackListDiv.scrollHeight
+                if (this.loopRecording) {
+                  track.muted = true
+                }
+                resolve()
+              }
+            }
+            this.mediaRecorder.stop()
+          } else {
+            reject(Error("mediarecorder is not recording"))
+          }
+        } else {
+          reject(Error("no media recorder"))
+        }
+      })
+    },
+    async stopRecording () {
       this.recording = false
+      await this.stopRecordLoop()
     },
     toggleRecloop () {
       this.recloop = !this.recloop
-      if (this.recloop) {
-        this.recloopDuration = this.maxTrackDuration
-      }
-    },
-    cancelRecording () {
-      if (this.recording) {
-        this.skipRecording = true
-        this.quitRecloop = true
-        this.stopRecording()
-      }
     },
     async initMediaRecorder () {
       debug('initializing media recorder')
@@ -383,25 +415,6 @@ export default defineComponent({
       this.mediaRecorder.ondataavailable = event => {
         this.recordingChunks.push(event.data)
         debug('added recording chunk')
-      }
-      this.mediaRecorder.onstop = async () => {
-        if (this.skipRecording) {
-          this.skipRecording = false
-          this.recordingProcessed = true
-        } else {
-          const audio = new Blob(this.recordingChunks, {
-            type: 'audio/ogg; codecs=opus'
-          })
-          debug('audio blob', audio)
-          const track = await this.createTrack(audio)
-          this.recordingProcessed = true
-          const trackListDiv = this.$refs.trackList as HTMLDivElement
-          trackListDiv.scrollTop = trackListDiv.scrollHeight
-          if (this.recloop && !this.quitRecloop) {
-            track.muted = true
-            this.toggleRecord()
-          }
-        }
       }
     },
     async initUserMedia () {
@@ -435,7 +448,7 @@ export default defineComponent({
               (audioBuffer) => {
                 debug(audioBuffer)
                 const track = new Track(this.state.settings.defaultRecordingOffset, {
-                  cid: undefined,
+                  hash: undefined,
                   audioBlob,
                   audioBuffer
                 })
@@ -475,7 +488,28 @@ export default defineComponent({
         this.resolveCalibrationPrompt(1)
         this.resolveCalibrationPrompt = undefined
       }
-    }
+    },
+    async renderAndDownload () {
+      const renderStartTime = 0.5
+      const oac = new OfflineAudioContext(2, (this.maxTrackDuration + renderStartTime) * 44100, 44100)
+      this.session.tracks.forEach(track => {
+        const playback = this.createPlayback(track, oac)
+        if (track.offset > 0) {
+          playback.source.start(renderStartTime, track.offset)
+        } else {
+          playback.source.start(renderStartTime - track.offset)
+        }
+        debug('started playback for offline ac')
+      })
+      const renderedBuffer = await oac.startRendering()
+      const wav = toWav(renderedBuffer)
+      const blob = new Blob([wav], { type: 'audio/wav' })
+
+      const link = this.$refs.hiddenDownload as HTMLLinkElement
+      link.setAttribute('href', URL.createObjectURL(blob))
+      link.setAttribute('download', this.session.title + '.wav')
+      link.click()
+    },
   }
 })
 
@@ -523,7 +557,9 @@ export default defineComponent({
 
   .trackArea {
     position: absolute;
-    background-color: #444;
+    border-radius: 1rem;
+    box-shadow: 0 0 4rem #0004;
+    background-color: #666;
     background-image: url('~@/assets/logo-watermark-small.png');
     background-position: center;
     background-repeat: repeat;
@@ -544,7 +580,7 @@ export default defineComponent({
       }
       .hint {
         text-align: center;
-        color: #999;
+        color: #bbb;
         margin: 1em 1em 0.5em 1em;
         div {
           display: inline-block;

@@ -3,7 +3,7 @@
     <div class="track-bar" :style="{ width: `calc(3em + ${relativeDuration} * (100% - 3.4em)`, backgroundColor: color}" @click="$emit('editTrack')">
       <div class="name">
         <div class="text" :style="{ backgroundColor: color + '88'}">
-          {{ name }}<span v-if="cid == undefined" class="small"> (unpublished)</span>
+          {{ name }}<span v-if="hash == undefined" class="small"> (unpublished)</span>
         </div>
         <span class="edit"></span>
       </div>
@@ -21,7 +21,7 @@ import ColorHash from 'color-hash'
 export default defineComponent({
   emits: ['editTrack', 'toggleMute'],
   props: {
-    cid: {
+    hash: {
       type: String,
       required: false
     },
@@ -40,9 +40,9 @@ export default defineComponent({
   },
   computed: {
     color (): string {
-      if (this.cid) {
+      if (this.hash) {
         const ch = new ColorHash({ lightness: 0.4 })
-        return ch.hex(this.cid)
+        return ch.hex(this.hash)
       } else {
         return '#999999'
       }

@@ -73,8 +73,8 @@ export default defineComponent({
     leave () {
       this.$router.go(-1)
     },
-    loadSession (cid: string) {
-      this.$router.push('/loadSession/' + cid)
+    loadSession (hash: string) {
+      this.$router.push('/loadSession/' + hash)
     }
   }
 })

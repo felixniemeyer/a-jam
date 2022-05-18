@@ -39,7 +39,7 @@ function makeRoutes (state: State): Array<RouteRecordRaw> {
       component: OffsetCalibration
     },
     {
-      path: '/loadSession/:cid',
+      path: '/loadSession/:hash',
       name: 'LoadSession',
       component: LoadSession
     },

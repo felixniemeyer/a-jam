@@ -1,6 +1,6 @@
 <template>
   <div class="copyable">
-    <textarea class="text" :value="text" readonly @click="copyCid"></textarea>
+    <textarea class="text" :value="text" readonly @click="copyHash"></textarea>
     <div v-if="action !== undefined" class="action" @click="$emit('click')"> {{action}} </div>
     <div class="copy-hint" :class="{visible}">copied to clipboard!</div>
   </div>
@@ -21,7 +21,7 @@ export default defineComponent({
     }
   },
   methods: {
-    copyCid (event: Event) {
+    copyHash (event: Event) {
       if (event.target instanceof HTMLTextAreaElement) {
         event.target.select()
         document.execCommand('copy')

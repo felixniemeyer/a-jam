@@ -1,8 +1,8 @@
 <template>
   <div class="track-settings">
-    <div v-if="track.recording.cid !== undefined">
-      <p> recording cid: </p>
-      <Copyable :text="track.recording.cid"/>
+    <div v-if="track.recording.hash !== undefined">
+      <p> recording hash: </p>
+      <Copyable :text="track.recording.hash"/>
     </div>
     <p>track name:
       <input :value="track.name" ref="name">

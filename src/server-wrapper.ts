@@ -3,7 +3,7 @@ import SparkMD5 from 'spark-md5'
 
 export class TrackConfig {
   constructor (
-    public cid: string,
+    public hash: string,
     public name: string,
     public volume: number,
     public panning: number,
@@ -15,7 +15,7 @@ export class TrackConfig {
 export class SessionConfig {
   constructor (
     public title: string,
-    public ancestor: string | undefined, // cid of the session this one builds upon
+    public ancestor: string | undefined, // hash of the session this one builds upon
     public localTime: number,
     public tracks: TrackConfig[]
   ) {}

@@ -73,7 +73,7 @@ export default defineComponent({
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
 
       const recording = {
-        cid: undefined,
+        hash: undefined,
         audioBuffer,
         audioBlob: undefined
       }

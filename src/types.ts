@@ -11,7 +11,7 @@ export class LocalSession extends Session {
 
 export class PublicSession extends Session {
   constructor (
-    public cid: string, // TODO: are these fields here correctly initialized despite non-empty constructor
+    public hash: string, // TODO: are these fields here correctly initialized despite non-empty constructor
     public date: number
   ) {
     super()
@@ -19,7 +19,7 @@ export class PublicSession extends Session {
 }
 
 export interface Publication {
-  cid: string;
+  hash: string;
   date: number;
 }
 
@@ -63,7 +63,7 @@ export class Track {
 }
 
 export interface Recording {
-  cid: string | undefined;
+  hash: string | undefined;
   audioBlob: Blob | undefined;
   audioBuffer: AudioBuffer;
 }

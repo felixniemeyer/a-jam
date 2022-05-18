@@ -11,9 +11,9 @@
         <div class="close" @click="closeSession(key)"> X </div>
       </div>
       <h4 v-if="state.sessions.recent.length > 0">recent sessions</h4>
-      <div class="sessionButton" v-for="rse in state.sessions.recent" :key="rse.cid" @click="loadSession(rse.cid)">
+      <div class="sessionButton" v-for="rse in state.sessions.recent" :key="rse.hash" @click="loadSession(rse.hash)">
         {{ rse.title }} <br />
-        <span class='small'>{{ rse.cid }}</span> <br/>
+        <span class='small'>{{ rse.hash }}</span> <br/>
         <i class='small'>Published: {{ (new Date(rse.timestamp)).toLocaleString() }}</i>
       </div>
       <div class='spacer'/>
@@ -43,8 +43,8 @@ export default defineComponent({
     closeSession (localId: number) {
       delete this.state.sessions.local[localId]
     },
-    loadSession (cid: string) {
-      this.$router.push(`/loadSession/${cid}`)
+    loadSession (hash: string) {
+      this.$router.push(`/loadSession/${hash}`)
     }
   }
 })

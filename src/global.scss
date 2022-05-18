@@ -9,7 +9,7 @@ $pink: #f482ed;
 
 
 @mixin clickable-box-shadow {
-  background-color: darken($grey, 36%);
+  background-color: desaturate($brown, 50%);
   box-shadow: 0 0 1rem #0004;
   &:hover {
     box-shadow: 0 0 0.4rem #0004;

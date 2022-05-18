@@ -1,12 +1,12 @@
 <template>
   <div class="publishing">
-    <h1> {{ resultCid !== undefined ? "session published!" : "publishing session..." }} </h1>
+    <h1> {{ resultHash !== undefined ? "session published!" : "publishing session..." }} </h1>
     <Section title="log" :initiallyClosed="true">
       <Log
         :entries="log"/>
     </Section>
     <p v-for="(error, i) in errors" :key="i" class="error">{{ error }}</p>
-    <div v-if="resultCid !== undefined">
+    <div v-if="resultHash !== undefined">
       <h4> share </h4>
       <p> share this linkt with your friends: </p>
       <Copyable :text="sharingLink"/>
@@ -42,7 +42,7 @@ export default defineComponent({
     return {
       log: [] as LogEntry[],
       errors: [] as string[],
-      resultCid: undefined as string | undefined,
+      resultHash: undefined as string | undefined,
       localId,
       session: this.state.sessions.local[localId]
     }
@@ -57,7 +57,7 @@ export default defineComponent({
   },
   computed: {
     loadSessionPath (): string {
-      return `#/loadSession/${this.resultCid}`
+      return `#/loadSession/${this.resultHash}`
     },
     sharingLink(): string {
       let url = window.location.protocol
@@ -78,12 +78,12 @@ export default defineComponent({
     async publishRecordings () {
       const promises: Promise<void>[] = []
       this.session.tracks.forEach(track => {
-        if (track.recording.cid === undefined) {
+        if (track.recording.hash === undefined) {
           this.log.push({ type: 'msg', s: `publishing recording ${track.name}...` })
           promises.push(this.publishRecording(track))
         } else {
           this.log.push({ type: 'msg', s: `recording ${track.name} already public by:` })
-          this.log.push({ type: 'copyable', s: track.recording.cid })
+          this.log.push({ type: 'copyable', s: track.recording.hash })
         }
       })
       if (promises.length === 0) {
@@ -94,11 +94,11 @@ export default defineComponent({
     async publishRecording (track: Track) {
       const recording = track.recording
       if (recording.audioBlob !== undefined) {
-        const cid = await postRecording(recording.audioBlob)
+        const hash = await postRecording(recording.audioBlob)
         this.log.push({ type: 'msg', s: `track ${track.name} is uploaded` })
-        this.log.push({ type: 'copyable', s: cid })
-        recording.cid = cid
-        this.state.recordings[cid] = track.recording
+        this.log.push({ type: 'copyable', s: hash })
+        recording.hash = hash
+        this.state.recordings[hash] = track.recording
         delete recording.audioBlob
       } else {
         throw Error("couldn't publish track: audioBlob undefined")
@@ -112,9 +112,9 @@ export default defineComponent({
         []
       )
       this.session.tracks.forEach(track => {
-        if (track.recording.cid !== undefined) {
+        if (track.recording.hash !== undefined) {
           sc.addTrack(new TrackConfig(
-            track.recording.cid,
+            track.recording.hash,
             track.name,
             track.volume,
             track.panning,
@@ -123,15 +123,15 @@ export default defineComponent({
           ))
         }
       })
-      const cid = await postSessionConfig(sc)
+      const hash = await postSessionConfig(sc)
       this.session.ancestorsAncestor = this.session.ancestor
-      this.session.ancestor = cid
+      this.session.ancestor = hash
       this.session.dirty = false
-      this.resultCid = cid
+      this.resultHash = hash
       this.log.push({ type: 'msg', s: 'jam session is uploaded' })
-      this.log.push({ type: 'copyable', s: cid })
+      this.log.push({ type: 'copyable', s: hash })
       const rse = new RecentSessionEntry(
-        cid,
+        hash,
         this.session.title,
         sc.localTime
       )
