@@ -139,11 +139,12 @@ export default defineComponent({
       // playback
       playtime: 0,
       playbackStartTime: 0,
+      stopPlaybackTimeout: undefined as number | undefined,
 
       // recording
       recordingChunks: [] as Blob[],
       mediaRecorder: undefined as MediaRecorder | undefined,
-      stopTimeout: undefined as number | undefined,
+      stopRecordingTimeout: undefined as number | undefined,
       recordingLoopDuration: 0,
       cancelRecording: false,
 
@@ -259,7 +260,7 @@ export default defineComponent({
     async play() {
       await this.ensureAcIsRunning()
       this.playAllTracks()
-      this.stopTimeout = window.setTimeout(
+      this.stopPlaybackTimeout = window.setTimeout(
         this.stopAllPlaybacks.bind(this),
         this.maxTrackDuration * 1000 + this.state.settings.playbackDelay
       )
@@ -320,9 +321,9 @@ export default defineComponent({
       }
     },
     stopAllPlaybacks () {
-      if (this.stopTimeout !== undefined) {
-        clearTimeout(this.stopTimeout)
-        this.stopTimeout = undefined
+      if (this.stopPlaybackTimeout !== undefined) {
+        clearTimeout(this.stopPlaybackTimeout)
+        this.stopPlaybackTimeout = undefined
       }
       this.session.tracks.forEach(track => {
         track.playback?.source.stop() // eslint-disable-line
@@ -359,7 +360,7 @@ export default defineComponent({
       this.mediaRecorder?.start() // eslint-disable-line
       this.loopRecording = this.recloop
       if (this.loopRecording) {
-        window.setTimeout(async () => {
+        this.stopRecordingTimeout = window.setTimeout(async () => {
           if(this.recording) {
             await this.stopRecordLoop()
             this.recordLoop()
@@ -368,6 +369,10 @@ export default defineComponent({
       }
     },
     async stopRecordLoop() : Promise<void> {
+      if (this.stopRecordingTimeout !== undefined) {
+        clearTimeout(this.stopRecordingTimeout)
+        this.stopPlaybackTimeout = undefined
+      }
       return new Promise((resolve, reject) => {
         if(this.mediaRecorder instanceof MediaRecorder) {
           if (this.playing) {
