@@ -53,6 +53,7 @@ $texareaBgc: #282828;
     height: 3em;
     width: 100%;
     box-sizing: border-box;
+    white-space: nowrap;
     &:focus {
       outline: none;
     }

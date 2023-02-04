@@ -1,4 +1,4 @@
-import { config } from '@/config'
+import { config } from './config'
 import SparkMD5 from 'spark-md5'
 
 export class TrackConfig {

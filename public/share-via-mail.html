@@ -1,0 +1,13 @@
+<!-- quick html page that is opened in a new tab for sending a mail. closes automatically -->
+<html>
+<script>
+const subject = 'asynchronous jam session incoming'
+const message = 'I have recorded some audio.%0D%0A%0D%0AYou can listen to it and add a track on top here:%0D%0A' 
+const link = encodeURIComponent(location.search.substring(1) + location.hash) 
+location.href = `mailto:?subject=${subject}&body=${message + link}`
+window.close();
+</script>
+<body>
+  you can close this tab
+</body>
+</html>

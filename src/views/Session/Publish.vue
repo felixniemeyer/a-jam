@@ -7,10 +7,11 @@
     </Section>
     <p v-for="(error, i) in errors" :key="i" class="error">{{ error }}</p>
     <div v-if="resultHash !== undefined">
-      <h4> share </h4>
-      <p> share this linkt with your friends: </p>
+      <p> Share the following link. Click to copy.</p>
       <Copyable :text="sharingLink"/>
-      <p> (click to copy) </p>
+      <hr>
+      <a class='sharelink' :href="'share-via-mail.html?' + sharingLink" target='_blank'>Share via mail</a>
+      <hr>
       <div class="button" @click="$router.go(-1)">
         return to session
       </div>
@@ -145,6 +146,17 @@ export default defineComponent({
 <style lang="scss">
 
 .publishing{
+  .sharelink{
+    display: inline-block;
+    color: #fff;
+    text-decoration: none;
+    @include clickable-surface;
+    margin: 0.2rem;
+    &:visited {
+      color: #fff;
+    }
+  }
+
   .button {
     @include clickable-surface;
     margin-top: 2em;

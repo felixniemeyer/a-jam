@@ -3,7 +3,7 @@
   "version": "0.4.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve --server",
+    "dev": "vue-cli-service serve --server",
     "watch": "vue-cli-service build --watch",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
@@ -28,7 +28,7 @@
     "@vue/cli-plugin-eslint": "~5.0.4",
     "@vue/cli-plugin-router": "~5.0.4",
     "@vue/cli-plugin-typescript": "~5.0.4",
-    "@vue/cli-service": "~5.0.4",
+    "@vue/cli-service": "^5.0.8",
     "@vue/compiler-sfc": "^3.2.33",
     "@vue/test-utils": "^2.0.0-rc.21",
     "audiobuffer-to-wav": "^1.0.0",
