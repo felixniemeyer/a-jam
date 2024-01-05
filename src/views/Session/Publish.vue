@@ -10,12 +10,21 @@
       <p> Share the following link. Click to copy.</p>
       <Copyable :text="sharingLink"/>
       <hr>
-      <a class='sharelink' :href="'share-via-mail.html?' + sharingLink" target='_blank'>Share via mail</a>
+      Share via:
+      <a class='sharelink' :href="'share-via-mail.html?' + sharingLink" target='_blank'>Mail</a>
+      <a class='sharelink' :href="`https://telegram.me/share/url?url=${shareUrl}&text=${shareMsg}`" target='_blank'>
+        Telegram
+      </a>
+      <a class='sharelink' :href="`https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareMsg}`" target='_blank'>
+        Twitter
+      </a>
+      <a class='sharelink' :href="`https://api.whatsapp.com/send?text=${shareMsg} ${shareUrl}`" target='_blank'>
+        WhatsApp
+      </a>
       <hr>
       <div class="button" @click="$router.go(-1)">
         return to session
       </div>
-
     </div>
     <div v-else class="button" @click="$router.go(-1)">
       {{ errors.length > 0 ? "return" : "abort" }}
@@ -45,13 +54,20 @@ export default defineComponent({
       errors: [] as string[],
       resultHash: undefined as string | undefined,
       localId,
-      session: this.state.sessions.local[localId]
+      session: this.state.sessions.local[localId],
+      shareApi: true
     }
   },
   components: {
     Copyable,
     Log,
     Section
+  },
+  beforeMount () {
+    //@ts-ignore
+    if (navigator.share !== undefined) {
+      this.shareApi = true
+    }
   },
   mounted () {
     this.publish()
@@ -65,6 +81,12 @@ export default defineComponent({
       url += "//" + window.location.host + '/'
       url += this.loadSessionPath
       return url
+    },
+    shareUrl(): string {
+      return encodeURIComponent(this.sharingLink)
+    },
+    shareMsg(): string {
+      return "jam with me asynchronously!"
     }
   },
   methods: {
@@ -137,6 +159,22 @@ export default defineComponent({
         sc.localTime
       )
       this.state.sessions.recent = this.storageWrapper.addRecentSession(rse, this.state.sessions.recent)
+    },
+    share() {
+        this.log.push({
+          type: 'msg',
+          s: 'sharing ' + navigator.share
+        })
+      navigator.share({
+        title: 'Ajam',
+        text: 'Jam with me asynchronously!',
+        url: this.sharingLink,
+      }).catch((error: any) => {
+        this.log.push({
+          type: 'msg',
+          s: 'Error sharing' + error
+        })
+      })
     }
   }
 })
@@ -151,6 +189,7 @@ export default defineComponent({
     color: #fff;
     text-decoration: none;
     @include clickable-surface;
+    background-color: darken($turquoise, 25%);
     margin: 0.2rem;
     &:visited {
       color: #fff;
